@@ -2,3 +2,4 @@
 - testing lead - Rheann Kunita
 - Backup Tech Lead, Art Direction Lead - Sydney Osako
 - Tech Lead - Quetzal Theobald
+- Backup Production Lead - Kamalika De

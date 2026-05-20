@@ -3,3 +3,4 @@
 - Backup Tech Lead, Art Direction Lead - Sydney Osako
 - Tech Lead - Quetzal Theobald
 - Backup Production Lead - Kamalika De
+- Production Lead - Ryan Funk

@@ -1,6 +1,6 @@
-export default class IntroCinematic extends Phaser.Scene {
+export default class MainMenu extends Phaser.Scene {
     constructor() {
-        super('Intro-Cinematic');
+        super('Main-Menu');
     }
 
     preload() {

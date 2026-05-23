@@ -7,5 +7,5 @@
     "noEmit": true,
     "lib": ["ES2022", "DOM"]
   },
-  "include": ["scenes/*", "scenes/prototypes/*", "*.js", "lib/phaser.d.ts"]
+  "include": ["scenes/*", "scenes/prototypes/*", "*.js", "lib/phaser.d.ts", "src/main.js"]
 }

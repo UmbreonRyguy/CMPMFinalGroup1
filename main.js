@@ -1,5 +1,5 @@
 import IntroCinematic from './scenes/prototypes/Intro-Cinematic.js';
-import mainMenu from './scenes/prototypes/Main-Menu.js';
+import MainMenu from './scenes/prototypes/Main-Menu.js';
 
 let config = {
     parent: 'root',
@@ -14,7 +14,7 @@ let config = {
     physics: {
         default: 'arcade'
     },
-    scene: [IntroCinematic, mainMenu]
+    scene: [IntroCinematic, MainMenu]
 }
 
 let game = new Phaser.Game(config);

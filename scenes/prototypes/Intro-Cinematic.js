@@ -1,6 +1,6 @@
 export default class IntroCinematic extends Phaser.Scene {
     constructor() {
-        super('Intro-Cinematic');
+        super('intro-cinematic');
     }
 
     preload() {

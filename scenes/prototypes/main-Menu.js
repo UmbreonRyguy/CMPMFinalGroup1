@@ -1,6 +1,6 @@
 export default class MainMenu extends Phaser.Scene {
     constructor() {
-        super('Main-Menu');
+        super('main-menu');
     }
 
     preload() {

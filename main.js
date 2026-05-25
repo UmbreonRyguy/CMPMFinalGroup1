@@ -17,8 +17,7 @@ let config = {
         default: 'arcade'
     },
     pixelArt: true,
-    //scene: [IntroCinematic, MainMenu]
-    scene: [IntroCinematic]
+    scene: [IntroCinematic, MainMenu]
 }
 
 let game = new Phaser.Game(config);

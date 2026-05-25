@@ -12,6 +12,9 @@ export default class MainMenu extends Phaser.Scene {
     }
     create() {
         this.add.image(640, 360, 'bg');
-        this.add.image(640, 350, 'title');
+        this.add.image(640, 400, 'title');
+        this.add.image(640, 400, 'start');
+        this.add.image(640, 500, 'settings');
+        this.add.image(640, 600, 'quit');
     }
 }

@@ -4,9 +4,14 @@ export default class MainMenu extends Phaser.Scene {
     }
 
     preload() {
-
+       this.load.image('bg', 'assets/finalproj-main-menu-protbg.png');
+       this.load.image('quit', 'assets/finalproj-main-menu-prototype-quitsign.png');
+       this.load.image('settings', 'assets/finalproj-main-menu-prototype-settingssign.png');
+       this.load.image('start', 'assets/finalproj-main-menu-prototype-startsign.png');
+       this.load.image('title', 'assets/finalproj-main-menu-prototype-titlesign.png') 
     }
     create() {
-        this.add.rectangle(200, 200, 100, 100, 0xff0000);
+        this.add.image(640, 360, 'bg');
+        this.add.image(640, 350, 'title');
     }
 }

@@ -1,6 +1,8 @@
 import IntroCinematic from './scenes/prototypes/Intro-Cinematic.js';
 import MainMenu from './scenes/prototypes/Main-Menu.js';
 
+
+
 let config = {
     parent: 'root',
     type: Phaser.WEBGL,
@@ -14,7 +16,8 @@ let config = {
     physics: {
         default: 'arcade'
     },
-    scene: [IntroCinematic, MainMenu]
+    //scene: [IntroCinematic, MainMenu]
+    scene: [MainMenu]
 }
 
 let game = new Phaser.Game(config);

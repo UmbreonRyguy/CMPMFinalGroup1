@@ -1,4 +1,4 @@
-class GameplayPrototype extends Phaser.Scene {
+export default class GameplayPrototype extends Phaser.Scene {
     constructor() {
         super('core-gameplay');
     }

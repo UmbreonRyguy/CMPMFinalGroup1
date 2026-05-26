@@ -1,6 +1,8 @@
 import IntroCinematic from './scenes/prototypes/Intro-Cinematic.js';
 import MainMenu from './scenes/prototypes/Main-Menu.js';
-
+import Credits from './scenes/prototypes/Credits.js';
+import Settings from './scenes/prototypes/Settings.js';
+import GameplayPrototype from './scenes/prototypes/Core-Gameplay.js';
 
 
 let config = {
@@ -17,7 +19,7 @@ let config = {
         default: 'arcade'
     },
     pixelArt: true,
-    scene: [IntroCinematic, MainMenu]
+    scene: [IntroCinematic, MainMenu, Credits, Settings, GameplayPrototype]
 }
 
 let game = new Phaser.Game(config);

@@ -1,11 +1,8 @@
-export default class GameplayPrototype extends Phaser.Scene {
+export default class EndScene extends Phaser.Scene {
     constructor() {
-        super('core-gameplay');
+        super('end-scene');
     }
     create() {
         this.add.rectangle(100, 100, 100, 100, 0x00ff00);
-        
-
-
     }
 }

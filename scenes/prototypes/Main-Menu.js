@@ -5,7 +5,7 @@ export default class MainMenu extends Phaser.Scene {
 
     preload() {
        this.load.image('bg', 'assets/finalproj-main-menu-protbg.png');
-       this.load.image('quit', 'assets/finalproj-main-menu-prototype-quitsign.png');
+       this.load.image('credits', 'assets/finalproj-main-menu-prototype-quitsign.png'); //assets must be switched out to credits button
        this.load.image('settings', 'assets/finalproj-main-menu-prototype-settingssign.png');
        this.load.image('start', 'assets/finalproj-main-menu-prototype-startsign.png');
        this.load.image('title', 'assets/finalproj-main-menu-prototype-titlesign.png') 
@@ -15,7 +15,7 @@ export default class MainMenu extends Phaser.Scene {
         this.add.image(640, 400, 'title');
         const start = this.add.image(640, 400, 'start').setAlpha(0).setInteractive();
         const settings = this.add.image(640, 500, 'settings').setAlpha(0).setInteractive();
-        const quit = this.add.image(640, 600, 'quit').setAlpha(0).setInteractive();
+        const credits = this.add.image(640, 600, 'credits').setAlpha(0).setInteractive();
 
         const fadeIn = (button, delayTime) =>{
             this.tweens.add({
@@ -29,18 +29,36 @@ export default class MainMenu extends Phaser.Scene {
         
         fadeIn(start, 0);
         fadeIn(settings, 2000);
-        fadeIn(quit, 4000);
+        fadeIn(credits, 4000);
 
         start.on('pointerdown', ()=> start.setTint(0x965A0B));
-        start.on('pointerup', ()=>start.clearTint());
+        start.on('pointerhover', ()=> start.setTint(0xb66d0f));
+        start.on('pointerup', ()=>{
+            start.clearTint()
+            this.cameras.main.fadeOut(500, 0, 0, 0);
+            this.cameras.main.once('camerafadeoutcomplete', () => {
+                this.scene.start('level-select');
+            });
         start.on('pointerout', ()=>start.clearTint());
+        });
 
         settings.on('pointerdown', ()=> settings.setTint(0x965A0B));
-        settings.on('pointerup', ()=>settings.clearTint());
+        settings.on('pointerhover', ()=> settings.setTint(0xb66d0f));
+        settings.on('pointerup', ()=>{
+            settings.clearTint()
+            this.cameras.main.fadeOut(500, 0, 0, 0);
+            this.cameras.main.once('camerafadeoutcomplete', () => {
+                this.scene.start('settings');
+            });
         settings.on('pointerout', ()=>settings.clearTint());
+        });
 
-        quit.on('pointerdown', ()=> quit.setTint(0x965A0B));
-        quit.on('pointerup', ()=>quit.clearTint());
-        quit.on('pointerout', ()=>quit.clearTint());
+        credits.on('pointerdown', ()=> credits.setTint(0x965A0B));
+        credits.on('pointerhover', ()=> credits.setTint(0xb66d0f));
+        credits.on('pointerup', ()=>{
+            credits.clearTint();
+            this.scene.start('credits');
+        });
+        credits.on('pointerout', ()=>credits.clearTint());
     }
 }

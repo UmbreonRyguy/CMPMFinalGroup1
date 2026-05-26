@@ -6,6 +6,7 @@ export default class IntroCinematic extends Phaser.Scene {
     CY = this.H * 0.5;
 
     shatter() { //function to shatter rock and make dust cloud at same time after rock shakes
+        this.logoDone = false;
 
         for (let i = 0; i < 6; i++) { //generate 6 random rock pieces
             const angle = Phaser.Math.FloatBetween(0, Math.PI*2); //shard angle
@@ -37,7 +38,7 @@ export default class IntroCinematic extends Phaser.Scene {
                     this.time.delayedCall(2500, () => {
                         this.cameras.main.fadeOut(500, 0, 0, 0); //fade out after cinematic is done
                         this.cameras.main.once('camerafadeoutcomplete', () => {
-                            this.scene.start('main-menu'); //load main menu after cinematic is done
+                            this.logoDone = true;
                         });
                     });
                 }
@@ -50,12 +51,23 @@ export default class IntroCinematic extends Phaser.Scene {
     }
 
     preload() {
+        // load assets used in logo/intro
         this.load.image("prototypeLogo", "assets/prototypeLogo.png");
         this.load.image("rock", "assets/rockForPrototypeCinematic.png");
         this.load.image("shard", "assets/rockShardForPrototype.png");
         this.load.image("dust", "assets/dustCloud.png");
     }
     create() {
+        // all the rest of the assets used in the game are loaded here
+        // this loading happens while the logo cinematic is playing
+        this.loadingDone = false;
+        // assets go here
+        this.load.start();
+
+        this.load.once("complete", () => {
+            this.loadingDone = true;
+        });
+
         this.prototypeLogo = this.add.image(this.game.config.width * 0.5, this.game.config.height * 0.5, "prototypeLogo")
             .setScale(2)
             .setAlpha(0);
@@ -80,5 +92,10 @@ export default class IntroCinematic extends Phaser.Scene {
                     duration: 850, ease: 'Back.out' } //reveal logo
             ]
         });
+    }
+    update() {
+        if (this.logoDone && this.logoDone) {
+            this.scene.start('main-menu'); // load main menu after cinematic is done AND loading is done
+        }
     }
 }

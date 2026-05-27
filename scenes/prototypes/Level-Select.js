@@ -23,7 +23,7 @@ export default class LevelSelect extends Phaser.Scene {
             lvl2.clearTint();
             this.cameras.main.fadeOut(500, 0, 0, 0);
             this.cameras.main.once('camerafadeoutcomplete', () => {
-                this.scene.start('core-gameplay');
+                this.scene.start('core-gameplay-level2');
             });
         });
 
@@ -34,7 +34,7 @@ export default class LevelSelect extends Phaser.Scene {
             lvl3.clearTint();
             this.cameras.main.fadeOut(500, 0, 0, 0);
             this.cameras.main.once('camerafadeoutcomplete', () => {
-                this.scene.start('core-gameplay');
+                this.scene.start('core-gameplay-level3');
             });
         });
     }

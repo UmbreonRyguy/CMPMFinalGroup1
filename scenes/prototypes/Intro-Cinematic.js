@@ -5,6 +5,8 @@ export default class IntroCinematic extends Phaser.Scene {
     CX = this.W * 0.5; //center x and y
     CY = this.H * 0.5;
 
+   
+
     shatter() { //function to shatter rock and make dust cloud at same time after rock shakes
         this.logoDone = false;
 
@@ -56,6 +58,7 @@ export default class IntroCinematic extends Phaser.Scene {
         this.load.image("rock", "assets/rockForPrototypeCinematic.png");
         this.load.image("shard", "assets/rockShardForPrototype.png");
         this.load.image("dust", "assets/dustCloud.png");
+
     }
     create() {
         // all the rest of the assets used in the game are loaded here

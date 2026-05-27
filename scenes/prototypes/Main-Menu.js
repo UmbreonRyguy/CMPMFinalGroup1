@@ -25,7 +25,7 @@ export default class MainMenu extends Phaser.Scene {
         fadeIn(credits, 2000);
 
         start.on('pointerdown', ()=> start.setTint(0x965A0B));
-        start.on('pointerhover', ()=> start.setTint(0xb66d0f));
+        start.on('pointerover', ()=> start.setTint(0xb66d0f));
         start.on('pointerup', ()=>{
             start.clearTint()
             this.cameras.main.fadeOut(500, 0, 0, 0);
@@ -36,7 +36,7 @@ export default class MainMenu extends Phaser.Scene {
         });
 
         settings.on('pointerdown', ()=> settings.setTint(0x965A0B));
-        settings.on('pointerhover', ()=> settings.setTint(0xb66d0f));
+        settings.on('pointerover', ()=> settings.setTint(0xb66d0f));
         settings.on('pointerup', ()=>{
             settings.clearTint()
             this.cameras.main.fadeOut(500, 0, 0, 0);
@@ -47,7 +47,7 @@ export default class MainMenu extends Phaser.Scene {
         });
 
         credits.on('pointerdown', ()=> credits.setTint(0x965A0B));
-        credits.on('pointerhover', ()=> credits.setTint(0xb66d0f));
+        credits.on('pointerover', ()=> credits.setTint(0xb66d0f));
         credits.on('pointerup', ()=>{
             credits.clearTint();
             this.scene.start('credits');

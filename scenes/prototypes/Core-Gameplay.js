@@ -7,6 +7,5 @@ export default class GameplayPrototype extends Phaser.Scene {
         
         const itemText = this.add.text(100, 100, "item for player to pick up", {color: "#ffffff"}).setInteractive();
         
-
     }
 }

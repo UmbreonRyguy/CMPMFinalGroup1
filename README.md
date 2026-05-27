@@ -20,7 +20,7 @@ Scene Flow Prototype Documentation
     -Gameplay Scene - Core-Gameplay.js
     -Menu Scene - Main-Menu.js
 
-Our Communication is demonstrated by a global variable titled "itemsheld" which is created in the intro scene, and updated in the various gameplay scenes
+Our Communication is demonstrated by a variable titled "itemsheld" which is created in the gameplay scene, and passed to the end scenes to display items collected
 
 The 'Fancy Transition' is demonstrated using the Gameplay scenes and pause scenes 
 

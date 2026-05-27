@@ -37,6 +37,12 @@ export default class LevelSelect extends Phaser.Scene {
                 this.scene.start('core-gameplay-level3');
             });
         });
+
+        const returnButtonText = this.add.text(640, 650, "Return to Menu", {color: "#fffcfc", backgroundColor: '#3f1352', padding: { x: 60, y: 20 }}).setOrigin(0.5).setInteractive();
+        returnButtonText.on('pointerdown', ()=> returnButtonText.setTint(0x965A0B));
+        returnButtonText.on('pointerup', ()=>{
+            this.scene.start('level-select');
+        });
     }
 }
 

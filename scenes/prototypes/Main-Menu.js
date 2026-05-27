@@ -3,13 +3,6 @@ export default class MainMenu extends Phaser.Scene {
         super('main-menu');
     }
 
-    preload() {
-       this.load.image('bg', 'assets/finalproj-main-menu-protbg.png');
-       this.load.image('credits', 'assets/finalproj-main-menu-prototype-quitsign.png'); //assets must be switched out to credits button
-       this.load.image('settings', 'assets/finalproj-main-menu-prototype-settingssign.png');
-       this.load.image('start', 'assets/finalproj-main-menu-prototype-startsign.png');
-       this.load.image('title', 'assets/finalproj-main-menu-prototype-titlesign.png') 
-    }
     create() {
         this.add.image(640, 360, 'bg');
         this.add.image(640, 400, 'title');
@@ -28,8 +21,8 @@ export default class MainMenu extends Phaser.Scene {
         }
         
         fadeIn(start, 0);
-        fadeIn(settings, 2000);
-        fadeIn(credits, 4000);
+        fadeIn(settings, 1000);
+        fadeIn(credits, 2000);
 
         start.on('pointerdown', ()=> start.setTint(0x965A0B));
         start.on('pointerhover', ()=> start.setTint(0xb66d0f));

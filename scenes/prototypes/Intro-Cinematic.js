@@ -62,6 +62,11 @@ export default class IntroCinematic extends Phaser.Scene {
         // this loading happens while the logo cinematic is playing
         this.loadingDone = false;
         // assets go here
+        this.load.image('bg', 'assets/finalproj-main-menu-protbg.png');
+        this.load.image('credits', 'assets/finalproj-main-menu-prototype-creditssign.png'); //assets must be switched out to credits button
+        this.load.image('settings', 'assets/finalproj-main-menu-prototype-settingssign.png');
+        this.load.image('start', 'assets/finalproj-main-menu-prototype-startsign.png');
+        this.load.image('title', 'assets/finalproj-main-menu-prototype-titlesign.png');
         this.load.start();
 
         this.load.once("complete", () => {
@@ -92,10 +97,14 @@ export default class IntroCinematic extends Phaser.Scene {
                     duration: 850, ease: 'Back.out' } //reveal logo
             ]
         });
+
+        // button to skip intro
+        this.skip = this.input.keyboard.addKey('SPACE');
     }
     update() {
-        if (this.logoDone && this.logoDone) {
+        if (this.loadingDone && (this.logoDone || Phaser.Input.Keyboard.JustDown(this.skip))) {
             this.scene.start('main-menu'); // load main menu after cinematic is done AND loading is done
+            // this.scene.start(''); // skip to a further scene for debug/testing
         }
     }
 }

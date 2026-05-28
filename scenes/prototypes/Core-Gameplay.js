@@ -148,6 +148,79 @@ export default class GameplayPrototype extends Phaser.Scene {
         //Game Objects
         //--------------------------
 
+        //------------------------------------------------------------
+        //Prefab class definition
+        //--------------------------------------------------
+        //prefab for trash---------------------------------------------------------------------------------
+        export default class TrashInfo extends Phaser.GameObjects.Image{
+            constructor(scene){
+                super(scene, 0, 0, 'trashinfo');
+            }
+            /**
+             * @param {{trashInventory?: string[]}} data 
+             * 
+             */
+            init(data){
+                this.trashInventory = data.trashInventory || [];
+            }
+
+            /* updates the trash inventory
+            *
+            * @param {string} item Item name. Short and consistent works best (e.g. `"key"`, not `"a shiny key"`)
+            * 
+            * @param {int} playerX. Player's x position
+            * @param {int} playerY. Player's Y position 
+            */
+            gainItemTrash(item, playerX, playerY){
+            if (this.trashInventory.includes(item)) {
+                console.warn('gaining item already held:', item);
+                return;
+            }
+                const message = this.add.text(playerX, playerY + 20, "You picked up trash!").setAlpha(0);
+                this.tween.add({
+                    targets: item,
+                    alpha: 1,
+                    duration: 3000,
+                    ease: 'linear' 
+                });
+                
+                this.trashInventory.push(item);
+            }
+
+            /*
+            decreaseTrashInventory(){
+
+            }*/
+                
+            //Test if the player has all trash items in trashInventory
+            /**
+            * @param {int} item Item name.
+            * @returns {boolean}
+            */
+            hasAllItemTrash(number) {
+                if(this.trashInventory.length == number){
+                    return true;
+                }else{
+                    return false;
+                }
+            }
+        }
+
+        //added trash object for player to interact with
+        //making a water bottle to throw away
+        let trash = this.add.image(W - 50, W + 30, "trash")
+            .setInteractive()
+            .on('pointerover', () => this.showMessage("Ew, trash"))
+            .on('pointerdown', () => {
+                this.showMessage("Throw it away!");
+                this.gainItem('trash');
+                this.tweens.add({
+                    targets: trash,
+                    alpha: {from: 1, to: 0},
+                    duration: 500,
+                    onComplete: ()=> trash.destroy()
+                });
+            })
     }
 
     update(){

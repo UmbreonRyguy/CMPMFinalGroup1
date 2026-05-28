@@ -63,39 +63,7 @@ export default class IntroCinematic extends Phaser.Scene {
         this.load.image('trash', 'assets/Trash.png');
     }
     create() {
-        //prefab for trash---------------------------------------------------------------------------------
-        class Trash extends Phaser.GameObjects.Image{
-            constructor(scene){
-                super(scene, 0, 0, 'trash');
-            }
-            /**
-             * @param {{trashInventory?: string[]}} data 
-             * 
-             */
-            init(data){
-                this.trashInventory = data.trashInventory || [];
-            }
-
-            //don't know if I need the below
-            /**
-             * @param {string} key unique phaser key
-             * @param {string} name human readable name 
-             */
-            constructor(key, name){
-                super(key);
-                this.name = name;
-
-            }
-
-            increaseTrashInventory(){
-                
-            }
-
-            decreaseTrashInventory(){
-
-            }
-
-        }
+        
 
         // all the rest of the assets used in the game are loaded here
         // this loading happens while the logo cinematic is playing

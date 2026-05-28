@@ -120,6 +120,8 @@ export default class GameplayPrototype extends Phaser.Scene {
         this.input.keyboard.on("keydown-" + "UP", () =>
         {
             this.isJumping = true;
+            //jump_sound = this.sound.add('jump_sound');
+            //jump_sound.play();
             if (this.player.body.onFloor()) {
                 this.player.setVelocityY(-350);
             }

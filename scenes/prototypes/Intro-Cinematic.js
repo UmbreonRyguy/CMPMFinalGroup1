@@ -72,6 +72,20 @@ export default class IntroCinematic extends Phaser.Scene {
              * @param {{trashInventory?: string[]}} data 
              * 
              */
+            init(data){
+                this.trashInventory = data.trashInventory || [];
+            }
+
+            //don't know if I need the below
+            /**
+             * @param {string} key unique phaser key
+             * @param {string} name human readable name 
+             */
+            constructor(key, name){
+                super(key);
+                this.name = name;
+
+            }
 
             increaseTrashInventory(){
                 

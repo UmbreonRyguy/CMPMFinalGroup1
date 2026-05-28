@@ -8,9 +8,22 @@ export default class GameplayPrototype extends Phaser.Scene {
         itemText = this.add.text(100, 180, "The player has " + this.itemsHeld + " items right now", {color: "#ffffff"});
         this.itemText = itemText;
     }
-    preload(){}
+    preload(){
+        this.load.tilemapTiledJSON("prototypeTilemap", "assets/prototypeTilemap.json");
+        this.load.spritesheet("Prototype_Tiles", "assets/Prototype_Tiles.png", {frameWidth: 80, frameHeight: 80});
+        // ^ this is just the tileset; you can convert the tiles into sprites if you load it as
+        // a spritesheet, though this is a bit difficult to figure out, so i may not end up
+        // using that functionality. anyways, this is all to say, dw about the specifics of all
+        // this junk
+    }
     create() {
 
+        const prototypeMap = this.make.tilemap({key: "prototypeTilemap"});
+        const prototypeTiles = prototypeMap.addTilesetImage("Prototype_Tiles", "Prototype_Tiles", 80, 80);
+        this.layer1 = prototypeMap.createLayer("Tile Layer 1", prototypeTiles, 0, 0);
+        this.layer1.setCollisionFromCollisionGroup();
+        // tiles can collide now
+        
         this.itemsHeld = 0;
         //this.add.rectangle(100, 100, 100, 100, 0x00ff00);
 

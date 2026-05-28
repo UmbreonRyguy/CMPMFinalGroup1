@@ -133,7 +133,7 @@ export default class GameplayPrototype extends Phaser.Scene {
             }
         });      
         
-        // this.input.keyboard.on("keyup-" + "LEFT", () =>
+        // this.input.keyboardon("keyup-" + "LEFT", () =>
         // {
         //     this.player.setVelocityX(0);
         // });

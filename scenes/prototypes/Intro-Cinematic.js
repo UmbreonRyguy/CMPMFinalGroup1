@@ -5,7 +5,7 @@ export default class IntroCinematic extends Phaser.Scene {
     CX = this.W * 0.5; //center x and y
     CY = this.H * 0.5;
 
-   
+  
 
     shatter() { //function to shatter rock and make dust cloud at same time after rock shakes
         this.logoDone = false;
@@ -59,8 +59,30 @@ export default class IntroCinematic extends Phaser.Scene {
         this.load.image("shard", "assets/rockShardForPrototype.png");
         this.load.image("dust", "assets/dustCloud.png");
 
+        //assets used for prefab
+        this.load.image('trash', 'assets/Trash.png');
     }
     create() {
+        //prefab for trash---------------------------------------------------------------------------------
+        class Trash extends Phaser.GameObjects.Image{
+            constructor(scene){
+                super(scene, 0, 0, 'trash');
+            }
+            /**
+             * @param {{trashInventory?: string[]}} data 
+             * 
+             */
+
+            increaseTrashInventory(){
+                
+            }
+
+            decreaseTrashInventory(){
+
+            }
+
+        }
+
         // all the rest of the assets used in the game are loaded here
         // this loading happens while the logo cinematic is playing
         this.loadingDone = false;
@@ -70,6 +92,12 @@ export default class IntroCinematic extends Phaser.Scene {
         this.load.image('settings', 'assets/finalproj-main-menu-prototype-settingssign.png');
         this.load.image('start', 'assets/finalproj-main-menu-prototype-startsign.png');
         this.load.image('title', 'assets/finalproj-main-menu-prototype-titlesign.png');
+        this.load.tilemapTiledJSON("prototypeTilemap", "assets/prototypeTilemap.json");
+        this.load.spritesheet("Prototype_Tiles", "assets/Prototype_Tiles.png", {frameWidth: 80, frameHeight: 80});
+        this.load.image('player', 'assets/PlaceholderPlayer.png');
+        this.load.image('jumpButton', 'assets/LargerArrowButton.png');
+        this.load.image('leftButton', 'assets/LargerArrowButton.png');
+        this.load.image('rightButton', 'assets/LargerArrowButton.png');
         this.load.start();
 
         this.load.once("complete", () => {

@@ -107,53 +107,56 @@ export default class GameplayPrototype extends Phaser.Scene {
 
         this.isJumping = false;
 
-        // we can use different input if player is using a touchscreen
-        this.input.keyboard.on("keydown-" + "LEFT", () =>
-        {
-            //if (this.player.body.velocity.x > -1000)
-            this.player.setVelocityX(this.player.body.velocity.x - 50);
-        });
-        this.input.keyboard.on("keydown-" + "RIGHT", () =>
-        {
-            this.player.setVelocityX(this.player.body.velocity.x + 50);
-        });
-        this.input.keyboard.on("keydown-" + "UP", () =>
-        {
-            this.isJumping = true;
-            jump_sound = this.sound.add('shorthop');
-            jump_sound.play();
-            if (this.player.body.onFloor()) {
-                this.player.setVelocityY(-350);
-            }
-        });      
+        //Keyboard input for player movement
+        this.cursors = this.input.keyboard.createCursorKeys();
         
-        // this.input.keyboard.on("keyup-" + "LEFT", () =>
-        // {
-        //     this.player.setVelocityX(0);
-        // });
-        // this.input.keyboard.on("keyup-" + "RIGHT", () =>
-        // {
-        //     this.player.setVelocityX(0);
-        // });
-
-        
-
-        //--------------------------
+        //---------------------------
         //Game Objects
         //--------------------------
 
     }
 
     update(){
-        if (this.player.body.onFloor()) {
+
+
+        const onFloor = this.player.body.onFloor();
+        if (onFloor) {
             this.isJumping = false;
         }
-        if(this.isJumping == true){
-            this.player.setDragX(0);
-        }
-        else{
-            this.player.setDragX(1000);
+
+        // Reduce horizontal drag while in-air so player retains momentum
+        if (this.isJumping) {
+            this.player.body.setDragX(0);
+        } else {
+            this.player.body.setDragX(1000);
         }
 
+        // Keyboard movement
+        const moveSpeed = 250;
+        if (this.cursors.left.isDown) {
+            while(this.player.body.velocity.x > -moveSpeed) {
+                this.player.setVelocityX(this.player.body.velocity.x - 10);
+            }
+        } else if (this.cursors.right.isDown) {
+            while(this.player.body.velocity.x < moveSpeed) {
+                this.player.setVelocityX(this.player.body.velocity.x + 10);
+            }
+        } else {
+            this.player.setVelocityX(0);
+        }
+        // if(this.cursors.left.isUp && this.isJumping == true){
+        //     this.player.setVelocityX(0);
+        // }
+        // if(this.cursors.right.isUp && this.isJumping == true){
+        //     this.player.setVelocityX(0);
+        // }
+
+        // Jump with keyboard
+        if (this.cursors.up.isDown && onFloor) {
+            this.isJumping = true;
+            jump_sound = this.sound.add('shorthop');
+            jump_sound.play();
+            this.player.setVelocityY(-400);
+        }
     }
 }

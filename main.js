@@ -20,7 +20,10 @@ let config = {
         height: 720
     },
     physics: {
-        default: 'arcade'
+        default: 'arcade',
+        arcade: {
+                gravity: { y: 500 },
+        }
     },
     pixelArt: true,
     scene: [IntroCinematic, MainMenu, Credits, Settings, GameplayPrototype, LevelSelect, EndScene, GameplayPrototypeLevel2, GameplayPrototypeLevel3, Pause]

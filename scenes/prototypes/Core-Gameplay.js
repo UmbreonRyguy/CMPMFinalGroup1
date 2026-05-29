@@ -21,17 +21,20 @@ export default class GameplayPrototype extends Phaser.Scene {
         const prototypeTiles = prototypeMap.addTilesetImage("Prototype_Tiles", "Prototype_Tiles", 80, 80);
         this.layer1 = prototypeMap.createLayer("Tile Layer 1", prototypeTiles, 0, 0);
         this.layer1.setCollisionFromCollisionGroup();
+        this.debugGraphics = this.add.graphics();
+        this.drawTileCollisions(this.debugGraphics);
+        this.platform = this.physics.add.body(360, 311, 240, 48).setAllowGravity(false);
 
         //--------------------------------------
         // image physics stuff
         //---------------------------------------
-        let mush = this.physics.add.image(400, 320, "Prototype_Tiles", 28).setBodySize(240, 80);
-        this.physics.add.image(480, 320, "Prototype_Tiles", 29);
-        this.physics.add.image(560, 320, "Prototype_Tiles", 30);
+        this.add.image(400, 320, "Prototype_Tiles", 21);
+        this.add.image(480, 320, "Prototype_Tiles", 22);
+        this.add.image(560, 320, "Prototype_Tiles", 23);
 
-        let conveyorBelt = this.physics.add.image(400, 320, "Prototype_Tiles", 14).setBodySize(240, 80);
-        this.physics.add.image(480, 320, "Prototype_Tiles", 15);
-        this.physics.add.image(560, 320, "Prototype_Tiles", 16);
+        //let conveyorBelt = this.add.image(400, 320, "Prototype_Tiles", 14);
+        //this.add.image(480, 320, "Prototype_Tiles", 15);
+        //this.add.image(560, 320, "Prototype_Tiles", 16);
         
         // tiles can collide now
         
@@ -108,6 +111,9 @@ export default class GameplayPrototype extends Phaser.Scene {
                 
         //     }  
         // });
+        this.physics.add.collider(this.player, this.platform, () => {
+            if (this.player.body.touching.down)
+        })
 
         this.player.body.setMaxVelocity(500);
         this.player.body.setDragX(1000);
@@ -122,6 +128,35 @@ export default class GameplayPrototype extends Phaser.Scene {
         //Game Objects
         //--------------------------
 
+    }
+
+    drawTileCollisions(graphics) {
+        graphics.clear();
+        graphics.lineStyle(3, 0xfc00fc, 1);
+
+        this.layer1.forEachTile(tile => {
+            const tileX = tile.getLeft();
+            const tileY = tile.getTop();
+            const collisionStuff = tile.getCollisionGroup();
+            
+
+            if (!collisionStuff || collisionStuff.objects.length === 0) {
+                return;
+            }
+            
+
+            const objects = collisionStuff.objects;
+
+            for (let i = 0; i < objects.length; ++i) {
+                const object = objects[i];
+                const objX = tileX + object.x;
+                const objY = tileY + object.y;
+
+                if (object.rectangle) {
+                    graphics.strokeRect(objX, objY, object.width, object.height);
+                }
+            }
+        })
     }
 
     update(){

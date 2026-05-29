@@ -227,7 +227,7 @@ export default class GameplayPrototype extends Phaser.Scene {
                 });
             })
 
-            this.trash2 = new TrashInfo(this, 950, 370) 
+        this.trash2 = new TrashInfo(this, 950, 370) 
             .setScale(0.5)
             .setInteractive()
             let trashMessage2 = this.trash2.scene.add.text(this.trash2.x, this.trash2.y - 10, "Someone left more trash here.").setColor('#ffffff').setAlpha(0)

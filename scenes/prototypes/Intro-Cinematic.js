@@ -74,6 +74,7 @@ export default class IntroCinematic extends Phaser.Scene {
         this.load.image('title', 'assets/finalproj-main-menu-prototype-titlesign.png');
         this.load.tilemapTiledJSON("prototypeTilemap", "assets/prototypeTilemap.json");
         this.load.spritesheet("Prototype_Tiles", "assets/Prototype_Tiles.png", {frameWidth: 80, frameHeight: 80});
+        this.load.atlas("levers", "assets/levers.png", "assets/textureAtlas.json");
         this.load.image('player', 'assets/PlaceholderPlayer.png');
         this.load.image('jumpButton', 'assets/ArrowButton.png');
         this.load.image('leftButton', 'assets/ArrowButton.png');

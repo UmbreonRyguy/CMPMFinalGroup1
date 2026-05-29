@@ -59,8 +59,6 @@ export default class IntroCinematic extends Phaser.Scene {
         this.load.image("shard", "assets/rockShardForPrototype.png");
         this.load.image("dust", "assets/dustCloud.png");
 
-        //assets used for prefab
-        this.load.image('trash', 'assets/Trash.png');
     }
     create() {
         
@@ -77,9 +75,12 @@ export default class IntroCinematic extends Phaser.Scene {
         this.load.tilemapTiledJSON("prototypeTilemap", "assets/prototypeTilemap.json");
         this.load.spritesheet("Prototype_Tiles", "assets/Prototype_Tiles.png", {frameWidth: 80, frameHeight: 80});
         this.load.image('player', 'assets/PlaceholderPlayer.png');
-        this.load.image('jumpButton', 'assets/LargerArrowButton.png');
-        this.load.image('leftButton', 'assets/LargerArrowButton.png');
-        this.load.image('rightButton', 'assets/LargerArrowButton.png');
+        this.load.image('jumpButton', 'assets/ArrowButton.png');
+        this.load.image('leftButton', 'assets/ArrowButton.png');
+        this.load.image('rightButton', 'assets/ArrowButton.png');
+        
+        //assets used for prefab
+        this.load.image('trash', 'assets/Trash.png');
         this.load.start();
 
         this.load.once("complete", () => {

@@ -7,7 +7,7 @@ export default class GameplayPrototype extends Phaser.Scene {
     
     updateItemText() {
         this.itemText.destroy();
-        itemText = this.add.text(100, 180, "The player has " + this.itemsHeld + " items right now", {color: "#ffffff"});
+        itemText = this.add.text(W/2, H/5, "The player has " + this.itemsHeld + " items right now", {color: "#ffffff"});
         this.itemText = itemText;
     }
     
@@ -51,7 +51,7 @@ export default class GameplayPrototype extends Phaser.Scene {
         //----------------------------------------
 
         const itemText = this.add.text(1200, 200, "item for player to pick up", {color: "#ffffff", backgroundColor: '#e03f3f', padding: { x: 20, y: 10 }}).setInteractive();
-        this.itemText = this.add.text(100, 180, "The player has " + this.itemsHeld + " items right now", {color: "#ffffff"});
+        this.itemText = this.add.text(640, 360, "The player has " + this.itemsHeld + " items right now", {color: "#ffffff"});
         itemText.on('pointerup',()=>{
             itemText.destroy();
             this.itemsHeld += 1;
@@ -152,9 +152,11 @@ export default class GameplayPrototype extends Phaser.Scene {
         //Prefab class definition
         //--------------------------------------------------
         //prefab for trash---------------------------------------------------------------------------------
-        export default class TrashInfo extends Phaser.GameObjects.Image{
-            constructor(scene){
-                super(scene, 0, 0, 'trashinfo');
+        class TrashInfo extends Phaser.GameObjects.Image{
+            constructor(scene, x, y){
+                super(scene, x, y, 'trash');
+                scene.add.existing(this)
+                this.trashInventory = []
             }
             /**
              * @param {{trashInventory?: string[]}} data 
@@ -171,15 +173,15 @@ export default class GameplayPrototype extends Phaser.Scene {
             * @param {int} playerX. Player's x position
             * @param {int} playerY. Player's Y position 
             */
-            gainItemTrash(item, playerX, playerY){
+            gainItemTrash(item){
             if (this.trashInventory.includes(item)) {
                 console.warn('gaining item already held:', item);
                 return;
             }
-                const message = this.add.text(playerX, playerY + 20, "You picked up trash!").setAlpha(0);
-                this.tween.add({
-                    targets: item,
-                    alpha: 1,
+                const message = this.scene.add.text(this.x, this.y + 20, "You picked up trash!").setAlpha(0).setColor('#ffffff');
+                this.scene.tweens.add({
+                    targets: message,
+                    alpha: {from:1, to: 0},
                     duration: 3000,
                     ease: 'linear' 
                 });
@@ -207,20 +209,42 @@ export default class GameplayPrototype extends Phaser.Scene {
         }
 
         //added trash object for player to interact with
-        //making a water bottle to throw away
-        let trash = this.add.image(W - 50, W + 30, "trash")
+        //let trash = this.add.image(100, 220, "trash")
+        this.trash = new TrashInfo(this, 100, 220) 
+            .setScale(0.5)
             .setInteractive()
-            .on('pointerover', () => this.showMessage("Ew, trash"))
+            let trashMessage = this.trash.scene.add.text(100, 210, "Someone left trash here.").setColor('#ffffff').setAlpha(0)
+            this.trash.on('pointerover', () => trashMessage.setAlpha(1))
+            .on('pointerout', () => trashMessage.setAlpha(0))
             .on('pointerdown', () => {
-                this.showMessage("Throw it away!");
-                this.gainItem('trash');
-                this.tweens.add({
-                    targets: trash,
+                trashMessage.setAlpha(0);
+                this.trash.gainItemTrash('trash');
+                this.trash.scene.tweens.add({
+                    targets: this.trash, 
                     alpha: {from: 1, to: 0},
                     duration: 500,
-                    onComplete: ()=> trash.destroy()
+                    onComplete: ()=> this.trash.destroy()
                 });
             })
+
+            this.trash2 = new TrashInfo(this, 950, 370) 
+            .setScale(0.5)
+            .setInteractive()
+            let trashMessage2 = this.trash2.scene.add.text(this.trash2.x, this.trash2.y - 10, "Someone left more trash here.").setColor('#ffffff').setAlpha(0)
+            this.trash2.on('pointerover', () => trashMessage2.setAlpha(1))
+            .on('pointerout', () => trashMessage2.setAlpha(0))
+            .on('pointerdown', () => {
+                trashMessage2.setAlpha(0);
+                this.trash2.gainItemTrash('trash2');
+                this.trash2.scene.tweens.add({
+                    targets: this.trash2, 
+                    alpha: {from: 1, to: 0},
+                    duration: 500,
+                    onComplete: ()=> this.trash2.destroy()
+                });
+            })
+
+            this.trashInventCheck = this.add.text( 600, 200, "Has the player collected all trash?")
     }
 
     update(){
@@ -234,5 +258,11 @@ export default class GameplayPrototype extends Phaser.Scene {
             this.player.setDragX(1000);
         }
 
+        let answer
+        if(this.trash.hasAllItemTrash(2)){
+            this.trashInventCheck.setText("Has the player collected all trash? Yes!")
+        }else{
+             this.trashInventCheck.setText("Has the player collected all trash? No")
+        }
     }
 }

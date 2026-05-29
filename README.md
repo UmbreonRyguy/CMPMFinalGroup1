@@ -25,4 +25,7 @@ Our Communication is demonstrated by a variable titled "itemsheld" which is crea
 The 'Fancy Transition' is demonstrated using the Gameplay scenes and pause scenes 
 
 All important scenes are accesible through buttons. 
+
+Asset Credits:
+to be added
     

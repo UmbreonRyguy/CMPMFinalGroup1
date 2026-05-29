@@ -138,6 +138,8 @@ export default class GameplayPrototype extends Phaser.Scene {
                 con2.setAlpha(1);
                 con3.setAlpha(1);
 
+                this.platform.setSize(240, 28).reset(440, 386);
+
                 this.past = false;
             }
             else {

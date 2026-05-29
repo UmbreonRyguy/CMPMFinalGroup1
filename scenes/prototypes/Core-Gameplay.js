@@ -117,7 +117,7 @@ export default class GameplayPrototype extends Phaser.Scene {
         this.physics.add.collider(this.player, this.platform, () => {
             if (this.player.body.touching.down && this.platform.touching.up) {
                 if (this.past == true) {
-                    this.player.setVelocityY(this.player.body.velocity.y - 400);
+                    this.player.setVelocityY(this.player.body.velocity.y - 600);
                     // doesn't work properly; read note in update for full context
                 }
                 else {

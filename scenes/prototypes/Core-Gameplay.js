@@ -36,15 +36,7 @@ export default class GameplayPrototype extends Phaser.Scene {
         // tiles can collide now
         
         this.itemsHeld = 0;
-        //this.add.rectangle(100, 100, 100, 100, 0x00ff00);
-
-        //--------------------------
-        //Background audio
-        //--------------------------
-        // music = this.sound.add();
-        // music.on('looped', listener);
-        // music.setloop(true);
-        // music.play();
+        //this.add.rectangle(100, 100, 100, 100, 0x00ff00); 
         
         //----------------------------------------
         //UI
@@ -162,6 +154,8 @@ export default class GameplayPrototype extends Phaser.Scene {
         // Jump with keyboard
         if (this.cursors.up.isDown && onFloor) {
             this.isJumping = true;
+            jump_sound = this.sound.add('shorthop');
+            jump_sound.play();
             this.player.setVelocityY(-400);
         }
     }

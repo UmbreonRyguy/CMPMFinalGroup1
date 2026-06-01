@@ -96,6 +96,10 @@ export default class GameplayPrototype extends Phaser.Scene {
         const rightButton = this.add.image(60, 50, 'rightButton').setInteractive();
         leftButton.angle = 90;
         leftButton.setAlpha(0.5);
+        
+        //
+        // player stuff
+        //
 
         this.jumpSound = this.sound.add('shorthop');
 
@@ -117,11 +121,10 @@ export default class GameplayPrototype extends Phaser.Scene {
         this.physics.add.collider(this.player, this.platform, () => {
             if (this.player.body.touching.down && this.platform.touching.up) {
                 if (this.past == true) {
-                    this.player.setVelocityY(this.player.body.velocity.y - 800);
-                    // doesn't work properly; read note in update for full context
+                    this.player.setVelocityY(this.player.body.velocity.y - 250);
                 }
                 else {
-                    this.player.setVelocityX(this.player.body.velocity.x - 200);
+                    this.player.setVelocityX(this.player.body.velocity.x - 50);
                 }
             }
         });
@@ -158,10 +161,8 @@ export default class GameplayPrototype extends Phaser.Scene {
         
 
 
-        this.player.body.setMaxVelocity(500);
-        this.player.body.setMaxVelocityY(600); 
-        // ^ comment this out if you'd like, I'm just doing this for testing purposes
-        this.player.body.setDragX(1000);
+        this.player.body.setMaxVelocity(600);
+        this.player.body.setDragX(900);
 
 
         this.isJumping = false;
@@ -336,7 +337,7 @@ export default class GameplayPrototype extends Phaser.Scene {
 
     
 
-    update(){
+    update() {
         const onFloor = this.player.body.onFloor();
         if (onFloor) {
             this.isJumping = false;
@@ -344,26 +345,31 @@ export default class GameplayPrototype extends Phaser.Scene {
 
         // Reduce horizontal drag while in-air so player retains momentum
         if (this.isJumping) {
-            this.player.body.setDragX(0);
+            this.player.body.setDragX(500);
         } else {
-            this.player.body.setDragX(1000);
+            this.player.body.setDragX(900);
         }
 
         // Keyboard movement
         const moveSpeed = 250;
-        if (this.cursors.left.isDown) {
-            while(this.player.body.velocity.x > -moveSpeed) {
-                this.player.setVelocityX(this.player.body.velocity.x - 10);
+
+        if (!(this.cursors.left.isDown && this.cursors.right.isDown)) {
+            if (this.cursors.left.isDown) {
+                if (this.player.body.velocity.x > -moveSpeed) {
+                    this.player.setVelocityX(this.player.body.velocity.x - 25);
+                }
             }
-        } else if (this.cursors.right.isDown) {
-            while(this.player.body.velocity.x < moveSpeed) {
-                this.player.setVelocityX(this.player.body.velocity.x + 10);
-            }
-        } else {
-            if (!(this.player.body.touching.down && this.platform.touching.up && !this.past)) { // basically if not on conveyor belt
-                this.player.setVelocityX(0);
+            else if (this.cursors.right.isDown) {
+                if (this.player.body.velocity.x < moveSpeed) {
+                    this.player.setVelocityX(this.player.body.velocity.x + 25);
+                }
             }
         }
+        // else {
+        //     if (!(this.player.body.touching.down && this.platform.touching.up && !this.past)) { // basically if not on conveyor belt
+        //         this.player.setVelocityX(0);
+        //     }
+        // }
         // if(this.cursors.left.isUp && this.isJumping == true){
         //     this.player.setVelocityX(0);
         // }
@@ -372,7 +378,7 @@ export default class GameplayPrototype extends Phaser.Scene {
         // }
 
         //let answer
-        if(this.trash.hasAllItemTrash(2)){
+        if (this.trash.hasAllItemTrash(2)){
             this.trashInventCheck.setText("Has the player collected all trash? Yes!")
         } else {
             this.trashInventCheck.setText("Has the player collected all trash? No")
@@ -381,25 +387,22 @@ export default class GameplayPrototype extends Phaser.Scene {
         // Jump with keyboard
         if (this.cursors.up.isDown && onFloor) {
             this.isJumping = true;
-            this.jumpSound.play();
-            this.player.setVelocityY(-400);
+            if (this.past && this.player.body.touching.down && this.platform.touching.up) {
+                this.jumpSound.play({rate: 0.3 + Math.random() * 0.2});
+                this.player.setVelocityY(-500);
+            }
+            else {
+                this.jumpSound.play({rate: 0.7 + Math.random() * 0.3});
+                this.player.setVelocityY(-375);
+            }
         }
-        // ^ hey, didn't want to change this cause idk if it was worked on such that
-        // merging would be a pain to deal with. In any case, this and my mushroom boucing stuff
-        // do not work together. It seems to be the case that whenever the player is jumping at the
-        // same time that the player is standing on the mushroom, the velocity for y only gets set to -400
-        // instead of the mushroom adding extra bounce. It's to the point that if you get the velocity of y
-        // low enough when on the mushroom, the player will go higher up while not pressing the jump button
-        // on the mushroom than when they do.
-        // basically, we need to make it so pressing the jump button while on the mushroom will make the player go higher
-        // than a regular jump, and right now pressing the jump button will only make the player do a regular jump.
-        // Ideally, the player would also bounce a bit on the mushroom, even when not actively jumping on it (which is why the
-        // mushroom jump stuff is written the way it is currently) 
-        // Also, the idea is that the player cannot complete whatever the goal is without using the past/future mechanic, which
-        // is why the top right platform is so high. The player is supposed to jump on the mushrooms to gain extra height in
-        // order to reach it, so the jumping not working on the mushroom is quite an issue.
-        // -Sydney
 
+        // variable jump height
+        if (this.cursors.up.isDown && this.player.body.velocity.y < -75) {
+            this.player.setVelocityY(this.player.body.velocity.y - 1.75);
+        }
+
+        // lever
         if (!this.physics.overlap(this.lever, this.player)) { // if the player is not in range of the lever
             this.leverOutline.setAlpha(0); // lever has no outline
             this.lever.disableInteractive(); // cannot click on lever

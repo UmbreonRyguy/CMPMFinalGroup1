@@ -125,7 +125,7 @@ export default class IntroCinematic extends Phaser.Scene {
     update() {
         if (this.loadingDone && (this.logoDone || Phaser.Input.Keyboard.JustDown(this.skip))) {
             this.scene.start('main-menu'); // load main menu after cinematic is done AND loading is done
-            // this.scene.start(''); // skip to a further scene for debug/testing
+            //this.scene.start('core-gameplay'); // skip to a further scene for debug/testing
         }
     }
 }

@@ -4,6 +4,9 @@ export default class MainMenu extends Phaser.Scene {
     }
 
     create() {
+        const synth = new Tone.Synth().toDestination();
+
+
         this.bg = this.add.image(640, 360, 'bg');
         this.add.image(640, 400, 'title');
         const start = this.add.image(640, 400, 'start').setAlpha(0).setInteractive();
@@ -27,6 +30,7 @@ export default class MainMenu extends Phaser.Scene {
         start.on('pointerdown', ()=> start.setTint(0x965A0B));
         start.on('pointerover', ()=> start.setTint(0xeab269));
         start.on('pointerup', ()=>{
+            synth.triggerAttackRelease("C4", "8n");
             start.clearTint()
             this.cameras.main.fadeOut(500, 0, 0, 0);
             this.cameras.main.once('camerafadeoutcomplete', () => {

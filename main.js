@@ -8,6 +8,7 @@ import EndScene from './scenes/prototypes/End-Scene.js';
 import GameplayPrototypeLevel2 from './scenes/prototypes/Core-Gameplay-Level2.js';
 import GameplayPrototypeLevel3 from './scenes/prototypes/Core-Gameplay-Level3.js';
 import Pause from './scenes/prototypes/Pause.js';
+import ToneLibrary from './scenes/toneLibrary.js';
 
 let config = {
     parent: 'root',

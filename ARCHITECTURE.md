@@ -2,7 +2,7 @@
 title: CMPM120 Final Game
 ---
 classDiagram
-    class `Phaser.GameObject.Image` {
+    class Phaser.GameObject.Image {
 	    +TrashInfo()
 	    +TreasureInfo()
     }

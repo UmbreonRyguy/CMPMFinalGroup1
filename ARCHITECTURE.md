@@ -2,7 +2,6 @@
 title: CMPM120 Final Game
 ---
 classDiagram
-direction TB
     class `Phaser.GameObject.Image` {
 	    +TrashInfo()
 	    +TreasureInfo()

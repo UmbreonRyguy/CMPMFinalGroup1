@@ -53,5 +53,12 @@ export default class MainMenu extends Phaser.Scene {
             this.scene.start('credits');
         });
         credits.on('pointerout', ()=>credits.clearTint());
+
+        //--------------------------
+        //Background audio
+        //--------------------------
+        var music = this.sound.add('bgmusic');
+        music.loop = true;
+        music.play();
     }
 }

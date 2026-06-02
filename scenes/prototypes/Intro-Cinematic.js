@@ -74,6 +74,7 @@ export default class IntroCinematic extends Phaser.Scene {
         this.load.image('title', 'assets/finalproj-main-menu-prototype-titlesign.png');
         this.load.tilemapTiledJSON("prototypeTilemap", "assets/prototypeTilemap.json");
         this.load.spritesheet("Prototype_Tiles", "assets/Prototype_Tiles.png", {frameWidth: 80, frameHeight: 80});
+        this.load.atlas("levers", "assets/levers.png", "assets/textureAtlas.json");
         this.load.image('player', 'assets/PlaceholderPlayer.png');
         this.load.image('jumpButton', 'assets/ArrowButton.png');
         this.load.image('leftButton', 'assets/ArrowButton.png');
@@ -81,6 +82,7 @@ export default class IntroCinematic extends Phaser.Scene {
         
         //assets used for prefab
         this.load.image('trash', 'assets/Trash.png');
+        this.load.image('treasure', 'assets/treasure.png');
         this.load.image('jumpButton', 'assets/LargerArrowButton.png');
         this.load.image('leftButton', 'assets/LargerArrowButton.png');
         this.load.image('rightButton', 'assets/LargerArrowButton.png');
@@ -123,7 +125,7 @@ export default class IntroCinematic extends Phaser.Scene {
     update() {
         if (this.loadingDone && (this.logoDone || Phaser.Input.Keyboard.JustDown(this.skip))) {
             this.scene.start('main-menu'); // load main menu after cinematic is done AND loading is done
-            // this.scene.start(''); // skip to a further scene for debug/testing
+            //this.scene.start('core-gameplay'); // skip to a further scene for debug/testing
         }
     }
 }

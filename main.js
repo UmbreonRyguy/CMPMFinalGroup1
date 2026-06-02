@@ -12,7 +12,7 @@ import Pause from './scenes/prototypes/Pause.js';
 let config = {
     parent: 'root',
     type: Phaser.WEBGL,
-    backgroundColor: '#111',
+    backgroundColor: '#223',
     scale: {
         mode: Phaser.Scale.FIT,
         autoCenter: Phaser.Scale.CENTER_HORIZONTALLY,
@@ -22,7 +22,8 @@ let config = {
     physics: {
         default: 'arcade',
         arcade: {
-                gravity: { y: 500 },
+                gravity: { y: 600 },
+                debug: true
         }
     },
     pixelArt: true,

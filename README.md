@@ -8,13 +8,21 @@
 
 Access Game Here - https://umbreonryguy.github.io/CMPMFinalGroup1/
 
+Core Gameplay Prototype Documentation
+
+Audio - Background music and Jump Sound inside game on level 1
+Visual - Our game contains hand-drawn image assets and tilemap sheets
+Motion - Game includes tween motions in the opening animation 
+Progression - The player can progress through level one, flipping a switch to progress to the top platform.
+Prefabs - We have 2 prefabs in the form of different collectible items, Trash and Treasure.
+
 Cinematics Prototype Documentation
 -Includes an intro cutscene showing our game studio logo (name still being decided)
 -Includes an interactive main menu with responsive buttons
 -The intro cutscene uses tween chains to satisfy the choreography requirement. 
 
 Scene Flow Prototype Documentation
--We have our 4 main scenes as well as additional scenes which are all accesible
+-We have our 4 main scenes as well as additional scenes, which are all accessible
     -Main title scene - Intro-Cinematic.js
     -Credits scene - Credits.js
     -Gameplay Scene - Core-Gameplay.js

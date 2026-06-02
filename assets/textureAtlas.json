@@ -1,0 +1,56 @@
+{
+    "textures": [
+        {
+            "image": "assets/levers.png",
+            "format": "ARGB8888",
+            "size": {
+                "w": 164,
+                "h": 80
+            },
+            "frames": [
+                {
+                    "filename": "lever",
+                    "rotated": false,
+                    "trimmed": true,
+                    "sourceSize": {
+                        "w": 80,
+                        "h": 80
+                    },
+                    "spriteSourceSize": {
+                        "x": 0,
+                        "y": 0,
+                        "w": 80,
+                        "h": 80
+                    },
+                    "frame": {
+                        "x": 0,
+                        "y": 0,
+                        "w": 80,
+                        "h": 80
+                    }
+                },
+                {
+                    "filename": "leverOutline",
+                    "rotated": false,
+                    "trimmed": true,
+                    "sourceSize": {
+                        "w": 84,
+                        "h": 80
+                    },
+                    "spriteSourceSize": {
+                        "x": 0,
+                        "y": 0,
+                        "w": 84,
+                        "h": 80
+                    },
+                    "frame": {
+                        "x": 80,
+                        "y": 0,
+                        "w": 84,
+                        "h": 80
+                    }
+                }
+            ]
+        }
+    ]
+}

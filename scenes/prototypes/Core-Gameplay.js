@@ -21,19 +21,34 @@ export default class GameplayPrototype extends Phaser.Scene {
         const prototypeTiles = prototypeMap.addTilesetImage("Prototype_Tiles", "Prototype_Tiles", 80, 80);
         this.layer1 = prototypeMap.createLayer("Tile Layer 1", prototypeTiles, 0, 0);
         this.layer1.setCollisionFromCollisionGroup();
+        this.platform = this.physics.add.body(440, 386, 240, 28).setAllowGravity(false).setImmovable();
 
         //--------------------------------------
         // image physics stuff
         //---------------------------------------
-        let mush = this.physics.add.image(400, 320, "Prototype_Tiles", 28).setBodySize(240, 80);
-        this.physics.add.image(480, 320, "Prototype_Tiles", 29);
-        this.physics.add.image(560, 320, "Prototype_Tiles", 30);
 
-        let conveyorBelt = this.physics.add.image(400, 320, "Prototype_Tiles", 14).setBodySize(240, 80);
-        this.physics.add.image(480, 320, "Prototype_Tiles", 15);
-        this.physics.add.image(560, 320, "Prototype_Tiles", 16);
+        // was there a better way to figure out how to add an outline to the lever?
+        // probably. Do I care? No. It is 12 AM. Did I try a better way? Yes. For much too long.
+        this.leverOutline = this.add.image(40, 202, "levers", "leverOutline").setAlpha(0);
+        this.lever = this.physics.add.staticImage(40, 200, "levers", "lever");
+
+        // idk why the hitbox is in a weird position either - 
+        // changing x or y has seemed to have little effect so I just left it alone
+        this.lever.body.setCircle(80, -80, -40);
+
+        // mushroom
+        const mush1 = this.add.image(480, 400, "Prototype_Tiles", 21).setAlpha(0);
+        const mush2 = this.add.image(560, 400, "Prototype_Tiles", 22).setAlpha(0);
+        const mush3 = this.add.image(640, 400, "Prototype_Tiles", 23).setAlpha(0);
+
+        // conveyor belt
+        const con1 = this.add.image(480, 400, "Prototype_Tiles", 14);
+        const con2 = this.add.image(560, 400, "Prototype_Tiles", 15);
+        const con3 = this.add.image(640, 400, "Prototype_Tiles", 16);
+
+        // var to keep track of which game state the player is in
+        this.past = false;
         
-        // tiles can collide now
         
         this.itemsHeld = 0;
         //this.add.rectangle(100, 100, 100, 100, 0x00ff00); 
@@ -55,7 +70,7 @@ export default class GameplayPrototype extends Phaser.Scene {
         const returnButtonText = this.add.text(1200, 100, "Return to Menu", {color: "#fffcfc", backgroundColor: '#3f1352', padding: { x: 20, y: 10 }}).setOrigin(0.5).setInteractive();
         returnButtonText.on('pointerdown', ()=> returnButtonText.setTint(0x965A0B));
         returnButtonText.on('pointerup', ()=>{
-            this.scene.start('level-select');
+            this.scene.start('main-menu');
         });
 
         const endSceneText = this.add.text(1200, 150, "Go to end scene", {color: "#ffffff", backgroundColor: '#3f1352', padding: { x: 20, y: 10 }}).setOrigin(0.5).setToTop().setInteractive();
@@ -82,11 +97,11 @@ export default class GameplayPrototype extends Phaser.Scene {
         leftButton.angle = 90;
         leftButton.setAlpha(0.5);
         
+        //
+        // player stuff
+        //
 
-        //----------------------------------------
-        //Player
-        //----------------------------------------
-
+        this.jumpSound = this.sound.add('shorthop');
 
         //Create Player sprite
         this.player = this.physics.add.sprite(800, 500, "player", 0).setScale(0.3);
@@ -101,8 +116,53 @@ export default class GameplayPrototype extends Phaser.Scene {
         //     }  
         // });
 
-        this.player.body.setMaxVelocity(500);
-        this.player.body.setDragX(1000);
+        // if the player hits the top of the conveyor belt, most fast to the left,
+        // if the player hits the top of the mushroom, bounce
+        this.physics.add.collider(this.player, this.platform, () => {
+            if (this.player.body.touching.down && this.platform.touching.up) {
+                if (this.past == true) {
+                    this.player.setVelocityY(this.player.body.velocity.y - 250);
+                }
+                else {
+                    this.player.setVelocityX(this.player.body.velocity.x - 50);
+                }
+            }
+        });
+
+        // if player clicks on lever, switch past to future or future to past;
+        // only works when player is near the switch
+        this.lever.on('pointerdown', () => {
+            if (this.past == true) {
+                mush1.setAlpha(0);
+                mush2.setAlpha(0);
+                mush3.setAlpha(0);
+
+                con1.setAlpha(1);
+                con2.setAlpha(1);
+                con3.setAlpha(1);
+
+                this.past = false;
+            }
+            else {
+                con1.setAlpha(0);
+                con2.setAlpha(0);
+                con3.setAlpha(0);
+
+                mush1.setAlpha(1);
+                mush2.setAlpha(1);
+                mush3.setAlpha(1);
+
+                this.platform.setSize(240, 28).reset(440, 391);
+
+                this.past = true;
+            }
+            //console.log("bean");
+        });
+        
+
+
+        this.player.body.setMaxVelocity(600);
+        this.player.body.setDragX(900);
 
 
         this.isJumping = false;
@@ -133,11 +193,7 @@ export default class GameplayPrototype extends Phaser.Scene {
             }
 
             /* updates the trash inventory
-            *
-            * @param {string} item Item name. Short and consistent works best (e.g. `"key"`, not `"a shiny key"`)
-            * 
-            * @param {int} playerX. Player's x position
-            * @param {int} playerY. Player's Y position 
+
             */
             gainItemTrash(item){
             if (this.trashInventory.includes(item)) {
@@ -167,6 +223,55 @@ export default class GameplayPrototype extends Phaser.Scene {
             */
             hasAllItemTrash(number) {
                 if(this.trashInventory.length == number){
+                    return true;
+                }else{
+                    return false;
+                }
+            }
+        }
+        //prefab for trash---------------------------------------------------------------------------------
+        class TreasureInfo extends Phaser.GameObjects.Image{
+            constructor(scene, x, y){
+                super(scene, x, y, 'treasure');
+                scene.add.existing(this)
+                this.treasureInventory = []
+            }
+            /**
+             * @param {{treasureInventory?: string[]}} data 
+             * 
+             */
+            init(data){
+                this.treasureInventory = data.treasureInventory || [];
+            }
+
+            gainItemTreasure(item){
+            if (this.treasureInventory.includes(item)) {
+                console.warn('gaining item already held:', item);
+                return;
+            }
+                const message = this.scene.add.text(this.x, this.y + 20, "You picked up treasure!").setAlpha(0).setColor('#ffffff');
+                this.scene.tweens.add({
+                    targets: message,
+                    alpha: {from:1, to: 0},
+                    duration: 3000,
+                    ease: 'linear' 
+                });
+                
+                this.treasureInventory.push(item);
+            }
+
+            /*
+            decreaseTreasureInventory(){
+
+            }*/
+                
+            //Test if the player has all treasure items in treasureInventory
+            /**
+            * @param {int} item Item name.
+            * @returns {boolean}
+            */
+            hasAllItemTreasure(number) {
+                if(this.treasureInventory.length == number){
                     return true;
                 }else{
                     return false;
@@ -211,11 +316,28 @@ export default class GameplayPrototype extends Phaser.Scene {
             })
 
             this.trashInventCheck = this.add.text( 600, 200, "Has the player collected all trash?")
+
+            this.treasure = new TreasureInfo(this, 1000, 130) 
+            .setScale(0.5)
+            .setInteractive()
+            let treasureMessage = this.treasure.scene.add.text(1000, 130, "Someone left treasure here.").setColor('#ffffff').setAlpha(0)
+            this.treasure.on('pointerover', () => treasureMessage.setAlpha(1))
+            .on('pointerout', () => treasureMessage.setAlpha(0))
+            .on('pointerdown', () => {
+                treasureMessage.setAlpha(0);
+                this.treasure.gainItemTreasure('treasure');
+                this.treasure.scene.tweens.add({
+                    targets: this.treasure, 
+                    alpha: {from: 1, to: 0},
+                    duration: 500,
+                    onComplete: ()=> this.treasure.destroy()
+                });
+            })
     }
 
-    update(){
+    
 
-
+    update() {
         const onFloor = this.player.body.onFloor();
         if (onFloor) {
             this.isJumping = false;
@@ -223,24 +345,31 @@ export default class GameplayPrototype extends Phaser.Scene {
 
         // Reduce horizontal drag while in-air so player retains momentum
         if (this.isJumping) {
-            this.player.body.setDragX(0);
+            this.player.body.setDragX(500);
         } else {
-            this.player.body.setDragX(1000);
+            this.player.body.setDragX(900);
         }
 
         // Keyboard movement
         const moveSpeed = 250;
-        if (this.cursors.left.isDown) {
-            while(this.player.body.velocity.x > -moveSpeed) {
-                this.player.setVelocityX(this.player.body.velocity.x - 10);
+
+        if (!(this.cursors.left.isDown && this.cursors.right.isDown)) {
+            if (this.cursors.left.isDown) {
+                if (this.player.body.velocity.x > -moveSpeed) {
+                    this.player.setVelocityX(this.player.body.velocity.x - 25);
+                }
             }
-        } else if (this.cursors.right.isDown) {
-            while(this.player.body.velocity.x < moveSpeed) {
-                this.player.setVelocityX(this.player.body.velocity.x + 10);
+            else if (this.cursors.right.isDown) {
+                if (this.player.body.velocity.x < moveSpeed) {
+                    this.player.setVelocityX(this.player.body.velocity.x + 25);
+                }
             }
-        } else {
-            this.player.setVelocityX(0);
         }
+        // else {
+        //     if (!(this.player.body.touching.down && this.platform.touching.up && !this.past)) { // basically if not on conveyor belt
+        //         this.player.setVelocityX(0);
+        //     }
+        // }
         // if(this.cursors.left.isUp && this.isJumping == true){
         //     this.player.setVelocityX(0);
         // }
@@ -248,18 +377,41 @@ export default class GameplayPrototype extends Phaser.Scene {
         //     this.player.setVelocityX(0);
         // }
 
-        let answer
-        if(this.trash.hasAllItemTrash(2)){
+        //let answer
+        if (this.trash.hasAllItemTrash(2)){
             this.trashInventCheck.setText("Has the player collected all trash? Yes!")
-        }else{
-             this.trashInventCheck.setText("Has the player collected all trash? No")
+        } else {
+            this.trashInventCheck.setText("Has the player collected all trash? No")
+        }
+
         // Jump with keyboard
         if (this.cursors.up.isDown && onFloor) {
             this.isJumping = true;
-            jump_sound = this.sound.add('shorthop');
-            jump_sound.play();
-            this.player.setVelocityY(-400);
+            if (this.past && this.player.body.touching.down && this.platform.touching.up) {
+                this.jumpSound.play({rate: 0.3 + Math.random() * 0.2});
+                this.player.setVelocityY(-500);
+            }
+            else {
+                this.jumpSound.play({rate: 0.7 + Math.random() * 0.3});
+                this.player.setVelocityY(-375);
+            }
         }
+
+        // variable jump height
+        if (this.cursors.up.isDown && this.player.body.velocity.y < -75) {
+            this.player.setVelocityY(this.player.body.velocity.y - 1.75);
+        }
+
+        // lever
+        if (!this.physics.overlap(this.lever, this.player)) { // if the player is not in range of the lever
+            this.leverOutline.setAlpha(0); // lever has no outline
+            this.lever.disableInteractive(); // cannot click on lever
+        }
+        else {
+            this.leverOutline.setAlpha(1); // lever has outline
+            this.lever.setInteractive(); // can interact with lever
+        }
+
+        
     }
-}
 }

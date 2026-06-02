@@ -12,7 +12,7 @@ import Pause from './scenes/prototypes/Pause.js';
 let config = {
     parent: 'root',
     type: Phaser.WEBGL,
-    backgroundColor: '#223',
+    backgroundColor: '#233',
     scale: {
         mode: Phaser.Scale.FIT,
         autoCenter: Phaser.Scale.CENTER_HORIZONTALLY,

@@ -1,3 +1,4 @@
+```mermaid
 ---
 title: CMPM120 Final Game
 ---
@@ -39,3 +40,4 @@ classDiagram
 	note for TreasureInfo "One of prefabs"
     note for Phaser.Scene "Classes for each game scene"
 	note "Both Prefabs allow player character to pick up items"
+```

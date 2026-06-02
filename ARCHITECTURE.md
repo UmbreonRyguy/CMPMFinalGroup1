@@ -2,13 +2,13 @@
 title: CMPM120 Final Game
 ---
 classDiagram
-    class Phaser.GameObject.Image {
+    class `Phaser.GameObject.Image` {
 	    +TrashInfo()
 	    +TreasureInfo()
     }
-    Phaser.GameObject.Image <|-- TrashInfo
-    Phaser.GameObject.Image <|-- TreasureInfo
-    note for Phaser.GameObject.Image "Prefabs made for each level of game play"
+    `Phaser.GameObject.Image` <|-- TrashInfo
+    `Phaser.GameObject.Image` <|-- TreasureInfo
+    note for `Phaser.GameObject.Image` "Prefabs made for each level of game play"
 
     class TrashInfo {
 	    +constructor(scene, x, y)
@@ -19,7 +19,7 @@ classDiagram
     class TreasureInfo {
 	    +constructor(scene, x, y)
 	    +gainItemTreasure()
-	    +HasAllItemTreach()
+	    +HasAllItemTreasure()
     }
 
     class `Phaser.Scene` {

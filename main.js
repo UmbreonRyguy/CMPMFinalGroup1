@@ -29,6 +29,9 @@ let config = {
                 debug: true
         }
     },
+    input: {
+        activePointers: 3 // should only need 2, but just in case
+    },
     pixelArt: true,
     scene: [LandingScene, IntroCinematic, LeafTransition, MainMenu, Credits, Settings, GameplayPrototype, LevelSelect, EndScene, GameplayPrototypeLevel2, GameplayPrototypeLevel3, Pause]
 }

@@ -61,10 +61,8 @@ export default class MainMenu extends Phaser.Scene {
         const synth2 = new Tone.Synth().toDestination().connect(crusher);
         const synth3 = new Tone.Synth().toDestination().connect(distortion);
         
-        // Load SFX setting from localStorage and apply Tone mute
-        const sfxEnabled = localStorage.getItem('sfxEnabled') !== 'false';
-        this.registry.set('sfxEnabled', sfxEnabled);
-        Tone.Destination.volume.value = sfxEnabled ? 0 : -Infinity;
+        // Apply global Tone mute based on SFX setting
+        Tone.Destination.mute = !this.registry.get('sfxEnabled');
         
         this.bg = this.add.image(640, 360, 'bg');
 

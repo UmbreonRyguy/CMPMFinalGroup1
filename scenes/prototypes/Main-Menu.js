@@ -61,6 +61,11 @@ export default class MainMenu extends Phaser.Scene {
         const synth2 = new Tone.Synth().toDestination().connect(crusher);
         const synth3 = new Tone.Synth().toDestination().connect(distortion);
         
+        // Load SFX setting from localStorage and apply Tone mute
+        const sfxEnabled = localStorage.getItem('sfxEnabled') !== 'false';
+        this.registry.set('sfxEnabled', sfxEnabled);
+        Tone.Destination.volume.value = sfxEnabled ? 0 : -Infinity;
+        
         this.bg = this.add.image(640, 360, 'bg');
 
         // leaves (BEHIND the buttons)
@@ -191,12 +196,9 @@ export default class MainMenu extends Phaser.Scene {
             const now = Tone.now();
             synth2.triggerAttackRelease("B2", "8n");
             synth2.triggerAttackRelease("D3", "8n", now + 0.1);
-
             settings.clearTint()
-            this.cameras.main.fadeOut(500, 0, 0, 0);
-            this.cameras.main.once('camerafadeoutcomplete', () => {
-                this.scene.start('settings');
-            });
+            this.scene.pause();
+            this.scene.launch('settings');
         });
         settings.on('pointerout', ()=> {
             settings.clearTint();
@@ -230,11 +232,31 @@ export default class MainMenu extends Phaser.Scene {
         //--------------------------
         //Background audio
         //--------------------------
-        if (!this.music) {
-            this.sound.stopByKey('bgmusic');
-            this.music = this.sound.add('mainMenuTheme');
+
+        this.music = this.sound.add('mainMenuTheme');
+
+        if (this.registry.get('musicEnabled')) { //check music bool, play if true
             this.music.loop = true;
             this.music.play();
         }
+        else {
+            this.sound.stopByKey('mainMenuTheme'); //otherwise stop
+        }
+        this.events.on('resume', (sys, data) => { //check again on scene resume
+            // Update global Tone mute on resume
+            Tone.Destination.mute = !this.registry.get('sfxEnabled');
+            
+            if (this.registry.get('musicEnabled')) {
+                if (!this.music.isPlaying) {
+                    this.music.loop = true;
+                    this.music.play();
+                }
+            }
+            else {
+                if (this.music.isPlaying) { 
+                    this.sound.stopByKey('mainMenuTheme');
+                }
+            }
+        });
     }
 }

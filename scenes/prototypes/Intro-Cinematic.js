@@ -12,6 +12,7 @@ const loopB = new Tone.Loop((time) => {
     synthRumble.triggerAttackRelease("F2", "16n", time + 0.1);
 }, "12n"); 
 
+
 var introOver = false;
 
 export default class IntroCinematic extends Phaser.Scene {
@@ -80,6 +81,18 @@ export default class IntroCinematic extends Phaser.Scene {
     }
     create() {
         
+
+        //Music and SFX sound toggles
+        const musicEnabled = localStorage.getItem('musicEnabled') !== 'false';
+        const sfxEnabled   = localStorage.getItem('sfxEnabled') !== 'false';
+
+        this.registry.set('musicEnabled', musicEnabled);
+        this.registry.set('sfxEnabled', sfxEnabled);
+        
+        // Apply global Tone mute based on SFX setting
+        Tone.Destination.volume.value = sfxEnabled ? 0 : -Infinity;
+
+        
         this.load.font('pixel', 'assets/fonts/pixelFont.ttf');
         // all the rest of the assets used in the game are loaded here
         // this loading happens while the logo cinematic is playing
@@ -97,6 +110,8 @@ export default class IntroCinematic extends Phaser.Scene {
         this.load.image('player', 'assets/PlaceholderPlayer.png');
         this.load.image('signLong', 'assets/SignLong.png');
         this.load.image('signSmall', 'assets/SignSmall.png');
+        this.load.image('offSwitch', 'assets/offSwitch.png');
+        this.load.image('onSwitch', 'assets/onSwitch.png');
         
         //assets used for prefab
         this.load.image('trash', 'assets/Trash.png');

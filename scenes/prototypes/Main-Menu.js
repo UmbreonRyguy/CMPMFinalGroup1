@@ -1,3 +1,6 @@
+const W = 1280; //height and width
+const H = 720;
+
 export default class MainMenu extends Phaser.Scene {
     constructor() {
         super('main-menu');
@@ -49,18 +52,50 @@ export default class MainMenu extends Phaser.Scene {
     }
 
     create() {
-        const synth = new Tone.Synth().toDestination();
+    const now = Tone.now();
+    const crusher = new Tone.BitCrusher(7).toDestination();
+    const distortion = new Tone.Distortion(5).toDestination();
+    const reverb = new Tone.Reverb(3).toDestination();
 
-
+    const synth = new Tone.Synth().toDestination();
+    const synth2 = new Tone.Synth().toDestination().connect(crusher);
+    const synth3 = new Tone.Synth().toDestination().connect(distortion);
         this.bg = this.add.image(640, 360, 'bg');
+
+        const title = this.add.image(640, 200, 'signLong').setScale(3);
+        const titleText =this.add.text(640, 200, "TITLE", {
+            color: "#ffffff",
+            fontFamily: 'pixel',
+            fontSize: '100px'
+        }).setOrigin(0.5).setAlpha(0);
 
         // leaves (behind the buttons)
         this.makeLeaves(50, 3.5);
+        const start = this.add.image(300, 500, 'signSmall').setAlpha(0).setScale(2).setOrigin(0.5, 0.5);
+        const startText =this.add.text(300, 500, "START", {
+            color: "#ffffff",
+            fontFamily: 'pixel',
+            fontSize: '40px'
+        }).setOrigin(0.5).setAlpha(0);
 
-        this.add.image(640, 400, 'title');
-        const start = this.add.image(640, 400, 'start').setAlpha(0);
-        const settings = this.add.image(640, 500, 'settings').setAlpha(0);
-        const credits = this.add.image(640, 600, 'credits').setAlpha(0);
+        const settings = this.add.image(640, 500, 'signSmall').setAlpha(0).setScale(2).setOrigin(0.5, 0.5);
+        const settingsText =this.add.text(640, 500, "SETTINGS", {
+            color: "#ffffff",
+            fontFamily: 'pixel',
+            fontSize: '40px'
+        }).setOrigin(0.5).setAlpha(0);
+
+
+        const credits = this.add.image(980, 500, 'signSmall').setAlpha(0).setScale(2).setOrigin(0.5, 0.5);
+        const creditsText =this.add.text(980, 500, "CREDITS", {
+            color: "#ffffff",
+            fontFamily: 'pixel',
+            fontSize: '40px'
+        }).setOrigin(0.5).setAlpha(0);
+
+        this.cameras.main.fadeIn(1000, 0, 0, 0);
+
+
 
         const fadeIn = (button, delayTime) =>{
             this.tweens.add({
@@ -82,17 +117,44 @@ export default class MainMenu extends Phaser.Scene {
             });
         }
         
+        fadeIn(title, 0);
+        fadeIn(titleText, 0);
+
         fadeIn(start, 0);
-        fadeIn(settings, 1000);
-        fadeIn(credits, 2000);
+        fadeIn(startText, 0);
+        fadeIn(settings, 500);
+        fadeIn(settingsText, 500);
+        fadeIn(credits, 1000); 
+        fadeIn(creditsText, 1000);
         this.pressable(start, 100);
         this.pressable(settings, 1100);
         this.pressable(credits, 2100);
 
+        //Tweens for buttons
+        this.tweens.add({
+            targets: title, y: title.y - 30, duration: 2000,
+            yoyo: true, repeat: -1, ease: 'Sine.easeInOut'
+        });
+        this.tweens.add({
+            targets: titleText, y: title.y - 30, duration: 2000,
+            yoyo: true, repeat: -1, ease: 'Sine.easeInOut'
+        });
+        this.tweens.add({
+            targets: [start, settings, credits,], scale: 2.05, duration: 1500,
+            yoyo: true, repeat: -1, ease: 'Sine.easeInOut'
+        })
+        this.tweens.add({
+            targets: [startText, settingsText, creditsText], scale: 1.05, duration: 1500,
+            yoyo: true, repeat: -1, ease: 'Sine.easeInOut'
+        })
+
+
         start.on('pointerdown', ()=> start.setTint(0x965A0B));
         start.on('pointerover', ()=> start.setTint(0xeab269));
         start.on('pointerup', ()=>{
-            synth.triggerAttackRelease("C4", "8n");
+            const now = Tone.now();
+            synth2.triggerAttackRelease("D3", "8n");
+            synth2.triggerAttackRelease("G3", "8n", now + 0.1);
             start.clearTint()
             this.cameras.main.fadeOut(500, 0, 0, 0);
             this.cameras.main.once('camerafadeoutcomplete', () => {
@@ -104,6 +166,10 @@ export default class MainMenu extends Phaser.Scene {
         settings.on('pointerdown', ()=> settings.setTint(0x965A0B));
         settings.on('pointerover', ()=> settings.setTint(0xeab269));
         settings.on('pointerup', ()=>{
+            const now = Tone.now();
+            synth2.triggerAttackRelease("B2", "8n");
+            synth2.triggerAttackRelease("D3", "8n", now + 0.1);
+
             settings.clearTint()
             this.cameras.main.fadeOut(500, 0, 0, 0);
             this.cameras.main.once('camerafadeoutcomplete', () => {
@@ -115,6 +181,9 @@ export default class MainMenu extends Phaser.Scene {
         credits.on('pointerdown', ()=> credits.setTint(0x965A0B));
         credits.on('pointerover', ()=> credits.setTint(0xeab269));
         credits.on('pointerup', ()=>{
+            const now = Tone.now();
+            synth2.triggerAttackRelease("G4", "8n");
+            synth2.triggerAttackRelease("C4", "8n", now + 0.1);
             credits.clearTint();
             this.scene.start('credits');
         });
@@ -126,8 +195,9 @@ export default class MainMenu extends Phaser.Scene {
         //--------------------------
         //Background audio
         //--------------------------
-        var music = this.sound.add('bgmusic');
-        music.loop = true;
-        music.play();
+        this.sound.stopByKey('bgmusic');
+        this.music = this.sound.add('bgmusic');
+        this.music.loop = true;
+        this.music.play();
     }
 }

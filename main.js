@@ -9,6 +9,7 @@ import GameplayPrototypeLevel2 from './scenes/prototypes/Core-Gameplay-Level2.js
 import GameplayPrototypeLevel3 from './scenes/prototypes/Core-Gameplay-Level3.js';
 import Pause from './scenes/prototypes/Pause.js';
 import ToneLibrary from './scenes/toneLibrary.js';
+import LeafTransition from './scenes/prototypes/leaf-Transition.js';
 
 let config = {
     parent: 'root',
@@ -28,7 +29,7 @@ let config = {
         }
     },
     pixelArt: true,
-    scene: [IntroCinematic, MainMenu, Credits, Settings, GameplayPrototype, LevelSelect, EndScene, GameplayPrototypeLevel2, GameplayPrototypeLevel3, Pause]
+    scene: [IntroCinematic, LeafTransition, MainMenu, Credits, Settings, GameplayPrototype, LevelSelect, EndScene, GameplayPrototypeLevel2, GameplayPrototypeLevel3, Pause]
 }
 
 let game = new Phaser.Game(config);

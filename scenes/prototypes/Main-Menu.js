@@ -49,18 +49,20 @@ export default class MainMenu extends Phaser.Scene {
     }
 
     create() {
+   
         const synth = new Tone.Synth().toDestination();
 
 
         this.bg = this.add.image(640, 360, 'bg');
+        const title = this.add.image(640, 400, 'title');
 
         // leaves (behind the buttons)
         this.makeLeaves(23, 3.5);
-
-        this.add.image(640, 400, 'title');
         const start = this.add.image(640, 400, 'start').setAlpha(0).setInteractive();
         const settings = this.add.image(640, 500, 'settings').setAlpha(0).setInteractive();
         const credits = this.add.image(640, 600, 'credits').setAlpha(0).setInteractive();
+
+        this.cameras.main.fadeIn(1000, 0, 0, 0);
 
         const fadeIn = (button, delayTime) =>{
             this.tweens.add({
@@ -75,6 +77,21 @@ export default class MainMenu extends Phaser.Scene {
         fadeIn(start, 0);
         fadeIn(settings, 1000);
         fadeIn(credits, 2000);
+
+        //Tweens for buttons
+        this.tweens.add({
+            targets: title, y: title.y - 30, duration: 2000,
+            yoyo: true, repeat: -1, ease: 'Sine.easeInOut'
+        });
+        this.tweens.add({
+            targets: title, angle: { from: -7, to: 7 }, duration: 2000,
+            yoyo: true, repeat: -1, ease: 'Sine.easeInOut'
+        });
+        this.tweens.add({
+            targets: [start, settings, credits], scale: 1.05, duration: 750,
+            yoyo: true, repeat: -1, ease: 'Sine.easeInOut'
+        })
+
 
         start.on('pointerdown', ()=> start.setTint(0x965A0B));
         start.on('pointerover', ()=> start.setTint(0xeab269));
@@ -113,8 +130,9 @@ export default class MainMenu extends Phaser.Scene {
         //--------------------------
         //Background audio
         //--------------------------
-        var music = this.sound.add('bgmusic');
-        music.loop = true;
-        music.play();
+        this.sound.stopByKey('bgmusic');
+        this.music = this.sound.add('bgmusic');
+        this.music.loop = true;
+        this.music.play();
     }
 }

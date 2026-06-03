@@ -90,7 +90,7 @@ export default class IntroCinematic extends Phaser.Scene {
         this.registry.set('sfxEnabled', sfxEnabled);
         
         // Apply global Tone mute based on SFX setting
-        Tone.Destination.volume.value = sfxEnabled ? 0 : -Infinity;
+        Tone.Destination.mute = !sfxEnabled;
 
         
         this.load.font('pixel', 'assets/fonts/pixelFont.ttf');

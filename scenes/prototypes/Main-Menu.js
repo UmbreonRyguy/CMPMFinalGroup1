@@ -52,10 +52,14 @@ export default class MainMenu extends Phaser.Scene {
     }
 
     create() {
-   
-        const synth = new Tone.Synth().toDestination();
+    const now = Tone.now();
+    const crusher = new Tone.BitCrusher(7).toDestination();
+    const distortion = new Tone.Distortion(5).toDestination();
+    const reverb = new Tone.Reverb(3).toDestination();
 
-
+    const synth = new Tone.Synth().toDestination();
+    const synth2 = new Tone.Synth().toDestination().connect(crusher);
+    const synth3 = new Tone.Synth().toDestination().connect(distortion);
         this.bg = this.add.image(640, 360, 'bg');
 
         const title = this.add.image(640, 200, 'signLong').setScale(3);
@@ -108,10 +112,10 @@ export default class MainMenu extends Phaser.Scene {
 
         fadeIn(start, 0);
         fadeIn(startText, 0);
-        fadeIn(settings, 1000);
-        fadeIn(settingsText, 1000);
-        fadeIn(credits, 2000); 
-        fadeIn(creditsText, 2000);
+        fadeIn(settings, 500);
+        fadeIn(settingsText, 500);
+        fadeIn(credits, 1000); 
+        fadeIn(creditsText, 1000);
 
         //Tweens for buttons
         this.tweens.add({
@@ -135,7 +139,9 @@ export default class MainMenu extends Phaser.Scene {
         start.on('pointerdown', ()=> start.setTint(0x965A0B));
         start.on('pointerover', ()=> start.setTint(0xeab269));
         start.on('pointerup', ()=>{
-            synth.triggerAttackRelease("C4", "8n");
+            const now = Tone.now();
+            synth2.triggerAttackRelease("D3", "8n");
+            synth2.triggerAttackRelease("G3", "8n", now + 0.1);
             start.clearTint()
             this.cameras.main.fadeOut(500, 0, 0, 0);
             this.cameras.main.once('camerafadeoutcomplete', () => {
@@ -147,6 +153,10 @@ export default class MainMenu extends Phaser.Scene {
         settings.on('pointerdown', ()=> settings.setTint(0x965A0B));
         settings.on('pointerover', ()=> settings.setTint(0xeab269));
         settings.on('pointerup', ()=>{
+            const now = Tone.now();
+            synth2.triggerAttackRelease("B2", "8n");
+            synth2.triggerAttackRelease("D3", "8n", now + 0.1);
+
             settings.clearTint()
             this.cameras.main.fadeOut(500, 0, 0, 0);
             this.cameras.main.once('camerafadeoutcomplete', () => {
@@ -158,6 +168,9 @@ export default class MainMenu extends Phaser.Scene {
         credits.on('pointerdown', ()=> credits.setTint(0x965A0B));
         credits.on('pointerover', ()=> credits.setTint(0xeab269));
         credits.on('pointerup', ()=>{
+            const now = Tone.now();
+            synth2.triggerAttackRelease("G4", "8n");
+            synth2.triggerAttackRelease("C4", "8n", now + 0.1);
             credits.clearTint();
             this.scene.start('credits');
         });

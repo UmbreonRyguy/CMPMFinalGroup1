@@ -55,12 +55,12 @@ export default class MainMenu extends Phaser.Scene {
         this.bg = this.add.image(640, 360, 'bg');
 
         // leaves (behind the buttons)
-        this.makeLeaves(23, 3.5);
+        this.makeLeaves(50, 3.5);
 
         this.add.image(640, 400, 'title');
-        const start = this.add.image(640, 400, 'start').setAlpha(0).setInteractive();
-        const settings = this.add.image(640, 500, 'settings').setAlpha(0).setInteractive();
-        const credits = this.add.image(640, 600, 'credits').setAlpha(0).setInteractive();
+        const start = this.add.image(640, 400, 'start').setAlpha(0);
+        const settings = this.add.image(640, 500, 'settings').setAlpha(0);
+        const credits = this.add.image(640, 600, 'credits').setAlpha(0);
 
         const fadeIn = (button, delayTime) =>{
             this.tweens.add({
@@ -68,13 +68,26 @@ export default class MainMenu extends Phaser.Scene {
                 alpha: 1,
                 ease: 'linear',
                 duration: 2000,
-                delay: delayTime
+                delay: delayTime,
+            });
+        }
+
+        this.pressable = (button, delayTime) => {
+            this.tweens.add({
+                targets: button,
+                y: button.y,
+                onComplete: () => {
+                    button.setInteractive();
+                }
             });
         }
         
         fadeIn(start, 0);
         fadeIn(settings, 1000);
         fadeIn(credits, 2000);
+        this.pressable(start, 100);
+        this.pressable(settings, 1100);
+        this.pressable(credits, 2100);
 
         start.on('pointerdown', ()=> start.setTint(0x965A0B));
         start.on('pointerover', ()=> start.setTint(0xeab269));
@@ -108,7 +121,7 @@ export default class MainMenu extends Phaser.Scene {
         credits.on('pointerout', ()=>credits.clearTint());
 
         // leaves (in front of buttons)
-        this.makeLeaves(10, 4.5);
+        this.makeLeaves(8, 4.5);
 
         //--------------------------
         //Background audio

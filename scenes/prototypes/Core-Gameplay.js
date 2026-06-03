@@ -394,6 +394,7 @@ export default class GameplayPrototype extends Phaser.Scene {
     
 
     update() {
+        console.log(this.touchJump);
         //
         // player stuff
         //

@@ -52,15 +52,19 @@ export default class MainMenu extends Phaser.Scene {
     }
 
     create() {
-    const now = Tone.now();
-    const crusher = new Tone.BitCrusher(7).toDestination();
-    const distortion = new Tone.Distortion(5).toDestination();
-    const reverb = new Tone.Reverb(3).toDestination();
+        const now = Tone.now();
+        const crusher = new Tone.BitCrusher(7).toDestination();
+        const distortion = new Tone.Distortion(5).toDestination();
+        const reverb = new Tone.Reverb(3).toDestination();
 
-    const synth = new Tone.Synth().toDestination();
-    const synth2 = new Tone.Synth().toDestination().connect(crusher);
-    const synth3 = new Tone.Synth().toDestination().connect(distortion);
+        const synth = new Tone.Synth().toDestination();
+        const synth2 = new Tone.Synth().toDestination().connect(crusher);
+        const synth3 = new Tone.Synth().toDestination().connect(distortion);
+        
         this.bg = this.add.image(640, 360, 'bg');
+
+        // leaves (BEHIND the buttons)
+        this.makeLeaves(50, 3.5);
 
         const title = this.add.image(640, 200, 'signLong').setScale(3);
         const titleText =this.add.text(640, 200, "TITLE", {
@@ -69,8 +73,6 @@ export default class MainMenu extends Phaser.Scene {
             fontSize: '100px'
         }).setOrigin(0.5).setAlpha(0);
 
-        // leaves (behind the buttons)
-        this.makeLeaves(50, 3.5);
         const start = this.add.image(300, 500, 'signSmall').setAlpha(0).setScale(2).setOrigin(0.5, 0.5);
         const startText =this.add.text(300, 500, "START", {
             color: "#ffffff",
@@ -148,9 +150,21 @@ export default class MainMenu extends Phaser.Scene {
             yoyo: true, repeat: -1, ease: 'Sine.easeInOut'
         })
 
+        this.buttonMove = (button, y) => {
+            this.tweens.add({
+                targets: button,
+                y: y,
+                ease: 'Cubic.easeInOut',
+                duration: 500
+            });
+        }
 
         start.on('pointerdown', ()=> start.setTint(0x965A0B));
-        start.on('pointerover', ()=> start.setTint(0xeab269));
+        start.on('pointerover', ()=> {
+            start.setTint(0xeab269);
+            this.buttonMove(start, 450);
+            this.buttonMove(startText, 450);
+        });
         start.on('pointerup', ()=>{
             const now = Tone.now();
             synth2.triggerAttackRelease("D3", "8n");
@@ -161,10 +175,18 @@ export default class MainMenu extends Phaser.Scene {
                 this.scene.start('level-select');
             });
         });
-        start.on('pointerout', ()=>start.clearTint());
+        start.on('pointerout', ()=> {
+            start.clearTint();
+            this.buttonMove(start, 500);
+            this.buttonMove(startText, 500);
+        });
 
         settings.on('pointerdown', ()=> settings.setTint(0x965A0B));
-        settings.on('pointerover', ()=> settings.setTint(0xeab269));
+        settings.on('pointerover', ()=> {
+            settings.setTint(0xeab269);
+            this.buttonMove(settings, 450);
+            this.buttonMove(settingsText, 450);
+        });
         settings.on('pointerup', ()=>{
             const now = Tone.now();
             synth2.triggerAttackRelease("B2", "8n");
@@ -176,10 +198,18 @@ export default class MainMenu extends Phaser.Scene {
                 this.scene.start('settings');
             });
         });
-        settings.on('pointerout', ()=>settings.clearTint());
+        settings.on('pointerout', ()=> {
+            settings.clearTint();
+            this.buttonMove(settings, 500);
+            this.buttonMove(settingsText, 500);
+        });
 
         credits.on('pointerdown', ()=> credits.setTint(0x965A0B));
-        credits.on('pointerover', ()=> credits.setTint(0xeab269));
+        credits.on('pointerover', ()=> {
+            credits.setTint(0xeab269);
+            this.buttonMove(credits, 450);
+            this.buttonMove(creditsText, 450);
+        });
         credits.on('pointerup', ()=>{
             const now = Tone.now();
             synth2.triggerAttackRelease("G4", "8n");
@@ -187,7 +217,11 @@ export default class MainMenu extends Phaser.Scene {
             credits.clearTint();
             this.scene.start('credits');
         });
-        credits.on('pointerout', ()=>credits.clearTint());
+        credits.on('pointerout', ()=> {
+            credits.clearTint();
+            this.buttonMove(credits, 500);
+            this.buttonMove(creditsText, 500);
+        });
 
         // leaves (in front of buttons)
         this.makeLeaves(8, 4.5);

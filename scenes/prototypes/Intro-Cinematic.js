@@ -103,7 +103,7 @@ export default class IntroCinematic extends Phaser.Scene {
         this.load.image('treasure', 'assets/treasure.png');
 
         this.load.image('jumpButton', 'assets/LargerArrowButton.png');
-        this.load.image('arrowButton', 'assets/arrowbutton.png');
+        this.load.image('arrowButton', 'assets/arrowButton.png');
         this.load.audio('bgmusic', 'assets/prototype-bg-music.mp3');
         this.load.audio('shorthop', 'assets/ShortHop.wav');
         this.load.start();

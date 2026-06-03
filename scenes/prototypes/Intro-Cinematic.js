@@ -95,9 +95,6 @@ export default class IntroCinematic extends Phaser.Scene {
         this.load.spritesheet("Prototype_Tiles", "assets/Prototype_Tiles.png", {frameWidth: 80, frameHeight: 80});
         this.load.atlas("levers", "assets/levers.png", "assets/textureAtlas.json");
         this.load.image('player', 'assets/PlaceholderPlayer.png');
-        this.load.image('jumpButton', 'assets/ArrowButton.png');
-        this.load.image('leftButton', 'assets/ArrowButton.png');
-        this.load.image('rightButton', 'assets/ArrowButton.png');
         this.load.image('signLong', 'assets/SignLong.png');
         this.load.image('signSmall', 'assets/SignSmall.png');
         
@@ -106,7 +103,7 @@ export default class IntroCinematic extends Phaser.Scene {
         this.load.image('treasure', 'assets/treasure.png');
 
         this.load.image('jumpButton', 'assets/LargerArrowButton.png');
-        this.load.image('arrowButton', 'assets/Arrowbutton.png');
+        this.load.image('arrowButton', 'assets/arrowbutton.png');
         this.load.audio('bgmusic', 'assets/prototype-bg-music.mp3');
         this.load.audio('shorthop', 'assets/ShortHop.wav');
         this.load.start();

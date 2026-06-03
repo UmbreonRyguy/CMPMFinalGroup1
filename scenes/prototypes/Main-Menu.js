@@ -1,3 +1,6 @@
+const W = 1280; //height and width
+const H = 720;
+
 export default class MainMenu extends Phaser.Scene {
     constructor() {
         super('main-menu');
@@ -54,15 +57,41 @@ export default class MainMenu extends Phaser.Scene {
 
 
         this.bg = this.add.image(640, 360, 'bg');
-        const title = this.add.image(640, 400, 'title');
+
+        const title = this.add.image(640, 200, 'signLong').setScale(3);
+        const titleText =this.add.text(640, 200, "TITLE", {
+            color: "#ffffff",
+            fontFamily: 'pixel',
+            fontSize: '100px'
+        }).setOrigin(0.5).setAlpha(0);
 
         // leaves (behind the buttons)
         this.makeLeaves(23, 3.5);
-        const start = this.add.image(640, 400, 'start').setAlpha(0).setInteractive();
-        const settings = this.add.image(640, 500, 'settings').setAlpha(0).setInteractive();
-        const credits = this.add.image(640, 600, 'credits').setAlpha(0).setInteractive();
+        const start = this.add.image(300, 500, 'signSmall').setAlpha(0).setInteractive().setScale(2).setOrigin(0.5, 0.5);
+        const startText =this.add.text(300, 500, "START", {
+            color: "#ffffff",
+            fontFamily: 'pixel',
+            fontSize: '40px'
+        }).setOrigin(0.5).setAlpha(0);
+
+        const settings = this.add.image(640, 500, 'signSmall').setAlpha(0).setInteractive().setScale(2).setOrigin(0.5, 0.5);
+        const settingsText =this.add.text(640, 500, "SETTINGS", {
+            color: "#ffffff",
+            fontFamily: 'pixel',
+            fontSize: '40px'
+        }).setOrigin(0.5).setAlpha(0);
+
+
+        const credits = this.add.image(980, 500, 'signSmall').setAlpha(0).setInteractive().setScale(2).setOrigin(0.5, 0.5);
+        const creditsText =this.add.text(980, 500, "CREDITS", {
+            color: "#ffffff",
+            fontFamily: 'pixel',
+            fontSize: '40px'
+        }).setOrigin(0.5).setAlpha(0);
 
         this.cameras.main.fadeIn(1000, 0, 0, 0);
+
+
 
         const fadeIn = (button, delayTime) =>{
             this.tweens.add({
@@ -74,9 +103,15 @@ export default class MainMenu extends Phaser.Scene {
             });
         }
         
+        fadeIn(title, 0);
+        fadeIn(titleText, 0);
+
         fadeIn(start, 0);
+        fadeIn(startText, 0);
         fadeIn(settings, 1000);
-        fadeIn(credits, 2000);
+        fadeIn(settingsText, 1000);
+        fadeIn(credits, 2000); 
+        fadeIn(creditsText, 2000);
 
         //Tweens for buttons
         this.tweens.add({
@@ -84,11 +119,15 @@ export default class MainMenu extends Phaser.Scene {
             yoyo: true, repeat: -1, ease: 'Sine.easeInOut'
         });
         this.tweens.add({
-            targets: title, angle: { from: -7, to: 7 }, duration: 2000,
+            targets: titleText, y: title.y - 30, duration: 2000,
             yoyo: true, repeat: -1, ease: 'Sine.easeInOut'
         });
         this.tweens.add({
-            targets: [start, settings, credits], scale: 1.05, duration: 750,
+            targets: [start, settings, credits,], scale: 2.05, duration: 1500,
+            yoyo: true, repeat: -1, ease: 'Sine.easeInOut'
+        })
+        this.tweens.add({
+            targets: [startText, settingsText, creditsText], scale: 1.05, duration: 1500,
             yoyo: true, repeat: -1, ease: 'Sine.easeInOut'
         })
 

@@ -215,7 +215,8 @@ export default class MainMenu extends Phaser.Scene {
             synth2.triggerAttackRelease("G4", "8n");
             synth2.triggerAttackRelease("C4", "8n", now + 0.1);
             credits.clearTint();
-            this.scene.start('credits');
+            this.scene.pause();
+            this.scene.launch('credits',{ resumeKey: 'main-menu' });
         });
         credits.on('pointerout', ()=> {
             credits.clearTint();

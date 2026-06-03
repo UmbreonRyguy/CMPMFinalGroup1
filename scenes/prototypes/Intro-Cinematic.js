@@ -80,7 +80,7 @@ export default class IntroCinematic extends Phaser.Scene {
     }
     create() {
         
-
+        this.load.font('pixel', 'assets/fonts/pixelFont.ttf');
         // all the rest of the assets used in the game are loaded here
         // this loading happens while the logo cinematic is playing
         this.loadingDone = false;
@@ -98,6 +98,8 @@ export default class IntroCinematic extends Phaser.Scene {
         this.load.image('jumpButton', 'assets/ArrowButton.png');
         this.load.image('leftButton', 'assets/ArrowButton.png');
         this.load.image('rightButton', 'assets/ArrowButton.png');
+        this.load.image('signLong', 'assets/SignLong.png');
+        this.load.image('signSmall', 'assets/SignSmall.png');
         
         //assets used for prefab
         this.load.image('trash', 'assets/Trash.png');

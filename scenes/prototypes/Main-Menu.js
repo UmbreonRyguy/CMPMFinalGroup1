@@ -195,9 +195,11 @@ export default class MainMenu extends Phaser.Scene {
         //--------------------------
         //Background audio
         //--------------------------
-        this.sound.stopByKey('bgmusic');
-        this.music = this.sound.add('bgmusic');
-        this.music.loop = true;
-        this.music.play();
+        if (!this.music) {
+            this.sound.stopByKey('bgmusic');
+            this.music = this.sound.add('mainMenuTheme');
+            this.music.loop = true;
+            this.music.play();
+        }
     }
 }

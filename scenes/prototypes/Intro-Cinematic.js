@@ -1,3 +1,19 @@
+const reverb = new Tone.Reverb(3).toDestination();
+const synthRumble = new Tone.Synth({ oscillator: { type: "square" }, envelope: { attack: 0.001, decay: 0.08, sustain: 0, release: 0.05 } }).toDestination();
+const crack = new Tone.NoiseSynth({ noise: { type: "white" }, envelope: { attack: 0.001, decay: 0.15, sustain: 0, release: 0.05 } }).toDestination().connect(reverb);
+
+const loopA = new Tone.Loop((time) => { 
+    synthRumble.triggerAttackRelease("A2", "16n", time);     
+    synthRumble.triggerAttackRelease("E2", "16n", time + 0.1);
+}, "8n"); 
+
+const loopB = new Tone.Loop((time) => { 
+    synthRumble.triggerAttackRelease("B2", "16n", time);     
+    synthRumble.triggerAttackRelease("F2", "16n", time + 0.1);
+}, "12n"); 
+
+var introOver = false;
+
 export default class IntroCinematic extends Phaser.Scene {
     W = 1280; //height and width 
     H = 720;
@@ -5,7 +21,10 @@ export default class IntroCinematic extends Phaser.Scene {
     CX = this.W * 0.5; //center x and y
     CY = this.H * 0.5;
 
-  
+    
+
+
+
 
     shatter() { //function to shatter rock and make dust cloud at same time after rock shakes
         this.logoDone = false;
@@ -37,11 +56,10 @@ export default class IntroCinematic extends Phaser.Scene {
                 ],
                 onComplete: () => {
                     dust.destroy(); //destroy dust cloud after tween
-                    this.time.delayedCall(2500, () => {
-                        this.cameras.main.fadeOut(500, 0, 0, 0); //fade out after cinematic is done
-                        this.cameras.main.once('camerafadeoutcomplete', () => {
-                            this.logoDone = true;
-                        });
+                    this.time.delayedCall(1000, () => {
+                        //this.scene.launch('leaf-transition', {target: 'main-menu' });
+                        //this.cameras.main.fadeOut(500, 0, 0, 0); //fade out after cinematic is done
+                        this.logoDone = true;
                     });
                 }
             });
@@ -100,20 +118,38 @@ export default class IntroCinematic extends Phaser.Scene {
         this.rock = this.add.image(this.game.config.width * 0.5, this.game.config.height * 0.5, "rock")
             .setScale(2);
         //the scale thing is just because i drew these on a canvas half the size of the current game canvas
-        
+
+
+        //sound fx for rock shattering
+
+        Tone.getTransport().start();
+        loopA.start();
+
+
         this.tweens.chain({
             targets: this.rock,
             tweens: [
                 { x: { from: this.CX - 6, to: this.CX + 6 }, angle: { from: -2.5, to: 2.5 }, //shake
-                    duration: 60, yoyo: true, repeat: 5, ease: 'Sine.inOut' },
+                    duration: 60, yoyo: true, repeat: 5, ease: 'Sine.inOut',
+                    onComplete: () => {
+                        loopA.stop();
+                        loopB.start();
+                    }
+                 },
                 { x: { from: this.CX - 12, to: this.CX + 12 }, angle: { from: -5, to: 5 }, //more intense shake
-                    duration: 42, yoyo: true, repeat: 8, ease: 'Sine.inOut' },
-
+                    duration: 42, yoyo: true, repeat: 8, ease: 'Sine.inOut', 
+                    onComplete: () => {
+                        loopB.stop();
+                        Tone.getTransport().stop();
+                    }
+                },
                 { x: this.CX, angle: 0, duration: 50 }, //center rock
 
                 { alpha: 0, scaleX: this.S * 1.12, scaleY: this.S * 1.12, duration: 320, ease: 'Quad.in',
-                    onStart: () => this.shatter() }, //shatter rock and make dust cloud
-                
+                    onStart: () => {this.shatter(), //shatter rock and make dust cloud
+                    crack.triggerAttackRelease("16n", Tone.now());
+                    }
+                },  
                 { targets: this.prototypeLogo, alpha: 1, scaleX: 2, scaleY: 2,
                     duration: 850, ease: 'Back.out' } //reveal logo
             ]
@@ -123,8 +159,14 @@ export default class IntroCinematic extends Phaser.Scene {
         this.skip = this.input.keyboard.addKey('SPACE');
     }
     update() {
-        if (this.loadingDone && (this.logoDone || Phaser.Input.Keyboard.JustDown(this.skip))) {
-            this.scene.start('main-menu'); // load main menu after cinematic is done AND loading is done
+        if (this.loadingDone && (!this.introOver && (this.logoDone || Phaser.Input.Keyboard.JustDown(this.skip)))) {
+            introOver = true;
+            this.scene.start('leaf-transition', {target: 'main-menu'}); // load main menu after cinematic is done AND loading is done
+            this.cameras.main.fadeOut(500, 0, 0, 0); //fade out after cinematic is done
+            this.cameras.main.once('camerafadeoutcomplete', () => {
+                this.scene.stop('intro-cinematic');
+            });
+            Tone.getTransport().stop();
             //this.scene.start('core-gameplay'); // skip to a further scene for debug/testing
         }
     }

@@ -8,6 +8,10 @@ export default class Credits extends Phaser.Scene {
         this.resumeKey = data.resumeKey || null;
         const crusher = new Tone.BitCrusher(7).toDestination();
         const synth2 = new Tone.Synth().toDestination().connect(crusher);
+        
+        // Apply global Tone mute based on SFX setting
+        Tone.Destination.mute = !this.registry.get('sfxEnabled');
+        
         this.add.rectangle(0, 0, W, H, 0x000000, 0.7).setOrigin(0);
 
         const backgroundSign = this.add.image(W/2, H/2 - 50, 'signSmall').setOrigin(0.5).setScale(6);

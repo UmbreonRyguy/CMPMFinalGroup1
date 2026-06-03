@@ -1,7 +1,8 @@
+import IntroCinematic from '../scenes/prototypes/Intro-Cinematic.js';
 let config = {
     parent: 'root',
     type: Phaser.WEBGL,
-    backgroundColor: '#111',
+    backgroundColor: '#223',
     scale: {
         mode: Phaser.Scale.FIT,
         autoCenter: Phaser.Scale.CENTER_HORIZONTALLY,
@@ -9,9 +10,14 @@ let config = {
         height: 720
     },
     physics: {
-        default: 'arcade'
+        default: 'arcade',
+        arcade: {
+                gravity: { y: 600 },
+                debug: true
+        }
     },
-    scene: [CinematicsPrototype]
+    pixelArt: true,
+    scene: [IntroCinematic]
 }
 
 let game = new Phaser.Game(config);

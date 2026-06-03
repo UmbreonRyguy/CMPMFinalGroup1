@@ -1,7 +1,22 @@
+
+class mainSceneFlow extends Phaser.Scene {
+
+    constructor() {
+        super('scene-flow');
+    }
+    preload() {
+        this.load.image('sceneFlow', 'assets/SceneFlowPic.jpg');
+    }
+
+    create() {
+        this.add.image(640, 360, 'sceneFlow').setScale(0.5);
+    }
+}
+
 let config = {
     parent: 'root',
     type: Phaser.WEBGL,
-    backgroundColor: '#111',
+    backgroundColor: '#223',
     scale: {
         mode: Phaser.Scale.FIT,
         autoCenter: Phaser.Scale.CENTER_HORIZONTALLY,
@@ -9,9 +24,14 @@ let config = {
         height: 720
     },
     physics: {
-        default: 'arcade'
+        default: 'arcade',
+        arcade: {
+                gravity: { y: 600 },
+                debug: true
+        }
     },
-    scene: [SceneFlowPrototype]
+    pixelArt: true,
+    scene: [mainSceneFlow]
 }
 
 let game = new Phaser.Game(config);

@@ -70,15 +70,15 @@ export default class MainMenu extends Phaser.Scene {
         }).setOrigin(0.5).setAlpha(0);
 
         // leaves (behind the buttons)
-        this.makeLeaves(23, 3.5);
-        const start = this.add.image(300, 500, 'signSmall').setAlpha(0).setInteractive().setScale(2).setOrigin(0.5, 0.5);
+        this.makeLeaves(50, 3.5);
+        const start = this.add.image(300, 500, 'signSmall').setAlpha(0).setScale(2).setOrigin(0.5, 0.5);
         const startText =this.add.text(300, 500, "START", {
             color: "#ffffff",
             fontFamily: 'pixel',
             fontSize: '40px'
         }).setOrigin(0.5).setAlpha(0);
 
-        const settings = this.add.image(640, 500, 'signSmall').setAlpha(0).setInteractive().setScale(2).setOrigin(0.5, 0.5);
+        const settings = this.add.image(640, 500, 'signSmall').setAlpha(0).setScale(2).setOrigin(0.5, 0.5);
         const settingsText =this.add.text(640, 500, "SETTINGS", {
             color: "#ffffff",
             fontFamily: 'pixel',
@@ -86,7 +86,7 @@ export default class MainMenu extends Phaser.Scene {
         }).setOrigin(0.5).setAlpha(0);
 
 
-        const credits = this.add.image(980, 500, 'signSmall').setAlpha(0).setInteractive().setScale(2).setOrigin(0.5, 0.5);
+        const credits = this.add.image(980, 500, 'signSmall').setAlpha(0).setScale(2).setOrigin(0.5, 0.5);
         const creditsText =this.add.text(980, 500, "CREDITS", {
             color: "#ffffff",
             fontFamily: 'pixel',
@@ -103,7 +103,17 @@ export default class MainMenu extends Phaser.Scene {
                 alpha: 1,
                 ease: 'linear',
                 duration: 2000,
-                delay: delayTime
+                delay: delayTime,
+            });
+        }
+
+        this.pressable = (button, delayTime) => {
+            this.tweens.add({
+                targets: button,
+                y: button.y,
+                onComplete: () => {
+                    button.setInteractive();
+                }
             });
         }
         
@@ -116,6 +126,9 @@ export default class MainMenu extends Phaser.Scene {
         fadeIn(settingsText, 500);
         fadeIn(credits, 1000); 
         fadeIn(creditsText, 1000);
+        this.pressable(start, 100);
+        this.pressable(settings, 1100);
+        this.pressable(credits, 2100);
 
         //Tweens for buttons
         this.tweens.add({
@@ -177,7 +190,7 @@ export default class MainMenu extends Phaser.Scene {
         credits.on('pointerout', ()=>credits.clearTint());
 
         // leaves (in front of buttons)
-        this.makeLeaves(10, 4.5);
+        this.makeLeaves(8, 4.5);
 
         //--------------------------
         //Background audio

@@ -44,7 +44,7 @@
 - `ShortHop.wav` - Ryan Funk - Ableton - */assets
 
 ### Custom Fonts
-- `fonts/pixelFont.ttf` - Free Use Font from dafont.com - Riciery Leal - */assets/fonts
+- `fonts/pixelFont.ttf` - Free Use Font from dafont.com - Riciery Leal - */assets/fonts - https://www.dafont.com/vcr-osd-mono.font
 
 ## Tilemaps 
 - `prototypeTilemap.json` - 

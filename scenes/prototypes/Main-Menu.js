@@ -23,10 +23,10 @@ export default class MainMenu extends Phaser.Scene {
                 targets: leaves[i],
                 delay: Math.random() * 10000 + (i % 2) * 1000,
                 y: 1280,
-                alpha: 0,
+                alpha: 0.3,
+                scale: 5,
                 duration: 5000 + Math.random() * 10000,
                 repeat: -1,
-                //onComplete:
             });
             if (!leaves[i].flipX) {
                 this.tweens.add({
@@ -34,8 +34,9 @@ export default class MainMenu extends Phaser.Scene {
                     rotation: {from: 0.1, to: -1.4},
                     x: {from: leaves[i].x - (100 + 50*Math.random()), to: leaves[i].x + (100 + 50*Math.random())},
                     yoyo: true,
-                    duration: 1000 + Math.random() * 1000,
+                    duration: 2000 + Math.random() * 1000,
                     repeat: -1,
+                    ease: 'Sine.easeInOut'
                 });
             }
             else {
@@ -44,8 +45,9 @@ export default class MainMenu extends Phaser.Scene {
                     rotation: {from: 1.4, to: -0.1},
                     x: {from: leaves[i].x - (100 + 50*Math.random()), to: leaves[i].x + (100 + 50*Math.random())},
                     yoyo: true,
-                    duration: 1000 + Math.random() * 1000,
+                    duration: 2000 + Math.random() * 1000,
                     repeat: -1,
+                    ease: 'Sine.easeInOut'
                 });
             }
         }
@@ -157,7 +159,7 @@ export default class MainMenu extends Phaser.Scene {
             this.tweens.add({
                 targets: button,
                 y: y,
-                ease: 'Cubic.easeInOut',
+                ease: 'Back.easeInOut',
                 duration: 500
             });
         }

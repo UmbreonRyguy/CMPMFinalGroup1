@@ -19,10 +19,10 @@ export default class LevelSelect extends Phaser.Scene {
                 targets: leaves[i],
                 delay: Math.random() * 10000 + (i % 2) * 1000,
                 y: 1280,
-                alpha: 0,
+                alpha: 0.3,
+                scale: 5,
                 duration: 5000 + Math.random() * 10000,
                 repeat: -1,
-                //onComplete:
             });
             if (!leaves[i].flipX) {
                 this.tweens.add({
@@ -30,8 +30,9 @@ export default class LevelSelect extends Phaser.Scene {
                     rotation: {from: 0.1, to: -1.4},
                     x: {from: leaves[i].x - (100 + 50*Math.random()), to: leaves[i].x + (100 + 50*Math.random())},
                     yoyo: true,
-                    duration: 1000 + Math.random() * 1000,
+                    duration: 2000 + Math.random() * 1000,
                     repeat: -1,
+                    ease: 'Sine.easeInOut'
                 });
             }
             else {
@@ -40,8 +41,9 @@ export default class LevelSelect extends Phaser.Scene {
                     rotation: {from: 1.4, to: -0.1},
                     x: {from: leaves[i].x - (100 + 50*Math.random()), to: leaves[i].x + (100 + 50*Math.random())},
                     yoyo: true,
-                    duration: 1000 + Math.random() * 1000,
+                    duration: 2000 + Math.random() * 1000,
                     repeat: -1,
+                    ease: 'Sine.easeInOut'
                 });
             }
         }
@@ -153,7 +155,7 @@ export default class LevelSelect extends Phaser.Scene {
             this.tweens.add({
                 targets: button,
                 y: y,
-                ease: 'Cubic.easeInOut',
+                ease: 'Back.easeInOut',
                 duration: 500
             });
         }
@@ -218,9 +220,6 @@ export default class LevelSelect extends Phaser.Scene {
             this.buttonMove(levelThreeText, 500);
         });
 
-        // leaves (in front of buttons)
-        this.makeLeaves(8, 4.5);
-
 
         // const lvl1 = this.add.text(100, 200, "level 1", {color: "#000000"}).setInteractive();
         // lvl1.on('pointerhover', ()=> lvl1.setTint(0xb66d0f));
@@ -271,6 +270,9 @@ export default class LevelSelect extends Phaser.Scene {
         });
         fadeIn(returnButton, 0);
         fadeIn(returnButtonText, 0);
+
+        // leaves (in front of buttons)
+        this.makeLeaves(8, 4.5);
     }
 }
 

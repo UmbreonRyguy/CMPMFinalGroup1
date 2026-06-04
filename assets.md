@@ -9,14 +9,14 @@
 - `arrowButton.png` - Ryan Funk - Piskel - */assets
 
 ### Background Assets
-- `ForestTrash-bg-correct-size.png` - 
-- `Forest-bg-correct-size.png` - 
-- `finalproj-main-menu-protbg.png` -
+- `ForestTrash-bg-correct-size.png` - Rheann Kunita - Piskel - */assets
+- `Forest-bg-correct-size.png` - Rheann Kunita - Piskel - */assets
+- `finalproj-main-menu-protbg.png` -Rheann Kunita - Krita - */assets
 
 ### Game Objects
 - `PlaceholderPlayer.png` - 
 - `Trash.png` - 
-- `Treasure.png` - 
+- `Treasure.png` - Rheann Kunita - Piskel */assets
 
 - `levers.png` - 
 - `textureAtlas.json` - 
@@ -38,7 +38,7 @@
 
 ### Music
 - `MenuTheme.mp3` - Ryan Funk - Ableton - */assets
-- `prototype-bg-music.mp3` - 
+- `prototype-bg-music.mp3` - Rheann Kunita - Chrome Music Lab - */assets
 
 ### Sound Effects
 - `ShortHop.wav` - Ryan Funk - Ableton - */assets

@@ -66,7 +66,7 @@ export default class MainMenu extends Phaser.Scene {
         // Apply global Tone mute based on SFX setting
         Tone.Destination.mute = !this.registry.get('sfxEnabled');
         
-        this.bg = this.add.image(640, 360, 'bg');
+        this.bg = this.add.image(640, 360, 'mainMenubg');
 
         // leaves (BEHIND the buttons)
         this.makeLeaves(50, 3.5);

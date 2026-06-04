@@ -218,6 +218,9 @@ export default class GameplayPrototype extends Phaser.Scene {
         this.jumpButton.on('pointerup', () => {
             this.touchJump = false;
         });
+        this.jumpButton.on('pointerover', () => {
+            this.touchJump = true;
+        });
 
         if (false) {
             this.leftButton.x += -9999;
@@ -394,7 +397,6 @@ export default class GameplayPrototype extends Phaser.Scene {
     
 
     update() {
-        console.log(this.touchJump);
         //
         // player stuff
         //

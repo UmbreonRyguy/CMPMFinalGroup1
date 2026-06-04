@@ -457,7 +457,7 @@ export default class GameplayPrototype extends Phaser.Scene {
 
         // variable jump height
         if ((this.cursors.up.isDown || this.touchJump) && this.player.body.velocity.y < -75) {
-            this.player.setVelocityY(this.player.body.velocity.y - 1.75);
+            this.player.setVelocityY(this.player.body.velocity.y - 5.75);
         }
 
         //let answer

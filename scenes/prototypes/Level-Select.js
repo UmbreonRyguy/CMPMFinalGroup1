@@ -266,6 +266,7 @@ export default class LevelSelect extends Phaser.Scene {
         returnButton.on('pointerout', ()=> returnButton.clearTint());
         
         returnButton.on('pointerup', ()=>{
+            this.sound.stopByKey('mainMenuTheme');
             this.scene.start('main-menu');
         });
         fadeIn(returnButton, 0);

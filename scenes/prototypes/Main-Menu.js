@@ -234,28 +234,33 @@ export default class MainMenu extends Phaser.Scene {
         //--------------------------
 
         this.music = this.sound.add('mainMenuTheme');
+        var musicPlaying = false;
 
-        if (this.registry.get('musicEnabled')) { //check music bool, play if true
-            this.music.loop = true;
-            this.music.play();
-        }
-        else {
-            this.sound.stopByKey('mainMenuTheme'); //otherwise stop
-        }
+         if (this.registry.get('musicEnabled')) {
+                if (!musicPlaying) {
+                    this.music.loop = true;
+                    this.music.play();
+                    musicPlaying = true;
+                }
+            }
+            else {
+                this.sound.stopByKey('mainMenuTheme');
+                musicPlaying = false;
+            }
         this.events.on('resume', (sys, data) => { //check again on scene resume
             // Update global Tone mute on resume
             Tone.Destination.mute = !this.registry.get('sfxEnabled');
             
             if (this.registry.get('musicEnabled')) {
-                if (!this.music.isPlaying) {
+                if (!musicPlaying) {
                     this.music.loop = true;
                     this.music.play();
+                    musicPlaying = true;
                 }
             }
             else {
-                if (this.music.isPlaying) { 
-                    this.sound.stopByKey('mainMenuTheme');
-                }
+                this.sound.stopByKey('mainMenuTheme');
+                musicPlaying = false;
             }
         });
     }

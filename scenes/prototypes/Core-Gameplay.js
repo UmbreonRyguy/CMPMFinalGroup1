@@ -340,21 +340,21 @@ export default class GameplayPrototype extends Phaser.Scene {
         //
         // touch UI
         //
-        this.leftButton = this.add.image((1280*1.5/16), (720*4.7/6)+40, 'arrowButton')
+        this.leftButton = this.add.image((1280*2/16), (720*4.7/6), 'arrowButton')
             .setScale(4)
             .setAlpha(0.5)
             .setAngle(270)
             .setInteractive();
         this.touchLeft = false;
 
-        this.rightButton = this.add.image(1280*4/16, (720*4.7/6)+40, 'arrowButton')
+        this.rightButton = this.add.image(1280*4.5/16, (720*4.7/6), 'arrowButton')
             .setScale(4)
             .setAlpha(0.5)
             .setAngle(90)
             .setInteractive();
         this.touchRight = false;
 
-        this.jumpButton = this.add.image(1280*14/16, (720*5/6)+20, 'jumpButton')
+        this.jumpButton = this.add.image(1280*14/16, (720*4.7/6), 'jumpButton')
             .setScale(4)
             .setAlpha(0.5)
             .setInteractive();
@@ -457,7 +457,7 @@ export default class GameplayPrototype extends Phaser.Scene {
 
         // variable jump height
         if ((this.cursors.up.isDown || this.touchJump) && this.player.body.velocity.y < -75) {
-            this.player.setVelocityY(this.player.body.velocity.y - 5.75);
+            this.player.setVelocityY(this.player.body.velocity.y - 3);
         }
 
         //let answer

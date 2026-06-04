@@ -117,7 +117,7 @@ export default class IntroCinematic extends Phaser.Scene {
         this.load.image('trash', 'assets/Trash.png');
         this.load.image('treasure', 'assets/treasure.png');
 
-        this.load.image('jumpButton', 'assets/LargerArrowButton.png');
+        this.load.image('jumpButton', 'assets/jumpButton.png');
         this.load.image('arrowButton', 'assets/arrowButton.png');
         this.load.audio('bgmusic', 'assets/prototype-bg-music.mp3');
         this.load.audio('shorthop', 'assets/ShortHop.wav');
@@ -175,17 +175,33 @@ export default class IntroCinematic extends Phaser.Scene {
 
         // button to skip intro
         this.skip = this.input.keyboard.addKey('SPACE');
+        this.introSkipped = false;
     }
     update() {
-        if (this.loadingDone && (!this.introOver && (this.logoDone || Phaser.Input.Keyboard.JustDown(this.skip)))) {
-            introOver = true;
-            this.scene.start('leaf-transition', {target: 'main-menu'}); // load main menu after cinematic is done AND loading is done
-            this.cameras.main.fadeOut(500, 0, 0, 0); //fade out after cinematic is done
-            this.cameras.main.once('camerafadeoutcomplete', () => {
-                this.scene.stop('intro-cinematic');
-            });
-            Tone.getTransport().stop();
-            //this.scene.start('core-gameplay'); // skip to a further scene for debug/testing
+        if(Phaser.Input.Keyboard.JustDown(this.skip)){
+            this.introSkipped = true;
+        }
+        if (this.loadingDone && !this.introOver) {
+            if(this.introSkipped || this.logoDone) {
+                if(this.introSkipped){
+                    Tone.getTransport().stop();
+                    this.scene.start('leaf-transition', {target: 'main-menu'})
+                }
+                else{
+                    this.introOver = true;
+                    this.scene.launch('leaf-transition', {target: 'main-menu'}); // load main menu after cinematic is done AND loading is done
+                    this.tweens.add({
+                        targets: [this.cameras, this.prototypeLogo],
+                        alpha: 0,
+                        duration: 800,
+                        ease: 'Linear'
+                    });
+                    this.time.delayedCall(800, () => {
+                        this.scene.stop('intro-cinematic');
+                    });
+                    Tone.getTransport().stop();
+                }
+            }
         }
     }
 }

@@ -237,15 +237,15 @@ export default class MainMenu extends Phaser.Scene {
         var musicPlaying = false;
 
          if (this.registry.get('musicEnabled')) {
-                if (!musicPlaying) {
+            if (!musicPlaying) {
                     this.music.loop = true;
                     this.music.play();
                     musicPlaying = true;
                 }
             }
-            else {
-                this.sound.stopByKey('mainMenuTheme');
-                musicPlaying = false;
+        else{
+            this.sound.stopByKey('mainMenuTheme');
+            musicPlaying = false;
             }
         this.events.on('resume', (sys, data) => { //check again on scene resume
             // Update global Tone mute on resume

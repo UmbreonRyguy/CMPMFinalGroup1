@@ -23,7 +23,7 @@ export default class LeafTransition extends Phaser.Scene {
             //targetScene.cameras.main.fadeIn(2500, 0, 0, 0);
         });
 
-        for(let i = 0; i < 60; i++) {
+        for(let i = 0; i < 100; i++) {
             const delay = Phaser.Math.Between(0, 500);
             const leaf = this.add.image(-50, Phaser.Math.Between(0, H), `leaf${Phaser.Math.Between(1, 4)}`)
             .setScale(Phaser.Math.FloatBetween(2, 5))

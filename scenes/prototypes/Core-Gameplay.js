@@ -365,29 +365,27 @@ export default class GameplayPrototype extends Phaser.Scene {
         //     .setAlpha(0.5)
         //     .setInteractive();
 
-        this.leftButton.on('pointerdown', () => {
-            this.touchLeft = true;
-        });
+        
         this.leftButton.on('pointerout', () => {
             this.touchLeft = false;
         });
         this.leftButton.on('pointerup', () => {
             this.touchLeft = false;
         });
-
-        this.rightButton.on('pointerdown', () => {
-            this.touchRight = true;
+        this.leftButton.on('pointerover', () => {
+            this.touchLeft = true;
         });
+
         this.rightButton.on('pointerout', () => {
             this.touchRight = false;
         });
         this.rightButton.on('pointerup', () => {
             this.touchRight = false;
         });
-
-        this.jumpButton.on('pointerdown', () => {
-            this.touchJump = true;
+        this.rightButton.on('pointerover', () => {
+            this.touchRight = true;
         });
+
         this.jumpButton.on('pointerout', () => {
             this.touchJump = false;
         });

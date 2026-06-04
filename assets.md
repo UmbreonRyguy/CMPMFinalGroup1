@@ -30,7 +30,7 @@
 - `leafs/leaf2.png` - Ryan Funk - Piskel - */assets/leafs
 - `leafs/leaf3.png` - Ryan Funk - Piskel - */assets/leafs
 - `leafs/leaf4.png` - Ryan Funk - Piskel - */assets/leafs
-- `leaf.png` - 
+- `leaf.png` - Quetzal Theobald - */assets - I made the sprite in Piskel and then all of the movement behavior was done in Phaser with tweens.
 
 ---
 

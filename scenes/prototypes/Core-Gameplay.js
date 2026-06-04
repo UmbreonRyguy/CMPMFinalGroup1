@@ -144,6 +144,7 @@ export default class GameplayPrototype extends Phaser.Scene {
         const returnButtonText = this.add.text(1200, 100, "Return to Menu", {color: "#fffcfc", backgroundColor: '#3f1352', padding: { x: 20, y: 10 }}).setOrigin(0.5).setInteractive();
         returnButtonText.on('pointerdown', ()=> returnButtonText.setTint(0x965A0B));
         returnButtonText.on('pointerup', ()=>{
+            this.sound.stopByKey('mainMenuTheme');
             this.scene.start('main-menu');
         });
 
@@ -164,30 +165,30 @@ export default class GameplayPrototype extends Phaser.Scene {
         //
         // touch UI
         //
-        this.leftButton = this.add.image(1280*1.5/16, 720*4.7/6, 'arrowButton')
-            .setScale(10)
+        this.leftButton = this.add.image((1280*1.5/16), (720*4.7/6)+40, 'arrowButton')
+            .setScale(4)
             .setAlpha(0.5)
             .setAngle(270)
             .setInteractive();
         this.touchLeft = false;
 
-        this.rightButton = this.add.image(1280*4/16, 720*4.7/6, 'arrowButton')
-            .setScale(10)
+        this.rightButton = this.add.image(1280*4/16, (720*4.7/6)+40, 'arrowButton')
+            .setScale(4)
             .setAlpha(0.5)
             .setAngle(90)
             .setInteractive();
         this.touchRight = false;
 
-        this.jumpButton = this.add.rectangle(1280*14/16, 720*5/6, 75, 75, 0xff0000)
-            .setScale(2)
+        this.jumpButton = this.add.image(1280*14/16, (720*5/6)+20, 'jumpButton')
+            .setScale(4)
             .setAlpha(0.5)
             .setInteractive();
         this.touchJump = false;
 
-        this.interactButton = this.add.rectangle(1280*14/16, 720*3.5/6, 75, 75, 0xffff00)
-            .setScale(2)
-            .setAlpha(0.5)
-            .setInteractive();
+        // this.interactButton = this.add.rectangle(1280*14/16, 720*3.5/6, 75, 75, 0xffff00)
+        //     .setScale(2)
+        //     .setAlpha(0.5)
+        //     .setInteractive();
 
         this.leftButton.on('pointerdown', () => {
             this.touchLeft = true;
@@ -226,7 +227,7 @@ export default class GameplayPrototype extends Phaser.Scene {
             this.leftButton.x += -9999;
             this.rightButton.x += -9999;
             this.jumpButton.x += -9999;
-            this.interactButton.x += -9999;
+            //this.interactButton.x += -9999;
         }
         
         //---------------------------

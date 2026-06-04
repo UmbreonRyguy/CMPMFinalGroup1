@@ -28,6 +28,7 @@ export default class Pause extends Phaser.Scene {
         }).setOrigin(0.5).setInteractive();
         menuButton.on('pointerdown', () => {
             this.scene.stop(this.resumeKey);
+            this.sound.stopByKey('mainMenuTheme');
             this.scene.start('main-menu');
             this.scene.stop();
         });

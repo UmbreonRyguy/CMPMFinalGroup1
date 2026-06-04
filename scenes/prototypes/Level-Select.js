@@ -173,7 +173,7 @@ export default class LevelSelect extends Phaser.Scene {
             levelOne.clearTint()
             this.cameras.main.fadeOut(500, 0, 0, 0);
             this.cameras.main.once('camerafadeoutcomplete', () => {
-                this.scene.start('core-gameplay');
+                this.scene.start('core-gameplay', {level: 1});
             });
         });
         levelOne.on('pointerout', ()=> {

@@ -63,6 +63,7 @@ export default class LevelSelect extends Phaser.Scene {
         Tone.Destination.mute = !this.registry.get('sfxEnabled');
         
         this.bg = this.add.image(640, 360, 'mainMenubg');
+        this.bg.setTint(0x888888);
 
         // leaves (BEHIND the buttons)
         this.makeLeaves(50, 3.5);

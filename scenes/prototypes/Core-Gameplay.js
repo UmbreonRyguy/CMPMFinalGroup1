@@ -1,8 +1,4 @@
 export default class GameplayPrototype extends Phaser.Scene {
-    
-
-    CX = this.W * 0.5; //center x and y
-    CY = this.H * 0.5;
     constructor() {
         super('core-gameplay');
     }
@@ -52,36 +48,28 @@ export default class GameplayPrototype extends Phaser.Scene {
     }
 
     create(){
-        
-
         // var to keep track of which game state the player is in
         this.past = false;
+        this.itemsHeld = 0;      
+        this.jumpSound = this.sound.add('shorthop');
+        this.isJumping = false;
+        this.cursors = this.input.keyboard.createCursorKeys();
         
-        
-        this.itemsHeld = 0;
-        //this.add.rectangle(100, 100, 100, 100, 0x00ff00); 
-        
-        //----------------------------------------
-        //UI
-        //----------------------------------------
+        // const itemText = this.add.text(1200, 200, "item for player to pick up", {color: "#ffffff", backgroundColor: '#e03f3f', padding: { x: 20, y: 10}}).setInteractive();
+        // this.itemText = this.add.text(640, 360, "The player has " + this.itemsHeld + " items right now", {color: "#ffffff"});
+        // itemText.on('pointerup',()=>{
+        //     itemText.destroy();
+        //     this.itemsHeld += 1;
+        //     this.updateItemText();
+        // });
 
-        const itemText = this.add.text(1200, 200, "item for player to pick up", {color: "#ffffff", backgroundColor: '#e03f3f', padding: { x: 20, y: 10}}).setInteractive();
-        this.itemText = this.add.text(640, 360, "The player has " + this.itemsHeld + " items right now", {color: "#ffffff"});
-        itemText.on('pointerup',()=>{
-            itemText.destroy();
-            this.itemsHeld += 1;
-            this.updateItemText();
-
-            
-        });
-
-        this.pauseButton = this.add.text(1200, 50, "Pause", {color: "#ffffff", backgroundColor: '#333333', padding: { x: 20, y: 10}}).setOrigin(0.5).setSize(100, 100).setInteractive();
-        //this.pauseButton.on('pointerover', () =>this.pauseButton.setTint(0xFF5C5));
-        this.pauseButton.on('pointerup', ()=> {
-            console.log("pause button clicked");
-            this.scene.pause();
-            this.scene.launch('pause', { resumeKey: 'core-gameplay' });
-        })
+        // this.pauseButton = this.add.text(1200, 50, "Pause", {color: "#ffffff", backgroundColor: '#333333', padding: { x: 20, y: 10}}).setOrigin(0.5).setSize(100, 100).setInteractive();
+        // //this.pauseButton.on('pointerover', () =>this.pauseButton.setTint(0xFF5C5));
+        // this.pauseButton.on('pointerup', ()=> {
+        //     console.log("pause button clicked");
+        //     this.scene.pause();
+        //     this.scene.launch('pause', { resumeKey: 'core-gameplay' });
+        // })
         
         //arrowbuttons
         // const jumpButton = this.add.image(50, 50, 'jumpButton').setInteractive();
@@ -93,47 +81,30 @@ export default class GameplayPrototype extends Phaser.Scene {
         // leftButton.angle = 90;
         // leftButton.setAlpha(0.5);
         
-        //
-        // player stuff
-        //
-
-        this.jumpSound = this.sound.add('shorthop');
-
+        // ------------------------
+        // PLAYER
+        // ------------------------
+    
         //Create Player sprite
         this.player = this.physics.add.sprite(800, 500, "player", 0).setScale(0.3);
-        
         //Player physics
         this.player.setCollideWorldBounds(true);
-        // Collider with tilemap will be added after tilemap is created
-
-        // this.physics.add.collider(this.player, mush, () => {
-        //     if (this.player.touching.down && mush.body.touching.up){
-        //         //make jump up big
-                
-        //     }  
-        // });
-
-        // if the player hits the top of the conveyor belt, most fast to the left,
-        // if the player hits the top of the mushroom, bounce
-        // Collider will be added after platform is created
-
-        // if player clicks on lever, switch past to future or future to past;
-        // only works when player is near the switch
-        
-
 
         this.player.body.setMaxVelocity(600);
         this.player.body.setDragX(900);
-
-
-        this.isJumping = false;
-
+        // if the player hits the top of the conveyor belt, most fast to the left,
+        // if the player hits the top of the mushroom, bounce
+        this.physics.add.collider(this.player, this.platform, () => {
+            if (this.player.body.touching.down && this.platform.touching.up) {
+                if (this.past == true) {
+                    this.player.setVelocityY((this.player.body.velocity.y - 250));
+                }
+                else {
+                    this.player.setVelocityX((this.player.body.velocity.x - 50));
+                }
+            }
+        });
         //Keyboard input for player movement
-        this.cursors = this.input.keyboard.createCursorKeys();
-        
-        //---------------------------
-        //Game Objects
-        //--------------------------
 
         //------------------------------------------------------------
         //Prefab class definition
@@ -190,7 +161,7 @@ export default class GameplayPrototype extends Phaser.Scene {
                 }
             }
         }
-        //prefab for trash---------------------------------------------------------------------------------
+        //prefab for Treasure---------------------------------------------------------------------------------
         class TreasureInfo extends Phaser.GameObjects.Image{
             constructor(scene, x, y){
                 super(scene, x, y, 'treasure');
@@ -239,6 +210,20 @@ export default class GameplayPrototype extends Phaser.Scene {
                 }
             }
         }
+
+        //Platform? maybe should be in Level 1?
+        this.platform = this.physics.add.body(440, 386, 240, 28).setAllowGravity(false).setImmovable();
+        // Add platform collider now that platform is created
+        this.physics.add.collider(this.player, this.platform, () => {
+            if (this.player.body.touching.down) {
+                if (this.past == true) {
+                    this.player.setVelocityY((this.player.body.velocity.y - 250));
+                }
+                else {
+                    this.player.setVelocityX((this.player.body.velocity.x - 50));
+                }
+            }
+        });
         //----------------------------------------
         //TileMap
         //----------------------------------------
@@ -365,36 +350,22 @@ export default class GameplayPrototype extends Phaser.Scene {
         else{ //level 3
 
         }
-        this.platform = this.physics.add.body(440, 386, 240, 28).setAllowGravity(false).setImmovable();
-        
-        // Add platform collider now that platform is created
-        this.physics.add.collider(this.player, this.platform, () => {
-            if (this.player.body.touching.down) {
-                if (this.past == true) {
-                    this.player.setVelocityY((this.player.body.velocity.y - 250));
-                }
-                else {
-                    this.player.setVelocityX((this.player.body.velocity.x - 50));
-                }
-            }
-        });
-        
         //----------------------------------------
         //UI
         //----------------------------------------
 
-        const returnButtonText = this.add.text(1200, 100, "Return to Menu", {color: "#fffcfc", backgroundColor: '#3f1352', padding: { x: 20, y: 10 }}).setOrigin(0.5).setInteractive();
-        returnButtonText.on('pointerdown', ()=> returnButtonText.setTint(0x965A0B));
-        returnButtonText.on('pointerup', ()=>{
-            this.sound.stopByKey('mainMenuTheme');
-            this.scene.start('main-menu');
-        });
+        // const returnButtonText = this.add.text(1200, 100, "Return to Menu", {color: "#fffcfc", backgroundColor: '#3f1352', padding: { x: 20, y: 10 }}).setOrigin(0.5).setInteractive();
+        // returnButtonText.on('pointerdown', ()=> returnButtonText.setTint(0x965A0B));
+        // returnButtonText.on('pointerup', ()=>{
+        //     this.sound.stopByKey('mainMenuTheme');
+        //     this.scene.start('main-menu');
+        // });
 
-        const endSceneText = this.add.text(1200, 150, "Go to end scene", {color: "#ffffff", backgroundColor: '#3f1352', padding: { x: 20, y: 10 }}).setOrigin(0.5).setToTop().setInteractive();
-        endSceneText.on('pointerdown', ()=> endSceneText.setTint(0x965A0B));
-        endSceneText.on('pointerup', ()=>{
-            this.scene.start('end-scene', { itemsHeld: this.itemsHeld });
-        });
+        // const endSceneText = this.add.text(1200, 150, "Go to end scene", {color: "#ffffff", backgroundColor: '#3f1352', padding: { x: 20, y: 10 }}).setOrigin(0.5).setToTop().setInteractive();
+        // endSceneText.on('pointerdown', ()=> endSceneText.setTint(0x965A0B));
+        // endSceneText.on('pointerup', ()=>{
+        //     this.scene.start('end-scene', { itemsHeld: this.itemsHeld });
+        // });
 
         this.pauseButton = this.add.image(1200, 50, "pauseIcon").setOrigin(0.5).setScale(2).setInteractive();
         //this.pauseButton.on('pointerover', () =>this.pauseButton.setTint(0xFF5C5));
@@ -403,10 +374,9 @@ export default class GameplayPrototype extends Phaser.Scene {
             this.scene.pause();
             this.scene.launch('pause', { resumeKey: 'core-gameplay' });
         })
-        
-        //
+        // --------------------
         // touch UI
-        //
+        // --------------------
         this.leftButton = this.add.image((1280*2/16), (720*4.7/6), 'arrowButton')
             .setScale(4)
             .setAlpha(0.5)
@@ -431,7 +401,6 @@ export default class GameplayPrototype extends Phaser.Scene {
         //     .setScale(2)
         //     .setAlpha(0.5)
         //     .setInteractive();
-
         
         this.leftButton.on('pointerout', () => {
             this.touchLeft = false;
@@ -469,10 +438,7 @@ export default class GameplayPrototype extends Phaser.Scene {
             this.jumpButton.x += -9999;
             //this.interactButton.x += -9999;
         }
-        
-        //---------------------------
-        //Game Objects
-        //--------------------------
+
     }
 
 

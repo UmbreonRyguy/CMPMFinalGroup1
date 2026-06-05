@@ -1,23 +1,177 @@
 export default class GameplayPrototype extends Phaser.Scene {
-    W = 1280;
-    H = 720;
+    
+
+    CX = this.W * 0.5; //center x and y
+    CY = this.H * 0.5;
     constructor() {
         super('core-gameplay');
+    }
+
+    init() {
+        this.W = this.game.config.width; // 1280 under normal circumstances
+        this.H = this.game.config.height; // 720
+        this.CX = this.W * 0.5; //center x and y
+        this.CY = this.H * 0.5;
     }
     
     updateItemText() {
         this.itemText.destroy();
-        itemText = this.add.text(W/2, H/5, "The player has " + this.itemsHeld + " items right now", {color: "#ffffff"});
+        itemText = this.add.text(this.W/2, this.H/5, "The player has " + this.itemsHeld + " items right now", {color: "#ffffff"});
         this.itemText = itemText;
     }
 
-    init(data){
-        this.levelNum = data.level || 1;
-    }
+        //--------------------------------------
+        // image physics stuff
+        //---------------------------------------
+
+        // was there a better way to figure out how to add an outline to the lever?
+        // probably. Do I care? No. It is 12 AM. Did I try a better way? Yes. For much too long.
+        this.leverOutline = this.add.image(40, 202, "spriteAtlas", "leverOutline").setAlpha(0);
+        this.lever = this.physics.add.staticImage(40, 200, "spriteAtlas", "lever");
+
+        // idk why the hitbox is in a weird position either - 
+        // changing x or y has seemed to have little effect so I just left it alone
+        this.lever.body.setCircle(80, -80, -40);
+
+        // mushroom
+        const mush1 = this.add.image(480, 400, "Prototype_Tiles", 21).setAlpha(0);
+        const mush2 = this.add.image(560, 400, "Prototype_Tiles", 22).setAlpha(0);
+        const mush3 = this.add.image(640, 400, "Prototype_Tiles", 23).setAlpha(0);
+
+        // conveyor belt
+        const con1 = this.add.image(480, 400, "Prototype_Tiles", 14);
+        const con2 = this.add.image(560, 400, "Prototype_Tiles", 15);
+        const con3 = this.add.image(640, 400, "Prototype_Tiles", 16);
+
+        // var to keep track of which game state the player is in
+        this.past = false;
+        
+        
+        this.itemsHeld = 0;
+        //this.add.rectangle(100, 100, 100, 100, 0x00ff00); 
+        
+        //----------------------------------------
+        //UI
+        //----------------------------------------
+
+        const itemText = this.add.text(1200, 200, "item for player to pick up", {color: "#ffffff", backgroundColor: '#e03f3f', padding: { x: 20, y: 10}}).setInteractive();
+        this.itemText = this.add.text(640, 360, "The player has " + this.itemsHeld + " items right now", {color: "#ffffff"});
+        itemText.on('pointerup',()=>{
+            itemText.destroy();
+            this.itemsHeld += 1;
+            this.updateItemText();
 
             
-    
-    create() {
+        });
+
+        const returnButtonText = this.add.text(1200, 100, "Return to Menu", {color: "#fffcfc", backgroundColor: '#3f1352', padding: { x: 20, y: 10 }}).setOrigin(0.5).setInteractive();
+        returnButtonText.on('pointerdown', ()=> returnButtonText.setTint(0x965A0B));
+        returnButtonText.on('pointerup', ()=>{
+            this.scene.start('main-menu');
+        });
+
+        const endSceneText = this.add.text(1200, 150, "Go to end scene", {color: "#ffffff", backgroundColor: '#3f1352', padding: { x: 20, y: 10}}).setOrigin(0.5).setToTop().setInteractive();
+        endSceneText.on('pointerdown', ()=> endSceneText.setTint(0x965A0B));
+        endSceneText.on('pointerup', ()=>{
+            this.scene.start('end-scene', { itemsHeld: this.itemsHeld });
+        });
+
+        this.pauseButton = this.add.text(1200, 50, "Pause", {color: "#ffffff", backgroundColor: '#333333', padding: { x: 20, y: 10}}).setOrigin(0.5).setSize(100, 100).setInteractive();
+        //this.pauseButton.on('pointerover', () =>this.pauseButton.setTint(0xFF5C5));
+        this.pauseButton.on('pointerup', ()=> {
+            console.log("pause button clicked");
+            this.scene.pause();
+            this.scene.launch('pause', { resumeKey: 'core-gameplay' });
+        })
+        
+        //arrowbuttons
+        const jumpButton = this.add.image(50, 50, 'jumpButton').setInteractive();
+        jumpButton.setAlpha(0.5);
+        const leftButton = this.add.image(40, 50, 'leftButton').setInteractive();
+        leftButton.angle = 270;
+        leftButton.setAlpha(0.5);
+        const rightButton = this.add.image(60, 50, 'rightButton').setInteractive();
+        leftButton.angle = 90;
+        leftButton.setAlpha(0.5);
+        
+        //
+        // player stuff
+        //
+
+        this.jumpSound = this.sound.add('shorthop');
+
+        //Create Player sprite
+        this.player = this.physics.add.sprite(800, 500, "player", 0).setScale(0.3);
+        
+        //Player physics
+        this.player.setCollideWorldBounds(true);
+        this.physics.add.collider(this.player, this.layer1);
+        // this.physics.add.collider(this.player, mush, () => {
+        //     if (this.player.touching.down && mush.body.touching.up){
+        //         //make jump up big
+                
+        //     }  
+        // });
+
+        // if the player hits the top of the conveyor belt, most fast to the left,
+        // if the player hits the top of the mushroom, bounce
+        this.physics.add.collider(this.player, this.platform, () => {
+            if (this.player.body.touching.down && this.platform.touching.up) {
+                if (this.past == true) {
+                    this.player.setVelocityY((this.player.body.velocity.y - 250));
+                }
+                else {
+                    this.player.setVelocityX((this.player.body.velocity.x - 50));
+                }
+            }
+        });
+
+        // if player clicks on lever, switch past to future or future to past;
+        // only works when player is near the switch
+        this.lever.on('pointerdown', () => {
+            if (this.past == true) {
+                mush1.setAlpha(0);
+                mush2.setAlpha(0);
+                mush3.setAlpha(0);
+
+                con1.setAlpha(1);
+                con2.setAlpha(1);
+                con3.setAlpha(1);
+
+                this.platform.setSize(240, 28).reset(440, 386);
+
+                this.past = false;
+            }
+            else {
+                con1.setAlpha(0);
+                con2.setAlpha(0);
+                con3.setAlpha(0);
+
+                mush1.setAlpha(1);
+                mush2.setAlpha(1);
+                mush3.setAlpha(1);
+
+                this.platform.setSize(240, 28).reset(440, 391);
+
+                this.past = true;
+            }
+            //console.log("bean");
+        });
+        
+
+
+        this.player.body.setMaxVelocity(600);
+        this.player.body.setDragX(900);
+
+
+        this.isJumping = false;
+
+        //Keyboard input for player movement
+        this.cursors = this.input.keyboard.createCursorKeys();
+        
+        //---------------------------
+        //Game Objects
+        //--------------------------
 
         //------------------------------------------------------------
         //Prefab class definition
@@ -28,6 +182,7 @@ export default class GameplayPrototype extends Phaser.Scene {
                 super(scene, x, y, 'trash');
                 scene.add.existing(this)
                 this.trashInventory = []
+                this.scale = scale;
             }
             /**
              * @param {{trashInventory?: string[]}} data 
@@ -77,7 +232,7 @@ export default class GameplayPrototype extends Phaser.Scene {
         //prefab for trash---------------------------------------------------------------------------------
         class TreasureInfo extends Phaser.GameObjects.Image{
             constructor(scene, x, y){
-                super(scene, x, y, 'treasure');
+                super(scene, x * scale, y * scale, 'treasure');
                 scene.add.existing(this)
                 this.treasureInventory = []
             }
@@ -94,7 +249,7 @@ export default class GameplayPrototype extends Phaser.Scene {
                 console.warn('gaining item already held:', item);
                 return;
             }
-                const message = this.scene.add.text(this.x, this.y + 20, "You picked up treasure!").setAlpha(0).setColor('#ffffff');
+                const message = this.scene.add.text(this.x, this.y + (20), "You picked up treasure!").setAlpha(0).setColor('#ffffff');
                 this.scene.tweens.add({
                     targets: message,
                     alpha: {from:1, to: 0},
@@ -432,12 +587,12 @@ export default class GameplayPrototype extends Phaser.Scene {
         if (!(this.cursors.left.isDown && this.cursors.right.isDown) && !(this.touchLeft && this.touchRight)) {
             if (this.cursors.left.isDown || this.touchLeft) {
                 if (this.player.body.velocity.x > -moveSpeed) {
-                    this.player.setVelocityX(this.player.body.velocity.x - 25);
+                    this.player.setVelocityX(this.player.body.velocity.x - (25));
                 }
             }
             else if (this.cursors.right.isDown || this.touchRight) {
                 if (this.player.body.velocity.x < moveSpeed) {
-                    this.player.setVelocityX(this.player.body.velocity.x + 25);
+                    this.player.setVelocityX(this.player.body.velocity.x + (25));
                 }
             }
         }
@@ -456,15 +611,8 @@ export default class GameplayPrototype extends Phaser.Scene {
         }
 
         // variable jump height
-        if ((this.cursors.up.isDown || this.touchJump) && this.player.body.velocity.y < -75) {
-            this.player.setVelocityY(this.player.body.velocity.y - 3);
-        }
-
-        //let answer
-        if (this.trash.hasAllItemTrash(2)){
-            this.trashInventCheck.setText("Has the player collected all trash? Yes!")
-        } else {
-            this.trashInventCheck.setText("Has the player collected all trash? No")
+        if (this.cursors.up.isDown && this.player.body.velocity.y < (-75)) {
+            this.player.setVelocityY(this.player.body.velocity.y - (1.75));
         }
 
         // lever

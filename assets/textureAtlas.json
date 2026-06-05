@@ -51,6 +51,173 @@
                     }
                 }
             ]
+        },
+        {
+            "image": "assets/Rock_Texture.png",
+            "format": "ARGB8888",
+            "size": {
+                "x": 240,
+                "y": 240
+            },
+            "frames": [
+                {
+                    "filename": "unbroken",
+                    "rotated": false,
+                    "trimmed": true,
+                    "sourceSize": {
+                        "w": 240,
+                        "h": 80
+                    },
+                    "spriteSourceSize": {
+                        "x": 0,
+                        "y": 0,
+                        "w": 240,
+                        "h": 80
+                    },
+                    "frame": {
+                        "x": 0,
+                        "y": 160,
+                        "w": 240,
+                        "h": 80
+                    }
+                },
+                {
+                    "filename": "broken1",
+                    "rotated": false,
+                    "trimmed": true,
+                    "sourceSize": {
+                        "w": 240,
+                        "h": 80
+                    },
+                    "spriteSourceSize": {
+                        "x": 0,
+                        "y": 0,
+                        "w": 240,
+                        "h": 80
+                    },
+                    "frame": {
+                        "x": 0,
+                        "y": 80,
+                        "w": 240,
+                        "h": 80
+                    }
+                },
+                {
+                    "filename": "broken2",
+                    "rotated": false,
+                    "trimmed": true,
+                    "sourceSize": {
+                        "w": 240,
+                        "h": 80
+                    },
+                    "spriteSourceSize": {
+                        "x": 0,
+                        "y": 0,
+                        "w": 240,
+                        "h": 80
+                    },
+                    "frame": {
+                        "x": 0,
+                        "y": 0,
+                        "w": 240,
+                        "h": 80
+                    }
+                }
+            ]
+        },
+        {
+            "image": "assets/level2sprites.png",
+            "format": "ARGB8888",
+            "size": {
+                "x": 240,
+                "y": 240
+            },
+            "frames": [
+                {
+                    "filename": "teleporter",
+                    "rotated": false,
+                    "trimmed": true,
+                    "sourceSize": {
+                        "w": 240,
+                        "h": 32
+                    },
+                    "spriteSourceSize": {
+                        "x": 0,
+                        "y": 0,
+                        "w": 240,
+                        "h": 32
+                    },
+                    "frame": {
+                        "x": 0,
+                        "y": 184,
+                        "w": 240,
+                        "h": 32
+                    }
+                },
+                {
+                    "filename": "door",
+                    "rotated": false,
+                    "trimmed": true,
+                    "sourceSize": {
+                        "w": 12,
+                        "h": 160
+                    },
+                    "spriteSourceSize": {
+                        "x": 0,
+                        "y": 0,
+                        "w": 12,
+                        "h": 160
+                    },
+                    "frame": {
+                        "x": 34,
+                        "y": 0,
+                        "w": 12,
+                        "h": 160
+                    }
+                },
+                {
+                    "filename": "stone",
+                    "rotated": false,
+                    "trimmed": true,
+                    "sourceSize": {
+                        "w": 16,
+                        "h": 16
+                    },
+                    "spriteSourceSize": {
+                        "x": 0,
+                        "y": 0,
+                        "w": 16,
+                        "h": 16
+                    },
+                    "frame": {
+                        "x": 192,
+                        "y": 112,
+                        "w": 16,
+                        "h": 16 
+                    }
+                },
+                {
+                    "filename": "pipe",
+                    "rotated": false,
+                    "trimmed": true,
+                    "sourceSize": {
+                        "w": 80,
+                        "h": 160
+                    },
+                    "spriteSourceSize": {
+                        "x": 0,
+                        "y": 0,
+                        "w": 80,
+                        "h": 160
+                    },
+                    "frame": {
+                        "x": 80,
+                        "y": 0,
+                        "w": 80,
+                        "h": 160
+                    }
+                }
+            ]
         }
     ]
 }

@@ -20,6 +20,7 @@ export default class GameplayPrototype extends Phaser.Scene {
         this.itemText = itemText;
     }
 
+    create(){
         //--------------------------------------
         // image physics stuff
         //---------------------------------------

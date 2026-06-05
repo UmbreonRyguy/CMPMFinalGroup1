@@ -125,6 +125,7 @@ export default class GameplayPrototype extends Phaser.Scene {
                 return null;
             }
 
+
             gainItem(item){
                 let Inventory = this.getInventory();
                 if (Inventory.includes(item)) {
@@ -149,6 +150,7 @@ export default class GameplayPrototype extends Phaser.Scene {
             * @returns {boolean}
             */
             hasAllItem(number) {
+                let Inventory = this.getInventory();
                 if(Inventory.length == number){
                     return true;
                 }else{
@@ -164,6 +166,7 @@ export default class GameplayPrototype extends Phaser.Scene {
                 super(scene, x, y, 'trash');
             }
 
+            //Don't know if this methood was overwritten correctly.
             getInventory(){
                 return this.scene.trashInventory
             }
@@ -273,7 +276,7 @@ export default class GameplayPrototype extends Phaser.Scene {
                 .on('pointerout', () => trashMessage.setAlpha(0))
                 .on('pointerdown', () => {
                     trashMessage.setAlpha(0);
-                    this.trash.gainItemTrash('trash');
+                    this.trash.gainItem('trash');
                     this.trash.scene.tweens.add({
                         targets: this.trash, 
                         alpha: {from: 1, to: 0},
@@ -290,7 +293,7 @@ export default class GameplayPrototype extends Phaser.Scene {
                 .on('pointerout', () => trashMessage2.setAlpha(0))
                 .on('pointerdown', () => {
                     trashMessage2.setAlpha(0);
-                    this.trash2.gainItemTrash('trash2');
+                    this.trash2.gainItem('trash2');
                     this.trash2.scene.tweens.add({
                         targets: this.trash2, 
                         alpha: {from: 1, to: 0},

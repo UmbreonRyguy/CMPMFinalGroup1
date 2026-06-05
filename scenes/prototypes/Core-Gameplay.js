@@ -54,6 +54,7 @@ export default class GameplayPrototype extends Phaser.Scene {
         this.jumpSound = this.sound.add('shorthop');
         this.isJumping = false;
         this.cursors = this.input.keyboard.createCursorKeys();
+        this.prev_time = 0;
         
         // const itemText = this.add.text(1200, 200, "item for player to pick up", {color: "#ffffff", backgroundColor: '#e03f3f', padding: { x: 20, y: 10}}).setInteractive();
         // this.itemText = this.add.text(640, 360, "The player has " + this.itemsHeld + " items right now", {color: "#ffffff"});
@@ -489,9 +490,11 @@ export default class GameplayPrototype extends Phaser.Scene {
         }
 
         // variable jump height
-        if ((this.cursors.up.isDown || this.touchJump) && this.player.body.velocity.y < -75 && (Math.floor(time) % 2 == 0)) { // runs every other millisecond?
-            this.player.setVelocityY(this.player.body.velocity.y - 3);
+        // this should hopefully run every 20 milliseconds no matter the platform??? like actually please this one better work
+        if ((this.cursors.up.isDown || this.touchJump) && (Math.floor(time/10) != this.prev_time && Math.floor(time/10) % 2 == 0) && this.player.body.velocity.y < -75) {
+            this.player.setVelocityY(this.player.body.velocity.y - 5);
         }
+        this.prev_time = Math.floor(time/10);
 
         // lever
         if (this.lever && this.leverOutline) { // only check if lever exists (level 1 only)

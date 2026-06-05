@@ -18,14 +18,14 @@
 - `Trash.png` - 
 - `Treasure.png` - Rheann Kunita - Piskel */assets
 
-- `levers.png` - 
-- `textureAtlas.json` - 
+- `levers.png` - Sydney Osako - made in Procreate, upscaled with GIMP - */assets
+- `textureAtlas.json` - Sydney Osako - just typed by hand in the VSCode editor - */assets
 
 ### Cinematic Assets
-- `prototypeLogo.png` - 
-- `rockForPrototypeCinematic.png` - 
-- `rockShardForPrototype.png` - 
-- `dustCloud.png` - 
+- `prototypeLogo.png` - Sydney Osako - Procreate - */assets
+- `rockForPrototypeCinematic.png` - Sydney Osako - Procreate - */assets
+- `rockShardForPrototype.png` - Sydney Osako - Procreate - */assets
+- `dustCloud.png` - Sydney Osako - Procreate - */assets
 - `leafs/leaf1.png` - Ryan Funk - Piskel - */assets/leafs
 - `leafs/leaf2.png` - Ryan Funk - Piskel - */assets/leafs
 - `leafs/leaf3.png` - Ryan Funk - Piskel - */assets/leafs
@@ -47,10 +47,10 @@
 - `fonts/pixelFont.ttf` - Free Use Font from dafont.com - Riciery Leal - */assets/fonts - https://www.dafont.com/vcr-osd-mono.font
 
 ## Tilemaps 
-- `prototypeTilemap.json` - 
+- `prototypeTilemap.json` - Sydney Osako - Tiled - */assets
 
 ### Tilesets (Spritesheets)
-- `Prototype_Tiles.png` - 
+- `Prototype_Tiles.png` - Sydney Osako - Procreate, upscaled with GIMP - */assets
 
 
 ## Unused Assets

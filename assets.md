@@ -14,8 +14,8 @@
 - `finalproj-main-menu-protbg.png` -Rheann Kunita - Krita - */assets
 
 ### Game Objects
-- `PlaceholderPlayer.png` - 
-- `Trash.png` - 
+- `PlaceholderPlayer.png` - Ryan Funk - Piskel - */assets
+- `Trash.png` - Kamalika De - Piskel - */assets
 - `Treasure.png` - Rheann Kunita - Piskel */assets
 
 - `levers.png` - Sydney Osako - made in Procreate, upscaled with GIMP - */assets
@@ -30,7 +30,7 @@
 - `leafs/leaf2.png` - Ryan Funk - Piskel - */assets/leafs
 - `leafs/leaf3.png` - Ryan Funk - Piskel - */assets/leafs
 - `leafs/leaf4.png` - Ryan Funk - Piskel - */assets/leafs
-- `leaf.png` - Quetzal Theobald - */assets - I made the sprite in Piskel and then all of the movement behavior was done in Phaser with tweens.
+- `leaf.png` - Quetzal Theobald - */assets - I made the sprite in Piskel, and then all of the movement behavior was done in Phaser with tweens.
 
 ---
 

@@ -12,25 +12,36 @@ export default class Pause extends Phaser.Scene {
         //this.cameras.main.setBackgroundColor('#f9f9f7a5');
         //this.screen_tint = this.add.rectangle(0, 0, W, H, 0xffffff, 0); //tint over other scene, starts fully transparent but is tweened later
 
-        this.add.text(W/2, H/2-100, 'I am the Pause screen', {color: 0x5a118a});
-        this.add.rectangle(0, 0, W, H, 0x000000, 0.6).setOrigin(0);
-
+        //this.add.text(W/2, H/2-100, 'I am the Pause screen', {color: 0x5a118a});
+        //this.add.rectangle(0, 0, W, H, 0x000000, 0.6).setOrigin(0);
+        const resumeSign = this.add.image(W/2, H/2 - 30, 'signSmall').setOrigin(0.5).setScale(2).setInteractive();
         const resumeButton = this.add.text(W / 2, H / 2 - 30, 'Resume', {
-            fontSize: '32px', color: '#ffffff', backgroundColor: '#333333', padding: { x: 20, y: 10 }
+            fontSize: '32px', 
+            color: "#ffffff",
+            fontFamily: 'pixel'
         }).setOrigin(0.5).setInteractive();
-        resumeButton.on('pointerdown', () => {
+        resumeSign.on('pointerover', ()=> resumeSign.setTint(0xeab269));
+        resumeSign.on('pointerout', ()=> resumeSign.clearTint());
+        resumeSign.on('pointerdown', () => {
             this.scene.resume(this.resumeKey);
             this.scene.stop();
         });
-
-        const menuButton = this.add.text(W / 2, H / 2 + 40, 'Exit to Main Menu', {
-            fontSize: '32px', color: '#ffffff', backgroundColor: '#333333', padding: { x: 20, y: 10 }
+        
+        const returnSign = this.add.image(W/2, H/2 + 200, 'signLong').setOrigin(0.5).setScale(2).setInteractive();
+        const menuButton = this.add.text(W / 2, H / 2 + 200, 'Exit to Main Menu', {
+            fontSize: '32px', 
+            fontFamily: 'pixel',
+            color: '#ffffff',
         }).setOrigin(0.5).setInteractive();
-        menuButton.on('pointerdown', () => {
+        returnSign.on('pointerover', ()=> returnSign.setTint(0xeab269));
+        returnSign.on('pointerout', ()=> returnSign.clearTint());
+        returnSign.on('pointerdown', () => {
             this.scene.stop(this.resumeKey);
+            this.sound.stopByKey('mainMenuTheme');
             this.scene.start('main-menu');
             this.scene.stop();
         });
+        
 
         //this.pausecontainer = this.add.container(0, 0, [resumebutton, resumetext, quitbutton, quittext]);
         //this.pausecontianer.y = H;

@@ -490,11 +490,11 @@ export default class GameplayPrototype extends Phaser.Scene {
         }
 
         // variable jump height
-        // this should hopefully run every 20 milliseconds no matter the platform??? like actually please this one better work
-        if ((this.cursors.up.isDown || this.touchJump) && (Math.floor(time/10) != this.prev_time && Math.floor(time/10) % 2 == 0) && this.player.body.velocity.y < -75) {
-            this.player.setVelocityY(this.player.body.velocity.y - 5);
+        // this should hopefully run every 50 milliseconds no matter the platform??? like actually please THIS one better work
+        if ((this.cursors.up.isDown || this.touchJump) && (Math.floor(time/10) != this.prev_time && Math.floor(time/10) % 5 == 0) && this.player.body.velocity.y < -100) {
+            this.prev_time = Math.floor(time/10);
+            this.player.setVelocityY(this.player.body.velocity.y - 13);
         }
-        this.prev_time = Math.floor(time/10);
 
         // lever
         if (this.lever && this.leverOutline) { // only check if lever exists (level 1 only)

@@ -174,33 +174,33 @@ export default class GameplayPrototype extends Phaser.Scene {
         //Game Objects
         //--------------------------
 
+        //------------------------------------------------
+        //Scene inventories 
+        //--------------------------------------------------------
+        this.trashInventory = [] //keep track of the trash here
+        this.treasureInventory = [] //keep track of the treasure here 
         //------------------------------------------------------------
         //Prefab class definition
         //--------------------------------------------------
-        //prefab for trash---------------------------------------------------------------------------------
-        class TrashInfo extends Phaser.GameObjects.Image{
-            constructor(scene, x, y){
-                super(scene, x, y, 'trash');
+        //base class 
+        class Collectible extends Phaser.GameObjects.Image{
+            constructor(scene, x, y, texture){
+                super(scene, x, y, texture);
                 scene.add.existing(this)
-                this.trashInventory = []
             }
-            /**
-             * @param {{trashInventory?: string[]}} data 
-             * 
-             */
-            init(data){
-                this.trashInventory = data.trashInventory || [];
+            getInventory(){
+                //override in subclasses
+                return null;
             }
 
-            /* updates the trash inventory
+            gainItem(item){
+                let Inventory = this.getInventory();
+                if (Inventory.includes(item)) {
+                    console.warn('gaining item already held:', item);
+                    return;
+                }
 
-            */
-            gainItemTrash(item){
-            if (this.trashInventory.includes(item)) {
-                console.warn('gaining item already held:', item);
-                return;
-            }
-                const message = this.scene.add.text(this.x, this.y + 20, "You picked up trash!").setAlpha(0).setColor('#ffffff');
+                const message = this.scene.add.text(this.x, this.y + 20, "You picked up a thing!").setAlpha(0).setColor('#ffffff');
                 this.scene.tweens.add({
                     targets: message,
                     alpha: {from:1, to: 0},
@@ -208,28 +208,36 @@ export default class GameplayPrototype extends Phaser.Scene {
                     ease: 'linear' 
                 });
                 
-                this.trashInventory.push(item);
+                Inventory.push(item);
             }
 
-            /*
-            decreaseTrashInventory(){
-
-            }*/
-                
             //Test if the player has all trash items in trashInventory
             /**
             * @param {int} item Item name.
             * @returns {boolean}
             */
-            hasAllItemTrash(number) {
-                if(this.trashInventory.length == number){
+            hasAllItem(number) {
+                if(Inventory.length == number){
                     return true;
                 }else{
                     return false;
                 }
             }
+
         }
+
         //prefab for trash---------------------------------------------------------------------------------
+        class TrashInfo extends Collectible{
+            constructor(scene, x, y){
+                super(scene, x, y, 'trash');
+            }
+
+            getInventory(){
+                return this.scene.trashInventory
+            }
+        }
+
+        //prefab for treasure---------------------------------------------------------------------------------
         class TreasureInfo extends Phaser.GameObjects.Image{
             constructor(scene, x, y){
                 super(scene, x, y, 'treasure');
@@ -378,7 +386,7 @@ export default class GameplayPrototype extends Phaser.Scene {
         // }
 
         //let answer
-        if (this.trash.hasAllItemTrash(2)){
+        if (this.trash.hasAllItem(2)){
             this.trashInventCheck.setText("Has the player collected all trash? Yes!")
         } else {
             this.trashInventCheck.setText("Has the player collected all trash? No")

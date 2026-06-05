@@ -112,6 +112,7 @@ export default class IntroCinematic extends Phaser.Scene {
         this.load.image('signSmall', 'assets/SignSmall.png');
         this.load.image('offSwitch', 'assets/offSwitch.png');
         this.load.image('onSwitch', 'assets/onSwitch.png');
+        this.load.image('pauseIcon', 'assets/pauseIcon.png');
         
         //assets used for prefab
         this.load.image('trash', 'assets/Trash.png');

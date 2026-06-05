@@ -158,7 +158,7 @@ export default class GameplayPrototype extends Phaser.Scene {
                 this.itemsHeld += 1;
                 this.updateItemText();
             });
-            
+
             //added trash object for player to interact with
             //let trash = this.add.image(100, 220, "trash")
             this.trash = new TrashInfo(this, 100, 220) 
@@ -329,7 +329,7 @@ export default class GameplayPrototype extends Phaser.Scene {
             this.scene.start('end-scene', { itemsHeld: this.itemsHeld });
         });
 
-        this.pauseButton = this.add.text(1200, 50, "Pause", {color: "#ffffff", backgroundColor: '#333333', padding: { x: 20, y: 10 }}).setOrigin(0.5).setSize(100, 100).setInteractive();
+        this.pauseButton = this.add.image(1200, 50, "pauseIcon").setOrigin(0.5).setScale(2).setInteractive();
         //this.pauseButton.on('pointerover', () =>this.pauseButton.setTint(0xFF5C5));
         this.pauseButton.on('pointerup', ()=> {
             console.log("pause button clicked");

@@ -442,7 +442,7 @@ export default class GameplayPrototype extends Phaser.Scene {
     }
 
 
-    update() {
+    update(time) {
         //
         // player stuff
         //
@@ -489,8 +489,8 @@ export default class GameplayPrototype extends Phaser.Scene {
         }
 
         // variable jump height
-        if (this.cursors.up.isDown && this.player.body.velocity.y < (-75)) {
-            this.player.setVelocityY(this.player.body.velocity.y - (1.75));
+        if ((this.cursors.up.isDown && this.player.body.velocity.y < -75) && (Math.floor(time) % 1 == 0)) { // runs every other millisecond?
+            this.player.setVelocityY(this.player.body.velocity.y - 1.75);
         }
 
         // lever

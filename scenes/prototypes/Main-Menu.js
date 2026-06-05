@@ -70,7 +70,7 @@ export default class MainMenu extends Phaser.Scene {
         this.bg.setTint(0x888888);
 
         // leaves (BEHIND the buttons)
-        this.makeLeaves(50, 30.5);
+        this.makeLeaves(50, 3.5);
 
         const title = this.add.image(640, 200, 'signLong').setScale(3);
         const titleText =this.add.text(640, 200, "TITLE", {

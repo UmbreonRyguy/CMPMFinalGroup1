@@ -1,9 +1,4 @@
 export default class IntroCinematic extends Phaser.Scene {
-    W = 1280; //height and width 
-    H = 720;
-
-    CX = this.W * 0.5; //center x and y
-    CY = this.H * 0.5;
 
   
 
@@ -17,8 +12,8 @@ export default class IntroCinematic extends Phaser.Scene {
                 .setScale(Phaser.Math.FloatBetween(1, 2.5)).setAngle(Phaser.Math.Between(0, 360));
             this.tweens.add({ //tween shard
                 targets: sh,
-                x: this.CX + Math.cos(angle) * dis, //move based on generated nums
-                y: this.CY + Math.sin(angle) * dis + 60,
+                x: this.CX + (Math.cos(angle) * dis), //move based on generated nums
+                y: this.CY + (Math.sin(angle) * dis) + (60),
                 angle: sh.angle + Phaser.Math.Between(-180, 180), //spin
                 alpha: 0,
                 duration: Phaser.Math.Between(700, 1200),
@@ -27,7 +22,7 @@ export default class IntroCinematic extends Phaser.Scene {
             });
         }
         for (let i = 0; i < 3; i++) { //create 3 dust clouds
-            const dust = this.add.image(this.CX + Phaser.Math.FloatBetween(-120, 120), this.CY + 180, 'dust') //create dust cloud at random x near rock
+            const dust = this.add.image(this.CX + (Phaser.Math.FloatBetween(-120, 120)), this.CY + (180), 'dust') //create dust cloud at random x near rock
                 .setOrigin(0.5, 0.8).setAlpha(0).setScale(1.5);
             this.tweens.chain({
                 targets: dust, //tween dust cloud
@@ -52,6 +47,14 @@ export default class IntroCinematic extends Phaser.Scene {
         super('intro-cinematic');
     }
 
+    init() {
+        this.W = this.game.config.width; // 1280 under normal circumstances
+        this.H = this.game.config.height; // 720
+        this.CX = this.W * 0.5; //center x and y
+        this.CY = this.H * 0.5;
+        this.S = 2; //scale for rock
+    }
+
     preload() {
         // load assets used in logo/intro
         this.load.image("prototypeLogo", "assets/prototypeLogo.png");
@@ -74,8 +77,10 @@ export default class IntroCinematic extends Phaser.Scene {
         this.load.image('title', 'assets/finalproj-main-menu-prototype-titlesign.png');
         this.load.image('leaf', 'assets/leaf.png');
         this.load.tilemapTiledJSON("prototypeTilemap", "assets/prototypeTilemap.json");
+        this.load.tilemapTiledJSON("level2tilemap", "assets/level2tilemap.json");
+        this.load.spritesheet("level2tiles", "assets/level2tiles.png", {frameWidth: 80, frameHeight: 80});
         this.load.spritesheet("Prototype_Tiles", "assets/Prototype_Tiles.png", {frameWidth: 80, frameHeight: 80});
-        this.load.atlas("levers", "assets/levers.png", "assets/textureAtlas.json");
+        this.load.multiatlas("spriteAtlas", "assets/textureAtlas.json");
         this.load.image('player', 'assets/PlaceholderPlayer.png');
         this.load.image('jumpButton', 'assets/ArrowButton.png');
         this.load.image('leftButton', 'assets/ArrowButton.png');
@@ -95,19 +100,19 @@ export default class IntroCinematic extends Phaser.Scene {
             this.loadingDone = true;
         });
 
-        this.prototypeLogo = this.add.image(this.game.config.width * 0.5, this.game.config.height * 0.5, "prototypeLogo")
+        this.prototypeLogo = this.add.image(this.W * 0.5, this.H * 0.5, "prototypeLogo")
             .setScale(2)
             .setAlpha(0);
-        this.rock = this.add.image(this.game.config.width * 0.5, this.game.config.height * 0.5, "rock")
+        this.rock = this.add.image(this.W * 0.5, this.H * 0.5, "rock")
             .setScale(2);
         //the scale thing is just because i drew these on a canvas half the size of the current game canvas
         
         this.tweens.chain({
             targets: this.rock,
             tweens: [
-                { x: { from: this.CX - 6, to: this.CX + 6 }, angle: { from: -2.5, to: 2.5 }, //shake
+                { x: { from: this.CX - (6), to: this.CX + (6) }, angle: { from: -2.5, to: 2.5 }, //shake
                     duration: 60, yoyo: true, repeat: 5, ease: 'Sine.inOut' },
-                { x: { from: this.CX - 12, to: this.CX + 12 }, angle: { from: -5, to: 5 }, //more intense shake
+                { x: { from: this.CX - (12), to: this.CX + (12) }, angle: { from: -5, to: 5 }, //more intense shake
                     duration: 42, yoyo: true, repeat: 8, ease: 'Sine.inOut' },
 
                 { x: this.CX, angle: 0, duration: 50 }, //center rock

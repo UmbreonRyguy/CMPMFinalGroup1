@@ -1,13 +1,22 @@
 export default class GameplayPrototype extends Phaser.Scene {
-    W = 1280;
-    H = 720;
+    
+
+    CX = this.W * 0.5; //center x and y
+    CY = this.H * 0.5;
     constructor() {
         super('core-gameplay');
+    }
+
+    init() {
+        this.W = this.game.config.width; // 1280 under normal circumstances
+        this.H = this.game.config.height; // 720
+        this.CX = this.W * 0.5; //center x and y
+        this.CY = this.H * 0.5;
     }
     
     updateItemText() {
         this.itemText.destroy();
-        itemText = this.add.text(W/2, H/5, "The player has " + this.itemsHeld + " items right now", {color: "#ffffff"});
+        itemText = this.add.text(this.W/2, this.H/5, "The player has " + this.itemsHeld + " items right now", {color: "#ffffff"});
         this.itemText = itemText;
     }
     
@@ -29,8 +38,8 @@ export default class GameplayPrototype extends Phaser.Scene {
 
         // was there a better way to figure out how to add an outline to the lever?
         // probably. Do I care? No. It is 12 AM. Did I try a better way? Yes. For much too long.
-        this.leverOutline = this.add.image(40, 202, "levers", "leverOutline").setAlpha(0);
-        this.lever = this.physics.add.staticImage(40, 200, "levers", "lever");
+        this.leverOutline = this.add.image(40, 202, "spriteAtlas", "leverOutline").setAlpha(0);
+        this.lever = this.physics.add.staticImage(40, 200, "spriteAtlas", "lever");
 
         // idk why the hitbox is in a weird position either - 
         // changing x or y has seemed to have little effect so I just left it alone
@@ -57,7 +66,7 @@ export default class GameplayPrototype extends Phaser.Scene {
         //UI
         //----------------------------------------
 
-        const itemText = this.add.text(1200, 200, "item for player to pick up", {color: "#ffffff", backgroundColor: '#e03f3f', padding: { x: 20, y: 10 }}).setInteractive();
+        const itemText = this.add.text(1200, 200, "item for player to pick up", {color: "#ffffff", backgroundColor: '#e03f3f', padding: { x: 20, y: 10}}).setInteractive();
         this.itemText = this.add.text(640, 360, "The player has " + this.itemsHeld + " items right now", {color: "#ffffff"});
         itemText.on('pointerup',()=>{
             itemText.destroy();
@@ -73,13 +82,13 @@ export default class GameplayPrototype extends Phaser.Scene {
             this.scene.start('main-menu');
         });
 
-        const endSceneText = this.add.text(1200, 150, "Go to end scene", {color: "#ffffff", backgroundColor: '#3f1352', padding: { x: 20, y: 10 }}).setOrigin(0.5).setToTop().setInteractive();
+        const endSceneText = this.add.text(1200, 150, "Go to end scene", {color: "#ffffff", backgroundColor: '#3f1352', padding: { x: 20, y: 10}}).setOrigin(0.5).setToTop().setInteractive();
         endSceneText.on('pointerdown', ()=> endSceneText.setTint(0x965A0B));
         endSceneText.on('pointerup', ()=>{
             this.scene.start('end-scene', { itemsHeld: this.itemsHeld });
         });
 
-        this.pauseButton = this.add.text(1200, 50, "Pause", {color: "#ffffff", backgroundColor: '#333333', padding: { x: 20, y: 10 }}).setOrigin(0.5).setSize(100, 100).setInteractive();
+        this.pauseButton = this.add.text(1200, 50, "Pause", {color: "#ffffff", backgroundColor: '#333333', padding: { x: 20, y: 10}}).setOrigin(0.5).setSize(100, 100).setInteractive();
         //this.pauseButton.on('pointerover', () =>this.pauseButton.setTint(0xFF5C5));
         this.pauseButton.on('pointerup', ()=> {
             console.log("pause button clicked");
@@ -121,10 +130,10 @@ export default class GameplayPrototype extends Phaser.Scene {
         this.physics.add.collider(this.player, this.platform, () => {
             if (this.player.body.touching.down && this.platform.touching.up) {
                 if (this.past == true) {
-                    this.player.setVelocityY(this.player.body.velocity.y - 250);
+                    this.player.setVelocityY((this.player.body.velocity.y - 250));
                 }
                 else {
-                    this.player.setVelocityX(this.player.body.velocity.x - 50);
+                    this.player.setVelocityX((this.player.body.velocity.x - 50));
                 }
             }
         });
@@ -185,6 +194,7 @@ export default class GameplayPrototype extends Phaser.Scene {
                 super(scene, x, y, 'trash');
                 scene.add.existing(this)
                 this.trashInventory = []
+                this.scale = scale;
             }
             /**
              * @param {{trashInventory?: string[]}} data 
@@ -234,7 +244,7 @@ export default class GameplayPrototype extends Phaser.Scene {
         //prefab for trash---------------------------------------------------------------------------------
         class TreasureInfo extends Phaser.GameObjects.Image{
             constructor(scene, x, y){
-                super(scene, x, y, 'treasure');
+                super(scene, x * scale, y * scale, 'treasure');
                 scene.add.existing(this)
                 this.treasureInventory = []
             }
@@ -251,7 +261,7 @@ export default class GameplayPrototype extends Phaser.Scene {
                 console.warn('gaining item already held:', item);
                 return;
             }
-                const message = this.scene.add.text(this.x, this.y + 20, "You picked up treasure!").setAlpha(0).setColor('#ffffff');
+                const message = this.scene.add.text(this.x, this.y + (20), "You picked up treasure!").setAlpha(0).setColor('#ffffff');
                 this.scene.tweens.add({
                     targets: message,
                     alpha: {from:1, to: 0},
@@ -303,7 +313,7 @@ export default class GameplayPrototype extends Phaser.Scene {
         this.trash2 = new TrashInfo(this, 950, 370) 
             .setScale(0.5)
             .setInteractive()
-            let trashMessage2 = this.trash2.scene.add.text(this.trash2.x, this.trash2.y - 10, "Someone left more trash here.").setColor('#ffffff').setAlpha(0)
+            let trashMessage2 = this.trash2.scene.add.text(this.trash2.x, this.trash2.y - (10), "Someone left more trash here.").setColor('#ffffff').setAlpha(0)
             this.trash2.on('pointerover', () => trashMessage2.setAlpha(1))
             .on('pointerout', () => trashMessage2.setAlpha(0))
             .on('pointerdown', () => {
@@ -358,12 +368,12 @@ export default class GameplayPrototype extends Phaser.Scene {
         if (!(this.cursors.left.isDown && this.cursors.right.isDown)) {
             if (this.cursors.left.isDown) {
                 if (this.player.body.velocity.x > -moveSpeed) {
-                    this.player.setVelocityX(this.player.body.velocity.x - 25);
+                    this.player.setVelocityX(this.player.body.velocity.x - (25));
                 }
             }
             else if (this.cursors.right.isDown) {
                 if (this.player.body.velocity.x < moveSpeed) {
-                    this.player.setVelocityX(this.player.body.velocity.x + 25);
+                    this.player.setVelocityX(this.player.body.velocity.x + (25));
                 }
             }
         }
@@ -400,8 +410,8 @@ export default class GameplayPrototype extends Phaser.Scene {
         }
 
         // variable jump height
-        if (this.cursors.up.isDown && this.player.body.velocity.y < -75) {
-            this.player.setVelocityY(this.player.body.velocity.y - 1.75);
+        if (this.cursors.up.isDown && this.player.body.velocity.y < (-75)) {
+            this.player.setVelocityY(this.player.body.velocity.y - (1.75));
         }
 
         // lever

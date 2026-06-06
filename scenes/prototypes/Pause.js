@@ -19,7 +19,7 @@ export default class Pause extends Phaser.Scene {
             fontSize: '32px', 
             color: "#ffffff",
             fontFamily: 'pixel'
-        }).setOrigin(0.5).setInteractive();
+        }).setOrigin(0.5);
         resumeSign.on('pointerover', ()=> resumeSign.setTint(0xeab269));
         resumeSign.on('pointerout', ()=> resumeSign.clearTint());
         resumeSign.on('pointerdown', () => {
@@ -32,7 +32,7 @@ export default class Pause extends Phaser.Scene {
             fontSize: '32px', 
             fontFamily: 'pixel',
             color: '#ffffff',
-        }).setOrigin(0.5).setInteractive();
+        }).setOrigin(0.5);
         returnSign.on('pointerover', ()=> returnSign.setTint(0xeab269));
         returnSign.on('pointerout', ()=> returnSign.clearTint());
         returnSign.on('pointerdown', () => {

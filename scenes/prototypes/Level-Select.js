@@ -213,7 +213,7 @@ export default class LevelSelect extends Phaser.Scene {
             synth2.triggerAttackRelease("G4", "8n");
             synth2.triggerAttackRelease("C4", "8n", now + 0.1);
             levelThree.clearTint();
-            this.scene.start('level-select');
+            this.scene.start('core-gameplay-level3');
         });
         levelThree.on('pointerout', ()=> {
             levelThree.clearTint();

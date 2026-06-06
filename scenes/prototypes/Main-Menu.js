@@ -70,7 +70,7 @@ export default class MainMenu extends Phaser.Scene {
         this.bg.setTint(0x888888);
 
         // leaves (BEHIND the buttons)
-        this.makeLeaves(500, 3.5);
+        this.makeLeaves(25, 3.5);
 
         const title = this.add.image(640, 200, 'signLong').setScale(3);
         const titleText =this.add.text(640, 200, "Back to \n the Forest", {
@@ -102,9 +102,6 @@ export default class MainMenu extends Phaser.Scene {
         }).setOrigin(0.5).setAlpha(0);
 
         this.cameras.main.fadeIn(1000, 0, 0, 0);
-
-
-
         const fadeIn = (button, delayTime) =>{
             this.tweens.add({
                 targets: button,
@@ -114,7 +111,6 @@ export default class MainMenu extends Phaser.Scene {
                 delay: delayTime,
             });
         }
-
         this.pressable = (button, delayTime) => {
             this.tweens.add({
                 targets: button,
@@ -228,7 +224,7 @@ export default class MainMenu extends Phaser.Scene {
         });
 
         // leaves (in front of buttons)
-        this.makeLeaves(8, 4.5);
+        this.makeLeaves(25, 4.5);
 
         //--------------------------
         //Background audio

@@ -1,3 +1,16 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
 class Rock extends Phaser.Physics.Arcade.Sprite { //made these because my code started to hurt to look at
     constructor(scene, x, y) {
         super(scene, x, y, "spriteAtlas", "unbroken");
@@ -59,6 +72,7 @@ class Teleporter extends Phaser.Physics.Arcade.Sprite {
     }
 }
 
+
 export default class GameplayPrototypeLevel3 extends Phaser.Scene {
     constructor() {
         super('core-gameplay-level3');
@@ -71,6 +85,36 @@ export default class GameplayPrototypeLevel3 extends Phaser.Scene {
         this.W / 1280;
         this.CX = this.W * 0.5; //center x and y
         this.CY = this.H * 0.5;
+    }
+    flipToFuture() {
+        const flash = this.add.rectangle(this.CX, this.CY, this.W, this.H, 0xffffff) //screen flash
+            .setAlpha(0)
+            .setDepth(999);
+        this.tweens.add({
+            targets: flash,
+            alpha: { from: 0.85, to: 0 },
+            duration: 350,
+            ease: 'Expo.Out',
+            onComplete: () => flash.destroy()
+        });
+        console.log("hi");
+        this.overlay = this.add.rectangle(this.CX, this.CY, this.W, this.H, 0xf9a039, 0.1);
+    }
+
+    flipToPast() {
+        const flash = this.add.rectangle(this.CX, this.CY, this.W, this.H, 0xffffff) //screen flash
+            .setAlpha(0)
+            .setDepth(999);
+        this.tweens.add({
+            targets: flash,
+            alpha: { from: 0.85, to: 0 },
+            duration: 350,
+            ease: 'Expo.Out',
+            onComplete: () => flash.destroy()
+        });
+        if(this.overlay){
+            this.overlay.destroy();
+        }
     }
 
     create() {
@@ -89,6 +133,7 @@ export default class GameplayPrototypeLevel3 extends Phaser.Scene {
         this.stone = this.physics.add.image(1160 , 80 , "spriteAtlas", "stone");
 
         this.add.image(1160 , 80 , "spriteAtlas", "pipe");
+        this.jumpSound = this.sound.add('shorthop');
 
         this.door = this.physics.add.image(240 , 80 , "spriteAtlas", "door");
         this.door.body.setAllowGravity(false).setImmovable().setDirectControl();
@@ -155,6 +200,7 @@ export default class GameplayPrototypeLevel3 extends Phaser.Scene {
         this.lever.body.setCircle(80, -40 , -20 ).setAllowGravity(false).setImmovable();
         this.lever.on('pointerdown', () => {
             if (this.past) {
+                this.flipToFuture();
                 this.pastObjects.forEach((pastObject) => {
                     pastObject.disableBody();
                     pastObject.setAlpha(0);
@@ -166,6 +212,7 @@ export default class GameplayPrototypeLevel3 extends Phaser.Scene {
                 this.past = false;
             }
             else {
+                this.flipToPast();
                 this.futureObjects.forEach((futureObject) => {
                     futureObject.disableBody();
                     futureObject.setAlpha(0);
@@ -178,26 +225,93 @@ export default class GameplayPrototypeLevel3 extends Phaser.Scene {
             }
         })
 
+
+        //UI
+
+        this.pauseButton = this.add.image(1200, 50, "pauseIcon").setOrigin(0.5).setScale(2).setInteractive();
+        //this.pauseButton.on('pointerover', () =>this.pauseButton.setTint(0xFF5C5));
+        this.pauseButton.on('pointerup', ()=> {
+            console.log("pause button clicked");
+            this.scene.pause();
+            this.scene.launch('pause', { resumeKey: 'core-gameplay' });
+        })
+        // --------------------
+        // touch UI
+        // --------------------
+        this.leftButton = this.add.image((1280*2/16), (720*4.7/6), 'arrowButton')
+            .setScale(4)
+            .setAlpha(0.5)
+            .setAngle(270)
+            .setInteractive();
+        this.touchLeft = false;
+
+        this.rightButton = this.add.image(1280*4.5/16, (720*4.7/6), 'arrowButton')
+            .setScale(4)
+            .setAlpha(0.5)
+            .setAngle(90)
+            .setInteractive();
+        this.touchRight = false;
+
+        this.jumpButton = this.add.image(1280*14/16, (720*4.7/6), 'jumpButton')
+            .setScale(4)
+            .setAlpha(0.5)
+            .setInteractive();
+        this.touchJump = false;
+
+        // this.interactButton = this.add.rectangle(1280*14/16, 720*3.5/6, 75, 75, 0xffff00)
+        //     .setScale(2)
+        //     .setAlpha(0.5)
+        //     .setInteractive();
+        
+        this.leftButton.on('pointerout', () => {
+            this.touchLeft = false;
+        });
+        this.leftButton.on('pointerup', () => {
+            this.touchLeft = false;
+        });
+        this.leftButton.on('pointerover', () => {
+            this.touchLeft = true;
+        });
+
+        this.rightButton.on('pointerout', () => {
+            this.touchRight = false;
+        });
+        this.rightButton.on('pointerup', () => {
+            this.touchRight = false;
+        });
+        this.rightButton.on('pointerover', () => {
+            this.touchRight = true;
+        });
+
+        this.jumpButton.on('pointerout', () => {
+            this.touchJump = false;
+        });
+        this.jumpButton.on('pointerup', () => {
+            this.touchJump = false;
+        });
+        this.jumpButton.on('pointerover', () => {
+            this.touchJump = true;
+        });
         //this.add.rectangle(100, 100, 100, 100, 0x00ff00);
         
-        this.returnButton = this.add.rectangle(640, 650, 200, 50, 0x5a118a).setInteractive();
-        //returnButton.on('pointerdown', ()=> returnButton.setTint(0x965A0B));
-        this.returnButton.on('pointerup', ()=>{
-            this.scene.start('level-select');
-        });
-        this.returnButtonText = this.add.text(640, 650, "Return to Menu", {color: "#000000"}).setOrigin(0.5).setSize(24);
+        // this.returnButton = this.add.rectangle(640, 650, 200, 50, 0x5a118a).setInteractive();
+        // //returnButton.on('pointerdown', ()=> returnButton.setTint(0x965A0B));
+        // this.returnButton.on('pointerup', ()=>{
+        //     this.scene.start('level-select');
+        // });
+        // this.returnButtonText = this.add.text(640, 650, "Return to Menu", {color: "#000000"}).setOrigin(0.5).setSize(24);
 
-        this.pauseButton = this.add.rectangle(400, 300, 100, 100,0xFF0000).setInteractive();
-        //this.pauseButton.on('pointerover', () =>this.pauseButton.setTint(0xFF5C5));
-        this.pauseButton.once('pointerup', ()=> {
-            console.log("pause button clicked");
-            this.scene.transition({
-                target: 'pause',
-                duration: 2000,
-                sleep: true,
-            });
+        // this.pauseButton = this.add.rectangle(400, 300, 100, 100,0xFF0000).setInteractive();
+        // //this.pauseButton.on('pointerover', () =>this.pauseButton.setTint(0xFF5C5));
+        // this.pauseButton.once('pointerup', ()=> {
+        //     console.log("pause button clicked");
+        //     this.scene.transition({
+        //         target: 'pause',
+        //         duration: 2000,
+        //         sleep: true,
+        //     });
 
-        })
+        // })
     }
 
     update() {
@@ -234,24 +348,46 @@ export default class GameplayPrototypeLevel3 extends Phaser.Scene {
         }
 
         // Keyboard movement
-        const moveSpeed = 250 ;
+       // Reduce horizontal drag while in-air so player retains momentum
+        if (onFloor) {
+            this.isJumping = false;
+        }
 
-        if (!(this.cursors.left.isDown && this.cursors.right.isDown)) {
-            if (this.cursors.left.isDown) {
+        // Reduce horizontal drag while in-air so player retains momentum
+        if (this.isJumping) {
+            this.player.body.setDragX(500);
+        } else {
+            this.player.body.setDragX(900);
+        }
+
+        // Movement
+        const moveSpeed = 250;
+
+        if (!(this.cursors.left.isDown && this.cursors.right.isDown) && !(this.touchLeft && this.touchRight)) {
+            if (this.cursors.left.isDown || this.touchLeft) {
                 if (this.player.body.velocity.x > -moveSpeed) {
-                    this.player.setVelocityX(this.player.body.velocity.x - (25 ));
+                    this.player.setVelocityX(this.player.body.velocity.x - (25));
                 }
             }
-            else if (this.cursors.right.isDown) {
+            else if (this.cursors.right.isDown || this.touchRight) {
                 if (this.player.body.velocity.x < moveSpeed) {
-                    this.player.setVelocityX(this.player.body.velocity.x + (25 ));
+                    this.player.setVelocityX(this.player.body.velocity.x + (25));
                 }
             }
         }
 
-        if (this.cursors.up.isDown && onFloor) {
+        // Jump
+        if ((this.cursors.up.isDown || this.touchJump) && onFloor) {
             this.isJumping = true;
-            this.player.setVelocityY(-375 );
+            // Jump higher on mushroom platform in past mode
+            if (this.past && this.player.body.touching.down && this.platform.touching.up) {
+                this.jumpSound.play({rate: 0.3 + Math.random() * 0.2});
+                this.player.setVelocityY(-700);
+            }
+            else {
+                this.jumpSound.play({rate: 0.7 + Math.random() * 0.3});
+                this.player.setVelocityY(-475);
+            }
         }
 
         if (!this.physics.overlap(this.lever, this.player)) { // if the player is not in range of the lever

@@ -233,7 +233,7 @@ export default class GameplayPrototypeLevel3 extends Phaser.Scene {
         this.pauseButton.on('pointerup', ()=> {
             console.log("pause button clicked");
             this.scene.pause();
-            this.scene.launch('pause', { resumeKey: 'core-gameplay' });
+            this.scene.launch('pause', { resumeKey: 'core-gameplay-level3' });
         })
         // --------------------
         // touch UI

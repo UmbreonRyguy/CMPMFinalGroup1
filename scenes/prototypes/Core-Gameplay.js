@@ -243,12 +243,15 @@ export default class GameplayPrototype extends Phaser.Scene {
 
             // was there a better way to figure out how to add an outline to the lever?
             // probably. Do I care? No. It is 12 AM. Did I try a better way? Yes. For much too long.
-            this.leverOutline = this.add.image(40, 202, "levers", "leverOutline").setAlpha(0);
-            this.lever = this.physics.add.staticImage(40, 200, "levers", "lever");
+            // this.leverOutline = this.add.image(40, 202, "levers", "leverOutline").setAlpha(0);
+            // this.lever = this.physics.add.staticImage(40, 200, "levers", "lever");
+
+            this.lever = this.physics.add.sprite(40, 202, "spriteAtlas", "lever");
+            this.lever.body.setCircle(80, -80 , -20).setAllowGravity(false).setImmovable();
 
             // idk why the hitbox is in a weird position either - 
             // changing x or y has seemed to have little effect so I just left it alone
-            this.lever.body.setCircle(80, -80, -40);
+            //this.lever.body.setCircle(80, -80, -40);
 
             // mushroom - stored as instance properties for access from other methods
             this.mush1 = this.add.image(480, 400, "Prototype_Tiles", 21).setAlpha(0);

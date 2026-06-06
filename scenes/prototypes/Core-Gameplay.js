@@ -107,33 +107,45 @@ export default class GameplayPrototype extends Phaser.Scene {
         });
         //Keyboard input for player movement
 
+        //------------------------------------------------
+        //Scene inventories 
+        //--------------------------------------------------------
+        this.trashInventory = [] //keep track of the trash here
+        this.treasureInventory = [] //keep track of the treasure here
+        //function to keep track of inventories----------------------------------------
+        //Test if the player has expected number of items in inventory.
+            /**
+            * @param {int} number number of expected items
+            * @param {array} Inventory, the inventory I'm checking
+            * @returns {boolean}
+            */
+            this.hasAllItem = (number, Inventory) => Inventory.length == number;
+
         //------------------------------------------------------------
         //Prefab class definition
         //--------------------------------------------------
-        //prefab for trash---------------------------------------------------------------------------------
-        class TrashInfo extends Phaser.GameObjects.Image{
-            constructor(scene, x, y){
-                super(scene, x, y, 'trash');
+        //base class 
+        class Collectible extends Phaser.GameObjects.Image{
+            constructor(scene, x, y, texture){
+                super(scene, x, y, texture)
+                .setInteractive()
+                .setScale(0.5)
                 scene.add.existing(this)
-                this.trashInventory = []
-            }
-            /**
-             * @param {{trashInventory?: string[]}} data 
-             * 
-             */
-            init(data){
-                this.trashInventory = data.trashInventory || [];
             }
 
-            /* updates the trash inventory
-
-            */
-            gainItemTrash(item){
-            if (this.trashInventory.includes(item)) {
-                console.warn('gaining item already held:', item);
-                return;
+            getInventory(){
+                //override in subclasses
+                return null;
             }
-                const message = this.scene.add.text(this.x, this.y + 20, "You picked up trash!").setAlpha(0).setColor('#ffffff');
+
+            gainItem(item){
+                let Inventory = this.getInventory();
+                if (Inventory.includes(item)) {
+                    console.warn('gaining item already held:', item);
+                    return;
+                }
+
+                const message = this.scene.add.text(this.x, this.y + 20, "You picked up a thing!").setAlpha(0).setColor('#ffffff');
                 this.scene.tweens.add({
                     targets: message,
                     alpha: {from:1, to: 0},
@@ -141,75 +153,65 @@ export default class GameplayPrototype extends Phaser.Scene {
                     ease: 'linear' 
                 });
                 
-                this.trashInventory.push(item);
+                Inventory.push(item);
             }
 
-            /*
-            decreaseTrashInventory(){
+        }
 
-            }*/
-                
-            //Test if the player has all trash items in trashInventory
-            /**
-            * @param {int} item Item name.
-            * @returns {boolean}
-            */
-            hasAllItemTrash(number) {
-                if(this.trashInventory.length == number){
-                    return true;
-                }else{
-                    return false;
-                }
+        //prefab for trash---------------------------------------------------------------------------------
+        class TrashInfo extends Collectible{
+            constructor(scene, x, y, keyword){
+                super(scene, x, y, 'trash');
+                let trashMessage = scene.add.text(this.x, this.y-10, "Someone left trash here.").setColor('#ffffff').setAlpha(0)
+                this.on('pointerover', () => trashMessage.setAlpha(1))
+                .on('pointerout', () => trashMessage.setAlpha(0))
+                .on('pointerdown', () => {
+                    trashMessage.setAlpha(0);
+                    this.gainItem(keyword);
+                    this.scene.tweens.add({
+                        targets: this, 
+                        alpha: {from: 1, to: 0},
+                        duration: 500,
+                        onComplete: ()=> {this.destroy(); 
+                            trashMessage.destroy();
+                        }
+                    });
+                })
+            }
+
+            //Don't know if this methood was overwritten correctly.
+            getInventory(){
+                //line below is causing errors
+                return this.scene.trashInventory;
             }
         }
+
         //prefab for Treasure---------------------------------------------------------------------------------
-        class TreasureInfo extends Phaser.GameObjects.Image{
-            constructor(scene, x, y){
+        class TreasureInfo extends Collectible{
+            constructor(scene, x, y, keyword){
                 super(scene, x, y, 'treasure');
                 scene.add.existing(this)
-                this.treasureInventory = []
+                let treasureMessage = scene.add.text(this.x, this.y-10, "ooo treasure").setColor('#ffffff').setAlpha(0)
+                this.on('pointerover', () => treasureMessage.setAlpha(1))
+                .on('pointerout', () => treasureMessage.setAlpha(0))
+                .on('pointerdown', () => {
+                    treasureMessage.setAlpha(0);
+                    this.gainItem(keyword);
+                    this.scene.tweens.add({
+                        targets: this, 
+                        alpha: {from: 1, to: 0},
+                        duration: 500,
+                        onComplete: ()=> {this.destroy(); 
+                            treasureMessage.destroy();
+                        }
+                    });
+                })
             }
-            /**
-             * @param {{treasureInventory?: string[]}} data 
-             * 
-             */
-            init(data){
-                this.treasureInventory = data.treasureInventory || [];
-            }
-
-            gainItemTreasure(item){
-            if (this.treasureInventory.includes(item)) {
-                console.warn('gaining item already held:', item);
-                return;
-            }
-                const message = this.scene.add.text(this.x, this.y + (20), "You picked up treasure!").setAlpha(0).setColor('#ffffff');
-                this.scene.tweens.add({
-                    targets: message,
-                    alpha: {from:1, to: 0},
-                    duration: 3000,
-                    ease: 'linear' 
-                });
                 
-                this.treasureInventory.push(item);
+            getInventory(){
+                return this.scene.treasureInventory;
             }
 
-            /*
-            decreaseTreasureInventory(){
-
-            }*/
-                
-            //Test if the player has all treasure items in treasureInventory
-            /**
-            * @param {int} item Item name.
-            * @returns {boolean}
-            */
-            hasAllItemTreasure(number) {
-                if(this.treasureInventory.length == number){
-                    return true;
-                }else{
-                    return false;
-                }
-            }
         }
 
         //Platform? maybe should be in Level 1?
@@ -260,58 +262,15 @@ export default class GameplayPrototype extends Phaser.Scene {
 
             //added trash object for player to interact with
             //let trash = this.add.image(100, 220, "trash")
-            this.trash = new TrashInfo(this, 100, 220) 
-                .setScale(0.5)
-                .setInteractive()
-                let trashMessage = this.trash.scene.add.text(100, 210, "Someone left trash here.").setColor('#ffffff').setAlpha(0)
-                this.trash.on('pointerover', () => trashMessage.setAlpha(1))
-                .on('pointerout', () => trashMessage.setAlpha(0))
-                .on('pointerdown', () => {
-                    trashMessage.setAlpha(0);
-                    this.trash.gainItemTrash('trash');
-                    this.trash.scene.tweens.add({
-                        targets: this.trash, 
-                        alpha: {from: 1, to: 0},
-                        duration: 500,
-                        onComplete: ()=> this.trash.destroy()
-                    });
-                })
+            this.trash = new TrashInfo(this, 100, 220, 'trash') 
 
-            this.trash2 = new TrashInfo(this, 950, 370) 
-                .setScale(0.5)
-                .setInteractive()
-                let trashMessage2 = this.trash2.scene.add.text(this.trash2.x, this.trash2.y - 10, "Someone left more trash here.").setColor('#ffffff').setAlpha(0)
-                this.trash2.on('pointerover', () => trashMessage2.setAlpha(1))
-                .on('pointerout', () => trashMessage2.setAlpha(0))
-                .on('pointerdown', () => {
-                    trashMessage2.setAlpha(0);
-                    this.trash2.gainItemTrash('trash2');
-                    this.trash2.scene.tweens.add({
-                        targets: this.trash2, 
-                        alpha: {from: 1, to: 0},
-                        duration: 500,
-                        onComplete: ()=> this.trash2.destroy()
-                    });
-                })
+            this.trash2 = new TrashInfo(this, 950, 370, 'trash2') 
+    
 
-                this.trashInventCheck = this.add.text( 600, 200, "Has the player collected all trash?")
+            this.trashInventCheck = this.add.text( 600, 200, "Has the player collected all trash?")
+            this.treasureInventCheck = this.add.text(600, 220, "Has the player collected all treasure?")
 
-                this.treasure = new TreasureInfo(this, 1000, 130) 
-                .setScale(0.5)
-                .setInteractive()
-                let treasureMessage = this.treasure.scene.add.text(1000, 130, "Someone left treasure here.").setColor('#ffffff').setAlpha(0)
-                this.treasure.on('pointerover', () => treasureMessage.setAlpha(1))
-                .on('pointerout', () => treasureMessage.setAlpha(0))
-                .on('pointerdown', () => {
-                    treasureMessage.setAlpha(0);
-                    this.treasure.gainItemTreasure('treasure');
-                    this.treasure.scene.tweens.add({
-                        targets: this.treasure, 
-                        alpha: {from: 1, to: 0},
-                        duration: 500,
-                        onComplete: ()=> this.treasure.destroy()
-                    });
-                })
+            this.treasure = new TreasureInfo(this, 1000, 130, 'treasure') 
 
         this.lever.on('pointerdown', () => {
             if (this.past == true) {
@@ -477,6 +436,21 @@ export default class GameplayPrototype extends Phaser.Scene {
             }
         }
 
+        //Checking if inventory is full
+        if (this.hasAllItem(2, this.trashInventory)){
+            this.trashInventCheck.setText("Has the player collected all trash? Yes!")
+        } else {
+            this.trashInventCheck.setText("Has the player collected all trash? No")
+        }
+
+        if(this.hasAllItem(1, this.treasureInventory)){
+            this.treasureInventCheck.setText("Has the player collected all treasure? Yes!")
+        }else{
+             this.treasureInventCheck.setText("Has the player collected all treasure? No")
+        }
+
+        // Jump with keyboard
+        if (this.cursors.up.isDown && onFloor) {
         // Jump
         if ((this.cursors.up.isDown || this.touchJump) && onFloor) {
             this.isJumping = true;
@@ -511,4 +485,4 @@ export default class GameplayPrototype extends Phaser.Scene {
 
         
     }
-}
+}}

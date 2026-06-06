@@ -28,8 +28,8 @@ export default class GameplayPrototype extends Phaser.Scene {
             ease: 'Expo.Out',
             onComplete: () => flash.destroy()
         });
-        if (this.layer1) this.layer1.setTint(0xffb347); //set future tint
-        if (this.background) this.background.setTint(0xffd580);
+        console.log("hi");
+        this.overlay = this.add.rectangle(this.CX, this.CY, this.W, this.H, 0xf9a039, 0.1);
     }
 
     flipToPast() {
@@ -43,8 +43,9 @@ export default class GameplayPrototype extends Phaser.Scene {
             ease: 'Expo.Out',
             onComplete: () => flash.destroy()
         });
-        if (this.layer1) this.layer1.clearTint(); //set past tint
-        if (this.background) this.background.clearTint();
+        if(this.overlay){
+            this.overlay.destroy();
+        }
     }
 
     create(){
@@ -230,7 +231,6 @@ export default class GameplayPrototype extends Phaser.Scene {
         //----------------------------------------
         //TileMap
         //----------------------------------------
-        if(this.levelNum == 1){ //level 1
             const prototypeMap = this.make.tilemap({key: "prototypeTilemap"});
             const prototypeTiles = prototypeMap.addTilesetImage("Prototype_Tiles", "Prototype_Tiles", 80, 80);
             this.layer1 = prototypeMap.createLayer("Tile Layer 1", prototypeTiles, 0, 0);
@@ -248,15 +248,15 @@ export default class GameplayPrototype extends Phaser.Scene {
             // changing x or y has seemed to have little effect so I just left it alone
             this.lever.body.setCircle(80, -80, -40);
 
-            // mushroom
-            const mush1 = this.add.image(480, 400, "Prototype_Tiles", 21).setAlpha(0);
-            const mush2 = this.add.image(560, 400, "Prototype_Tiles", 22).setAlpha(0);
-            const mush3 = this.add.image(640, 400, "Prototype_Tiles", 23).setAlpha(0);
+            // mushroom - stored as instance properties for access from other methods
+            this.mush1 = this.add.image(480, 400, "Prototype_Tiles", 21).setAlpha(0);
+            this.mush2 = this.add.image(560, 400, "Prototype_Tiles", 22).setAlpha(0);
+            this.mush3 = this.add.image(640, 400, "Prototype_Tiles", 23).setAlpha(0);
 
-            // conveyor belt
-            const con1 = this.add.image(480, 400, "Prototype_Tiles", 14);
-            const con2 = this.add.image(560, 400, "Prototype_Tiles", 15);
-            const con3 = this.add.image(640, 400, "Prototype_Tiles", 16);
+            // conveyor belt - stored as instance properties for access from other methods
+            this.con1 = this.add.image(480, 400, "Prototype_Tiles", 14);
+            this.con2 = this.add.image(560, 400, "Prototype_Tiles", 15);
+            this.con3 = this.add.image(640, 400, "Prototype_Tiles", 16);
 
             //added trash object for player to interact with
             //let trash = this.add.image(100, 220, "trash")
@@ -314,45 +314,38 @@ export default class GameplayPrototype extends Phaser.Scene {
                 })
 
         this.lever.on('pointerdown', () => {
+            console.log("Lever clicked! Current past state:", this.past);
             if (this.past == true) {
+                console.log("Switching to future - hiding mushrooms, showing conveyors");
                 this.flipToFuture();
-                mush1.setAlpha(0);
-                mush2.setAlpha(0);
-                mush3.setAlpha(0);
+                this.mush1.setAlpha(0);
+                this.mush2.setAlpha(0);
+                this.mush3.setAlpha(0);
 
-                con1.setAlpha(1);
-                con2.setAlpha(1);
-                con3.setAlpha(1);
+                this.con1.setAlpha(1);
+                this.con2.setAlpha(1);
+                this.con3.setAlpha(1);
 
                 this.platform.setSize(240, 28).reset(440, 386);
 
                 this.past = false;
             }
             else {
+                console.log("Switching to past - showing mushrooms, hiding conveyors");
                 this.flipToPast();
-                con1.setAlpha(0);
-                con2.setAlpha(0);
-                con3.setAlpha(0);
+                this.con1.setAlpha(0);
+                this.con2.setAlpha(0);
+                this.con3.setAlpha(0);
 
-                mush1.setAlpha(1);
-                mush2.setAlpha(1);
-                mush3.setAlpha(1);
+                this.mush1.setAlpha(1);
+                this.mush2.setAlpha(1);
+                this.mush3.setAlpha(1);
 
                 this.platform.setSize(240, 28).reset(440, 391);
 
                 this.past = true;
             }
-            //console.log("bean");
         });
-        
-            
-        }
-        else if(this.levelNum == 2){ //level 2
-
-        }
-        else{ //level 3
-
-        }
         //----------------------------------------
         //UI
         //----------------------------------------
@@ -508,7 +501,5 @@ export default class GameplayPrototype extends Phaser.Scene {
                 this.lever.setInteractive(); // can interact with lever
             }
         }
-
-        
     }
 }

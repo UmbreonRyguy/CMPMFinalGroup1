@@ -98,10 +98,10 @@ export default class GameplayPrototype extends Phaser.Scene {
         this.physics.add.collider(this.player, this.platform, () => {
             if (this.player.body.touching.down && this.platform.touching.up) {
                 if (this.past == true) {
-                    this.player.setVelocityY((this.player.body.velocity.y - 250));
+                    this.player.body.setVelocityY((this.player.body.velocity.y - 250));
                 }
                 else {
-                    this.player.setVelocityX((this.player.body.velocity.x - 50));
+                    this.player.body.setVelocityX((this.player.body.velocity.x - 50));
                 }
             }
         });
@@ -217,11 +217,13 @@ export default class GameplayPrototype extends Phaser.Scene {
         // Add platform collider now that platform is created
         this.physics.add.collider(this.player, this.platform, () => {
             if (this.player.body.touching.down) {
+                // small bounce while on mushroom
+                // the real bounce happens in update if you press jump
                 if (this.past == true) {
-                    this.player.setVelocityY((this.player.body.velocity.y - 250));
+                    this.player.body.setVelocityY((this.player.body.velocity.y - 250));
                 }
                 else {
-                    this.player.setVelocityX((this.player.body.velocity.x - 50));
+                    this.player.body.setVelocityX((this.player.body.velocity.x - 50));
                 }
             }
         });
@@ -443,7 +445,7 @@ export default class GameplayPrototype extends Phaser.Scene {
     }
 
 
-    update(time) {
+    update() {
         //
         // player stuff
         //
@@ -479,22 +481,21 @@ export default class GameplayPrototype extends Phaser.Scene {
         if ((this.cursors.up.isDown || this.touchJump) && onFloor) {
             this.isJumping = true;
             // Jump higher on mushroom platform in past mode
-            if (this.past) {
+            if (this.past && this.player.body.touching.down && this.platform.touching.up) {
                 this.jumpSound.play({rate: 0.3 + Math.random() * 0.2});
-                this.player.setVelocityY(-500);
+                this.player.setVelocityY(-700);
             }
             else {
                 this.jumpSound.play({rate: 0.7 + Math.random() * 0.3});
-                this.player.setVelocityY(-375);
+                this.player.setVelocityY(-475);
             }
         }
 
-        // variable jump height
-        // this should hopefully run every 50 milliseconds no matter the platform??? like actually please THIS one better work
-        if ((this.cursors.up.isDown || this.touchJump) && (Math.floor(time/10) != this.prev_time && Math.floor(time/10) % 5 == 0) && this.player.body.velocity.y < -100) {
-            this.prev_time = Math.floor(time/10);
-            this.player.setVelocityY(this.player.body.velocity.y - 13);
-        }
+        // variable jump is dead and phaser killed it
+        // if ((this.cursors.up.isDown || this.touchJump) && (Math.floor(time/10) != this.prev_time && Math.floor(time/10) % 5 == 0) && this.player.body.velocity.y < -100) {
+        //     this.prev_time = Math.floor(time/10);
+        //     this.player.setVelocityY(this.player.body.velocity.y - 13);
+        // }
 
         // lever
         if (this.lever && this.leverOutline) { // only check if lever exists (level 1 only)

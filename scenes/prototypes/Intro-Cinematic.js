@@ -80,6 +80,7 @@ export default class IntroCinematic extends Phaser.Scene {
         this.load.image("rock", "assets/rockForPrototypeCinematic.png");
         this.load.image("shard", "assets/rockShardForPrototype.png");
         this.load.image("dust", "assets/dustCloud.png");
+        this.load.image("text", "assets/logotext.png")
 
     }
     create() {
@@ -138,13 +139,17 @@ export default class IntroCinematic extends Phaser.Scene {
             this.loadingDone = true;
         });
 
-        this.prototypeLogo = this.add.image(this.W * 0.5, this.H * 0.5, "prototypeLogo")
+        this.prototypeLogo = this.add.image(this.W * 0.5, this.H * 0.5 - 50, "prototypeLogo")
             .setScale(2)
             .setAlpha(0);
         this.rock = this.add.image(this.W * 0.5, this.H * 0.5, "rock")
             .setScale(2);
         //the scale thing is just because i drew these on a canvas half the size of the current game canvas
 
+        this.text = this.add.image(this.W * 0.5, this.H * 0.5 + 50, "text")
+            .setScale(1.5)
+            .setTint(0x223037)
+            .setOrigin(0.45, 0.5);
 
         //sound fx for rock shattering
 
@@ -153,7 +158,7 @@ export default class IntroCinematic extends Phaser.Scene {
 
 
         this.tweens.chain({
-            targets: this.rock,
+            targets: [this.rock, this.text],
             tweens: [
                 { x: { from: this.CX - 6, to: this.CX + 6 }, angle: { from: -2.5, to: 2.5 }, //shake
                     duration: 60, yoyo: true, repeat: 5, ease: 'Sine.inOut',

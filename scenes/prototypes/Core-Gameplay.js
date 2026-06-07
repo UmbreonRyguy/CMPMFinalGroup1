@@ -94,18 +94,7 @@ export default class GameplayPrototype extends Phaser.Scene {
 
         this.player.body.setMaxVelocity(600);
         this.player.body.setDragX(900);
-        // if the player hits the top of the conveyor belt, most fast to the left,
-        // if the player hits the top of the mushroom, bounce
-        this.physics.add.collider(this.player, this.platform, () => {
-            if (this.player.body.touching.down && this.platform.touching.up) {
-                if (this.past == true) {
-                    this.player.body.setVelocityY((this.player.body.velocity.y - 250));
-                }
-                else {
-                    this.player.body.setVelocityX((this.player.body.velocity.x - 50));
-                }
-            }
-        });
+
         //Keyboard input for player movement
 
         //------------------------------------------------

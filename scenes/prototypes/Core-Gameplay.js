@@ -481,11 +481,15 @@ export default class GameplayPrototype extends Phaser.Scene {
             this.isJumping = true;
             // Jump higher on mushroom platform in past mode
             if (this.past && this.player.body.touching.down && this.platform.touching.up) {
+                if (this.registry.get('sfxEnabled')) {
                 this.jumpSound.play({rate: 0.3 + Math.random() * 0.2});
+                }
                 this.player.setVelocityY(-700);
             }
             else {
+                if (this.registry.get('sfxEnabled')) {
                 this.jumpSound.play({rate: 0.7 + Math.random() * 0.3});
+                }
                 this.player.setVelocityY(-475);
             }
         }

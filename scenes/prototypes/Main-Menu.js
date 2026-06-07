@@ -167,7 +167,7 @@ export default class MainMenu extends Phaser.Scene {
             this.buttonMove(start, 450);
             this.buttonMove(startText, 450);
         });
-        start.on('pointerup', ()=>{
+        start.once('pointerup', ()=>{
             const now = Tone.now();
             synth2.triggerAttackRelease("D3", "8n");
             synth2.triggerAttackRelease("G3", "8n", now + 0.1);

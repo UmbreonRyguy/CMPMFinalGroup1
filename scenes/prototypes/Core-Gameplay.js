@@ -29,7 +29,10 @@ export default class GameplayPrototype extends Phaser.Scene {
             onComplete: () => flash.destroy()
         });
         console.log("hi");
-        this.overlay = this.add.rectangle(this.CX, this.CY, this.W, this.H, 0xf9a039, 0.1);
+        if(this.overlay){
+            this.overlay.destroy();
+        }
+        
     }
 
     flipToPast() {
@@ -43,9 +46,7 @@ export default class GameplayPrototype extends Phaser.Scene {
             ease: 'Expo.Out',
             onComplete: () => flash.destroy()
         });
-        if(this.overlay){
-            this.overlay.destroy();
-        }
+        this.overlay = this.add.rectangle(this.CX, this.CY, this.W, this.H, 0xf9a039, 0.1);
     }
 
     create(){
@@ -312,15 +313,15 @@ export default class GameplayPrototype extends Phaser.Scene {
 
             //added trash object for player to interact with
             //let trash = this.add.image(100, 220, "trash")
-            this.trash = new TrashInfo(this, 100, 220, 'trash') 
+            this.trash = new TrashInfo(this, 100, 220, 'trash'); 
 
-            this.trash2 = new TrashInfo(this, 950, 370, 'trash2') 
+            this.trash2 = new TrashInfo(this, 950, 370, 'trash2') ;
     
 
-            this.trashInventCheck = this.add.text( 600, 200, "Has the player collected all trash?")
-            this.treasureInventCheck = this.add.text(600, 220, "Has the player collected all treasure?")
+            this.trashInventCheck = this.add.text( 600, 200, "Has the player collected all trash?").setAlpha(0);
+            this.treasureInventCheck = this.add.text(600, 220, "Has the player collected all treasure?").setAlpha(0);
 
-            this.treasure = new TreasureInfo(this, 1000, 130, 'treasure') 
+            this.treasure = new TreasureInfo(this, 1000, 130, 'treasure');
 
         this.lever.on('pointerdown', () => {
             console.log("Lever clicked! Current past state:", this.past);

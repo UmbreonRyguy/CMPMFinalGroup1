@@ -167,7 +167,7 @@ export default class LevelSelect extends Phaser.Scene {
             this.buttonMove(levelOne, 450);
             this.buttonMove(levelOneText, 450);
         });
-        levelOne.on('pointerup', ()=>{
+        levelOne.once('pointerup', ()=>{
             const now = Tone.now();
             synth2.triggerAttackRelease("D3", "8n");
             synth2.triggerAttackRelease("G3", "8n", now + 0.1);
@@ -189,12 +189,15 @@ export default class LevelSelect extends Phaser.Scene {
             this.buttonMove(levelTwo, 450);
             this.buttonMove(levelTwoText, 450);
         });
-        levelTwo.on('pointerup', ()=>{
+        levelTwo.once('pointerup', ()=>{
             const now = Tone.now();
             synth2.triggerAttackRelease("B2", "8n");
             synth2.triggerAttackRelease("D3", "8n", now + 0.1);
             levelTwo.clearTint()
-            this.scene.start('level-select');
+            this.cameras.main.fadeOut(500, 0, 0, 0);
+            this.cameras.main.once('camerafadeoutcomplete', () => {
+                this.scene.start('core-gameplay-level2');
+            });
         });
         levelTwo.on('pointerout', ()=> {
             levelTwo.clearTint();
@@ -208,12 +211,15 @@ export default class LevelSelect extends Phaser.Scene {
             this.buttonMove(levelThree, 450);
             this.buttonMove(levelThreeText, 450);
         });
-        levelThree.on('pointerup', ()=>{
+        levelThree.once('pointerup', ()=>{
             const now = Tone.now();
             synth2.triggerAttackRelease("G4", "8n");
             synth2.triggerAttackRelease("C4", "8n", now + 0.1);
             levelThree.clearTint();
-            this.scene.start('core-gameplay-level3');
+            this.cameras.main.fadeOut(500, 0, 0, 0);
+            this.cameras.main.once('camerafadeoutcomplete', () => {
+                this.scene.start('core-gameplay-level3');
+            });
         });
         levelThree.on('pointerout', ()=> {
             levelThree.clearTint();

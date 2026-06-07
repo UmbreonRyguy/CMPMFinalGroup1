@@ -550,27 +550,30 @@ export default class GameplayPrototype extends Phaser.Scene {
             // Jump higher on mushroom platform in past mode
             if (this.past && this.player.body.touching.down && this.platform.touching.up) {
                 if (this.registry.get('sfxEnabled')) {
-                this.jumpSound.play({rate: 0.3 + Math.random() * 0.2});
-                this.player.setVelocityY(-700);
-                this.tweens.add({
-                    targets: mushroomCaption,
-                    alpha: 0,
-                    ease: 'linear',
-                    duration: 1000
-                });
+                    this.jumpSound.play({rate: 0.3 + Math.random() * 0.2});
+                    mushroomCaption.setAlpha(1);
+                    this.player.setVelocityY(-700);
+                    this.tweens.add({
+                        targets: mushroomCaption,
+                        alpha: 0,
+                        ease: 'linear',
+                        duration: 1000
+                    });
+                }
             }
             else {
                 if (this.registry.get('sfxEnabled')) {
-                this.jumpSound.play({rate: 0.7 + Math.random() * 0.3});
-                this.player.setVelocityY(-475);
-                this.tweens.add({
-                    targets: jumpCaption,
-                    alpha: 0,
-                    ease: 'linear',
-                    duration: 1000
-                });
+                    this.jumpSound.play({rate: 0.7 + Math.random() * 0.3});
+                    jumpCaption.setAlpha(1);
+                    this.player.setVelocityY(-475);
+                    this.tweens.add({
+                        targets: jumpCaption,
+                        alpha: 0,
+                        ease: 'linear',
+                        duration: 1000
+                    });
+                }
             }
-        }
 
         // variable jump is dead and phaser killed it
         // if ((this.cursors.up.isDown || this.touchJump) && (Math.floor(time/10) != this.prev_time && Math.floor(time/10) % 5 == 0) && this.player.body.velocity.y < -100) {
@@ -588,4 +591,5 @@ export default class GameplayPrototype extends Phaser.Scene {
             this.lever.setInteractive(); // can interact with lever
         }
     }
+}
 }

@@ -453,30 +453,31 @@ export default class GameplayPrototypeLevel3 extends Phaser.Scene {
             });
             // Jump higher on mushroom platform in past mode
             if (this.past && this.player.body.touching.down && this.platform.touching.up) {
-                if (this.registry.get('sfxEnabled')) {
-                this.jumpSound.play({rate: 0.3 + Math.random() * 0.2});
+                    if (this.registry.get('sfxEnabled')) {
+                    this.jumpSound.play({rate: 0.3 + Math.random() * 0.2});
+                    mushroomCaption.setAlpha(1);
+                    this.player.setVelocityY(-700);
+                    this.tweens.add({
+                        targets: mushroomCaption,
+                        alpha: 0,
+                        ease: 'linear',
+                        duration: 1000
+                    });
                 }
-                mushroomCaption.setAlpha(1);
-                this.player.setVelocityY(-700);
-                this.tweens.add({
-                    targets: mushroomCaption,
-                    alpha: 0,
-                    ease: 'linear',
-                    duration: 1000
-                });
             }
             else {
                 if (this.registry.get('sfxEnabled')) {
-                this.jumpSound.play({rate: 0.7 + Math.random() * 0.3});
-                this.player.setVelocityY(-475);
-                this.tweens.add({
-                    targets: jumpCaption,
-                    alpha: 0,
-                    ease: 'linear',
-                    duration: 1000
-                });
+                    this.jumpSound.play({rate: 0.7 + Math.random() * 0.3});
+                    jumpCaption.setAlpha(1);
+                    this.player.setVelocityY(-475);
+                    this.tweens.add({
+                        targets: jumpCaption,
+                        alpha: 0,
+                        ease: 'linear',
+                        duration: 1000
+                    });
+                }
             }
-        }
 
         if (!this.physics.overlap(this.lever, this.player)) { // if the player is not in range of the lever
             this.lever.setFrame("lever"); // lever has no outline
@@ -487,4 +488,5 @@ export default class GameplayPrototypeLevel3 extends Phaser.Scene {
             this.lever.setInteractive(); // can interact with lever
         }
     }
+}
 }

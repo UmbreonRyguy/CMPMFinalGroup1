@@ -590,17 +590,17 @@ export default class GameplayPrototypeLevel2 extends Phaser.Scene {
         }
 
         // Jump
-        const jumpCaption = this.add.text(640, 600, 'boing', {
+        const jumpCaption = this.add.text(1280/2, 600, '*boing*', {
             color: "#ffffff",
             fontFamily: 'pixel',
-            fontSize: '20px'
+            fontSize: '50px'
         })
         .setOrigin(0.5).setAlpha(0);
 
-        const mushroomCaption = this.add.text(640, 600, 'bwoump', {
+        const mushroomCaption = this.add.text(1280/2, 600, '*bwoump*', {
             color: "#ffffff",
             fontFamily: 'pixel',
-            fontSize: '20px'
+            fontSize: '50px'
         })
         .setOrigin(0.5).setAlpha(0);
 
@@ -644,6 +644,7 @@ export default class GameplayPrototypeLevel2 extends Phaser.Scene {
                     ease: 'linear',
                     duration: 1000
                 });
+                }
             }
         }
 
@@ -663,5 +664,4 @@ export default class GameplayPrototypeLevel2 extends Phaser.Scene {
             this.lever.setInteractive(); // can interact with lever
         }
     }
-}
 }

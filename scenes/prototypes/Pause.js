@@ -6,8 +6,7 @@ export default class Pause extends Phaser.Scene {
     }
     create(data) {
         console.log('pause scene start');
-
-
+        this.anySoundPlaying = this.sound.getAllPlaying().length > 0;
         this.resumeKey = data.resumeKey || null;
         //this.cameras.main.setBackgroundColor('#f9f9f7a5');
         //this.screen_tint = this.add.rectangle(0, 0, W, H, 0xffffff, 0); //tint over other scene, starts fully transparent but is tweened later
@@ -36,6 +35,9 @@ export default class Pause extends Phaser.Scene {
         returnSign.on('pointerover', ()=> returnSign.setTint(0xeab269));
         returnSign.on('pointerout', ()=> returnSign.clearTint());
         returnSign.on('pointerdown', () => {
+            if(this.anySoundPlaying){
+            this.sound.stopByKey('inGameTheme');
+            }
             this.scene.stop(this.resumeKey);
             this.sound.stopByKey('mainMenuTheme');
             this.scene.start('main-menu');

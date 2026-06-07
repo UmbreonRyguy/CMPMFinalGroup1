@@ -108,6 +108,7 @@ export default class IntroCinematic extends Phaser.Scene {
         this.load.image('title', 'assets/finalproj-main-menu-prototype-titlesign.png');
         this.load.image('leaf', 'assets/leaf.png');
         this.load.tilemapTiledJSON("prototypeTilemap", "assets/prototypeTilemap.json");
+        this.load.tilemapTiledJSON("lvl2tilemap", "assets/lvl2tilemap.json");
         this.load.tilemapTiledJSON("level2tilemap", "assets/level2tilemap.json");
         this.load.spritesheet("level2tiles", "assets/level2tiles.png", {frameWidth: 80, frameHeight: 80});
         this.load.spritesheet("Prototype_Tiles", "assets/Prototype_Tiles.png", {frameWidth: 80, frameHeight: 80});
@@ -129,8 +130,13 @@ export default class IntroCinematic extends Phaser.Scene {
         this.load.audio('bgmusic', 'assets/prototype-bg-music.mp3');
         this.load.audio('shorthop', 'assets/ShortHop.wav');
         this.load.audio('mainMenuTheme', 'assets/MenuTheme.mp3');
+        this.load.audio('inGameTheme', 'assets/GameTheme.wav');
         this.load.image('mainMenubg', 'assets/ForestTrash-bg-correct-size.png');
         this.load.image('endScenebg', 'assets/Forest-bg-correct-size.png');
+        this.load.spritesheet('playerS', 'assets/slugSS.png', {
+            frameWidth: 64,
+            frameHeight: 64
+        });
         this.load.start();
 
         this.load.once("complete", () => {

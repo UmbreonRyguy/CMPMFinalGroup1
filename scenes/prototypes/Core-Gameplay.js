@@ -50,12 +50,53 @@ export default class GameplayPrototype extends Phaser.Scene {
 
     create(){
         // var to keep track of which game state the player is in
+
         this.past = false;
         this.itemsHeld = 0;      
         this.jumpSound = this.sound.add('shorthop');
         this.isJumping = false;
         this.cursors = this.input.keyboard.createCursorKeys();
         this.prev_time = 0;
+
+
+        //MUSIC
+
+        this.anySoundPlaying = this.sound.getAllPlaying().length > 0;
+        if(this.anySoundPlaying){
+            this.sound.stopByKey('mainMenuTheme');
+        }
+
+        this.music = this.sound.add('inGameTheme');
+        var musicPlaying = false;
+
+        if (this.registry.get('musicEnabled')) {
+            if (!musicPlaying) {
+                    this.music.loop = true;
+                    this.music.play();
+                    musicPlaying = true;
+                }
+            }
+        else{
+            this.sound.stopByKey('inGameTheme');
+            musicPlaying = false;
+            }
+
+        this.events.on('resume', (sys, data) => { //check again on scene resume
+            // Update global Tone mute on resume
+            Tone.Destination.mute = !this.registry.get('sfxEnabled');
+            
+            if (this.registry.get('musicEnabled')) {
+                if (!musicPlaying) {
+                    this.music.loop = true;
+                    this.music.play();
+                    musicPlaying = true;
+                }
+            }
+            else {
+                this.sound.stopByKey('mainMenuTheme');
+                musicPlaying = false;
+            }
+        });
         
         // const itemText = this.add.text(1200, 200, "item for player to pick up", {color: "#ffffff", backgroundColor: '#e03f3f', padding: { x: 20, y: 10}}).setInteractive();
         // this.itemText = this.add.text(640, 360, "The player has " + this.itemsHeld + " items right now", {color: "#ffffff"});
@@ -88,24 +129,29 @@ export default class GameplayPrototype extends Phaser.Scene {
         // ------------------------
     
         //Create Player sprite
-        this.player = this.physics.add.sprite(800, 500, "player", 0).setScale(0.3);
+        this.player = this.physics.add.sprite(800, 500, "playerS", 0).setScale(1);
+
+        this.anims.create({
+            key: 'walk',
+            frames: this.anims.generateFrameNumbers('playerS', { frames: [0, 1] }),
+            frameRate: 8,
+            repeat: -1
+        });
+        this.anims.create({
+            key: 'jump',
+            frames: this.anims.generateFrameNumbers('playerS', { frames: [2] }),
+            frameRate: 1,
+            repeat: 0
+        });
+
         //Player physics
         this.player.setCollideWorldBounds(true);
-
         this.player.body.setMaxVelocity(600);
         this.player.body.setDragX(900);
-        // if the player hits the top of the conveyor belt, most fast to the left,
-        // if the player hits the top of the mushroom, bounce
-        this.physics.add.collider(this.player, this.platform, () => {
-            if (this.player.body.touching.down && this.platform.touching.up) {
-                if (this.past == true) {
-                    this.player.body.setVelocityY((this.player.body.velocity.y - 250));
-                }
-                else {
-                    this.player.body.setVelocityX((this.player.body.velocity.x - 50));
-                }
-            }
-        });
+
+        this.isJumping = false;
+        this.justLanded = false;
+
         //Keyboard input for player movement
 
         //------------------------------------------------
@@ -247,6 +293,7 @@ export default class GameplayPrototype extends Phaser.Scene {
             // this.lever = this.physics.add.staticImage(40, 200, "levers", "lever");
 
             this.lever = this.physics.add.sprite(40, 202, "spriteAtlas", "lever");
+            this.leverOutline = this.add.sprite(40, 202, "spriteAtlas", "leverOutline").setAlpha(0);
             this.lever.body.setCircle(80, -80 , -20).setAllowGravity(false).setImmovable();
 
             // idk why the hitbox is in a weird position either - 
@@ -405,8 +452,12 @@ export default class GameplayPrototype extends Phaser.Scene {
         // player stuff
         //
         const onFloor = this.player.body.onFloor();
-        if (onFloor) {
+
+        if (onFloor && this.isJumping) {
             this.isJumping = false;
+            this.justLanded = true;
+        } else if (onFloor) {
+            this.justLanded = false;
         }
 
         // Reduce horizontal drag while in-air so player retains momentum
@@ -418,17 +469,40 @@ export default class GameplayPrototype extends Phaser.Scene {
 
         // Movement
         const moveSpeed = 250;
+        const movingLeft  = this.cursors.left.isDown  || this.touchLeft;
+        const movingRight = this.cursors.right.isDown || this.touchRight;
+        const bothPressed = (this.cursors.left.isDown && this.cursors.right.isDown) || (this.touchLeft && this.touchRight);
 
-        if (!(this.cursors.left.isDown && this.cursors.right.isDown) && !(this.touchLeft && this.touchRight)) {
-            if (this.cursors.left.isDown || this.touchLeft) {
-                if (this.player.body.velocity.x > -moveSpeed) {
-                    this.player.setVelocityX(this.player.body.velocity.x - (25));
-                }
+        if (!bothPressed) {
+            if (movingLeft) {
+                if (this.player.body.velocity.x > -moveSpeed)
+                    this.player.setVelocityX(this.player.body.velocity.x - 25);
+                this.player.play('walk', true);
+                this.player.setFlipX(true);
+            } else if (movingRight) {
+                if (this.player.body.velocity.x < moveSpeed)
+                    this.player.setVelocityX(this.player.body.velocity.x + 25);
+                this.player.play('walk', true);
+                this.player.setFlipX(false);
             }
-            else if (this.cursors.right.isDown || this.touchRight) {
-                if (this.player.body.velocity.x < moveSpeed) {
-                    this.player.setVelocityX(this.player.body.velocity.x + (25));
-                }
+        }
+
+
+        //Animations
+        if (this.isJumping) {
+            if (this.player.anims.currentAnim?.key !== 'jump') this.player.play('jump');
+        } else if (onFloor) {
+            if (this.justLanded) {
+                this.tweens.killTweensOf(this.player);
+                this.player.setScale(1, 1);
+                this.justLanded = false;
+            }
+            if (movingLeft || movingRight) {
+                 if (this.player.anims.currentAnim?.key !== 'walk') this.player.play('walk');
+            } 
+            else {
+                this.player.anims.stop();
+                this.player.setFrame(0);
             }
         }
 
@@ -445,18 +519,31 @@ export default class GameplayPrototype extends Phaser.Scene {
              this.treasureInventCheck.setText("Has the player collected all treasure? No")
         }
 
-        // Jump with keyboard
-        if (this.cursors.up.isDown && onFloor) {
         // Jump
         if ((this.cursors.up.isDown || this.touchJump) && onFloor) {
             this.isJumping = true;
+            this.justLanded = false;
+
+            this.tweens.killTweensOf(this.player); //stop current tweens
+            this.player.setScale(0.39, 0.18);
+            this.tweens.add({ //jump anim
+                targets: this.player,
+                scaleX: { from: 1.3, to: 0.75 },
+                scaleY: { from: 0.6, to: 1.4 },
+                duration: 250,
+                ease: 'Quad.Out'
+            });
             // Jump higher on mushroom platform in past mode
             if (this.past && this.player.body.touching.down && this.platform.touching.up) {
+                if (this.registry.get('sfxEnabled')) {
                 this.jumpSound.play({rate: 0.3 + Math.random() * 0.2});
+                }
                 this.player.setVelocityY(-700);
             }
             else {
+                if (this.registry.get('sfxEnabled')) {
                 this.jumpSound.play({rate: 0.7 + Math.random() * 0.3});
+                }
                 this.player.setVelocityY(-475);
             }
         }
@@ -468,15 +555,13 @@ export default class GameplayPrototype extends Phaser.Scene {
         // }
 
         // lever
-        if (this.lever && this.leverOutline) { // only check if lever exists (level 1 only)
-            if (!this.physics.overlap(this.lever, this.player)) { // if the player is not in range of the lever
-                this.leverOutline.setAlpha(0); // lever has no outline
-                this.lever.disableInteractive(); // cannot click on lever
-            }
-            else {
-                this.leverOutline.setAlpha(1); // lever has outline
-                this.lever.setInteractive(); // can interact with lever
-            }
+        if (!this.physics.overlap(this.lever, this.player)) { // if the player is not in range of the lever
+            this.leverOutline.setAlpha(0); // lever has no outline
+            this.lever.disableInteractive(); // cannot click on lever
+        }
+        else {
+            this.leverOutline.setAlpha(1); // lever has outline
+            this.lever.setInteractive(); // can interact with lever
         }
     }
-}}
+}

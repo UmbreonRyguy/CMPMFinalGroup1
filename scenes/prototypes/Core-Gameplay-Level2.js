@@ -590,6 +590,20 @@ export default class GameplayPrototypeLevel2 extends Phaser.Scene {
         }
 
         // Jump
+        const jumpCaption = this.add.text(640, 600, 'boing', {
+            color: "#ffffff",
+            fontFamily: 'pixel',
+            fontSize: '20px'
+        })
+        .setOrigin(0.5).setAlpha(0);
+
+        const mushroomCaption = this.add.text(640, 600, 'bwoump', {
+            color: "#ffffff",
+            fontFamily: 'pixel',
+            fontSize: '20px'
+        })
+        .setOrigin(0.5).setAlpha(0);
+
         if ((this.cursors.up.isDown || this.touchJump) && onFloor) {
             this.isJumping = true;
             this.justLanded = false;
@@ -606,15 +620,28 @@ export default class GameplayPrototypeLevel2 extends Phaser.Scene {
             // Jump higher on mushroom platform in past mode
             if (this.past && this.player.body.touching.down && (this.platform.touching.up || this.platform2.touching.up || this.platform3.touching.up)) {
                 if (this.registry.get('sfxEnabled')) {
-                this.jumpSound.play({rate: 0.3 + Math.random() * 0.2});
+                    this.jumpSound.play({rate: 0.3 + Math.random() * 0.2});
+                    mushroomCaption.setAlpha(1);
+                    this.player.setVelocityY(-750);
+                    this.tweens.add({
+                        targets: mushroomCaption,
+                        alpha: 0,
+                        ease: 'linear',
+                        duration: 1000
+                    });
                 }
-                this.player.setVelocityY(-750);
             }
             else {
                 if (this.registry.get('sfxEnabled')) {
                 this.jumpSound.play({rate: 0.7 + Math.random() * 0.3});
-                }
+                jumpCaption.setAlpha(1);
                 this.player.setVelocityY(-475);
+                this.tweens.add({
+                    targets: jumpCaption,
+                    alpha: 0,
+                    ease: 'linear',
+                    duration: 1000
+                });
             }
         }
 
@@ -634,4 +661,5 @@ export default class GameplayPrototypeLevel2 extends Phaser.Scene {
             this.lever.setInteractive(); // can interact with lever
         }
     }
+}
 }

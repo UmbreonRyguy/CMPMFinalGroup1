@@ -161,7 +161,19 @@ export default class GameplayPrototypeLevel3 extends Phaser.Scene {
         // --------------------------------------------------------------------------------------------------
         // basic player stuff
         // --------------------------------------------------------------------------------------------------
-        this.player = this.physics.add.sprite(80 , 80 , "player", 0).setScale(0.3);
+        this.player = this.physics.add.sprite(80 , 80 , "playerS", 0).setScale(1);
+        this.anims.create({
+            key: 'walk',
+            frames: this.anims.generateFrameNumbers('playerS', { frames: [0, 1] }),
+            frameRate: 8,
+            repeat: -1
+        });
+        this.anims.create({
+            key: 'jump',
+            frames: this.anims.generateFrameNumbers('playerS', { frames: [2] }),
+            frameRate: 1,
+            repeat: 0
+        });
         
         //Player physics
         this.player.setCollideWorldBounds(true);
@@ -192,6 +204,7 @@ export default class GameplayPrototypeLevel3 extends Phaser.Scene {
 
 
         this.isJumping = false;
+        this.justLanded = false;
 
         //Keyboard input for player movement
         this.cursors = this.input.keyboard.createCursorKeys();
@@ -336,8 +349,12 @@ export default class GameplayPrototypeLevel3 extends Phaser.Scene {
 
     update() {
         const onFloor = this.player.body.onFloor();
-        if (onFloor) {
+
+        if (onFloor && this.isJumping) {
             this.isJumping = false;
+            this.justLanded = true;
+        } else if (onFloor) {
+            this.justLanded = false;
         }
 
         if (this.stone.body.onFloor()) {
@@ -358,6 +375,7 @@ export default class GameplayPrototypeLevel3 extends Phaser.Scene {
         }
 
         // Reduce horizontal drag while in-air so player retains momentum
+
         if (this.isJumping) {
             this.rock1.playerOff = true;
             this.rock2.playerOff = true;
@@ -366,39 +384,59 @@ export default class GameplayPrototypeLevel3 extends Phaser.Scene {
         } else {
             this.player.body.setDragX(900);
         }
-
-        // Keyboard movement
-       // Reduce horizontal drag while in-air so player retains momentum
-        if (onFloor) {
-            this.isJumping = false;
-        }
-
-        // Reduce horizontal drag while in-air so player retains momentum
-        if (this.isJumping) {
-            this.player.body.setDragX(500);
-        } else {
-            this.player.body.setDragX(900);
-        }
-
+        
         // Movement
         const moveSpeed = 250;
+        const movingLeft  = this.cursors.left.isDown  || this.touchLeft;
+        const movingRight = this.cursors.right.isDown || this.touchRight;
+        const bothPressed = (this.cursors.left.isDown && this.cursors.right.isDown) || (this.touchLeft && this.touchRight);
 
-        if (!(this.cursors.left.isDown && this.cursors.right.isDown) && !(this.touchLeft && this.touchRight)) {
-            if (this.cursors.left.isDown || this.touchLeft) {
-                if (this.player.body.velocity.x > -moveSpeed) {
-                    this.player.setVelocityX(this.player.body.velocity.x - (25));
-                }
+
+        if (!bothPressed) {
+            if (movingLeft) {
+                if (this.player.body.velocity.x > -moveSpeed)
+                    this.player.setVelocityX(this.player.body.velocity.x - 25);
+                this.player.play('walk', true);
+                this.player.setFlipX(true);
+            } else if (movingRight) {
+                if (this.player.body.velocity.x < moveSpeed)
+                    this.player.setVelocityX(this.player.body.velocity.x + 25);
+                this.player.play('walk', true);
+                this.player.setFlipX(false);
             }
-            else if (this.cursors.right.isDown || this.touchRight) {
-                if (this.player.body.velocity.x < moveSpeed) {
-                    this.player.setVelocityX(this.player.body.velocity.x + (25));
-                }
+        }
+        //Anims
+        if (this.isJumping) {
+            if (this.player.anims.currentAnim?.key !== 'jump') this.player.play('jump');
+        } else if (onFloor) {
+            if (this.justLanded) {
+                this.tweens.killTweensOf(this.player);
+                this.player.setScale(1, 1);
+                this.justLanded = false;
+            }
+            if (movingLeft || movingRight) {
+                 if (this.player.anims.currentAnim?.key !== 'walk') this.player.play('walk');
+            } 
+            else {
+                this.player.anims.stop();
+                this.player.setFrame(0);
             }
         }
 
         // Jump
         if ((this.cursors.up.isDown || this.touchJump) && onFloor) {
             this.isJumping = true;
+            this.justLanded = false;
+
+            this.tweens.killTweensOf(this.player); //stop current tweens
+            this.player.setScale(0.39, 0.18);
+            this.tweens.add({ //jump anim
+                targets: this.player,
+                scaleX: { from: 1.3, to: 0.75 },
+                scaleY: { from: 0.6, to: 1.4 },
+                duration: 250,
+                ease: 'Quad.Out'
+            });
             // Jump higher on mushroom platform in past mode
             if (this.past && this.player.body.touching.down && this.platform.touching.up) {
                 if (this.registry.get('sfxEnabled')) {

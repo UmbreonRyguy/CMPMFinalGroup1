@@ -445,8 +445,6 @@ export default class GameplayPrototype extends Phaser.Scene {
              this.treasureInventCheck.setText("Has the player collected all treasure? No")
         }
 
-        // Jump with keyboard
-        if (this.cursors.up.isDown && onFloor) {
         // Jump
         if ((this.cursors.up.isDown || this.touchJump) && onFloor) {
             this.isJumping = true;
@@ -479,4 +477,4 @@ export default class GameplayPrototype extends Phaser.Scene {
             }
         }
     }
-}}
+}

@@ -152,8 +152,10 @@ export default class GameplayPrototypeLevel3 extends Phaser.Scene {
         //this.teleporter1 = this.physics.add.image(120 , 336 , "spriteAtlas", "teleporter").setAngle(180);
         this.stone = this.physics.add.image(1160 , 80 , "spriteAtlas", "stone");
 
-        this.button = this.physics.add.image(840, 635, "spriteAtlas", "button").setToBack();
+        this.button = this.physics.add.image(840, 631, "spriteAtlas", "button").setToBack();
         this.button.body.setAllowGravity(0).setImmovable().setDirectControl();
+
+        this.buttonBase = this.add.image(840, 636, "spriteAtlas", "buttonBase");
 
         this.add.image(1160 , 80 , "spriteAtlas", "pipe");
         this.jumpSound = this.sound.add('shorthop');

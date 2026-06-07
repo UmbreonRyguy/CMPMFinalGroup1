@@ -197,7 +197,22 @@ export default class GameplayPrototypeLevel2 extends Phaser.Scene {
         // ------------------------
 
         //Create Player sprite
-        this.player = this.physics.add.sprite(880, 720 - 250, "player", 0).setScale(0.3);
+        this.player = this.physics.add.sprite(880, 720 - 250, "playerS", 0).setScale(1);
+         this.anims.create({
+            key: 'walk',
+            frames: this.anims.generateFrameNumbers('playerS', { frames: [0, 1] }),
+            frameRate: 8,
+            repeat: -1
+        });
+        this.anims.create({
+            key: 'jump',
+            frames: this.anims.generateFrameNumbers('playerS', { frames: [2] }),
+            frameRate: 1,
+            repeat: 0
+        });
+
+        this.isJumping = false;
+        this.justLanded = false;
         //Player physics
         this.player.setCollideWorldBounds(true);
 
@@ -459,8 +474,11 @@ export default class GameplayPrototypeLevel2 extends Phaser.Scene {
         // player stuff
         //
         const onFloor = this.player.body.onFloor();
-        if (onFloor) {
+        if (onFloor && this.isJumping) {
             this.isJumping = false;
+            this.justLanded = true;
+        } else if (onFloor) {
+            this.justLanded = false;
         }
 
         // Reduce horizontal drag while in-air so player retains momentum
@@ -472,17 +490,38 @@ export default class GameplayPrototypeLevel2 extends Phaser.Scene {
 
         // Movement
         const moveSpeed = 250;
+        const movingLeft  = this.cursors.left.isDown  || this.touchLeft;
+        const movingRight = this.cursors.right.isDown || this.touchRight;
+        const bothPressed = (this.cursors.left.isDown && this.cursors.right.isDown) || (this.touchLeft && this.touchRight);
 
-        if (!(this.cursors.left.isDown && this.cursors.right.isDown) && !(this.touchLeft && this.touchRight)) {
-            if (this.cursors.left.isDown || this.touchLeft) {
-                if (this.player.body.velocity.x > -moveSpeed) {
-                    this.player.setVelocityX(this.player.body.velocity.x - (25));
-                }
+
+        if (!bothPressed) {
+            if (movingLeft) {
+                if (this.player.body.velocity.x > -moveSpeed)
+                    this.player.setVelocityX(this.player.body.velocity.x - 25);
+                this.player.play('walk', true);
+                this.player.setFlipX(true);
+            } else if (movingRight) {
+                if (this.player.body.velocity.x < moveSpeed)
+                    this.player.setVelocityX(this.player.body.velocity.x + 25);
+                this.player.play('walk', true);
+                this.player.setFlipX(false);
             }
-            else if (this.cursors.right.isDown || this.touchRight) {
-                if (this.player.body.velocity.x < moveSpeed) {
-                    this.player.setVelocityX(this.player.body.velocity.x + (25));
-                }
+        }
+        if (this.isJumping) {
+            if (this.player.anims.currentAnim?.key !== 'jump') this.player.play('jump');
+        } else if (onFloor) {
+            if (this.justLanded) {
+                this.tweens.killTweensOf(this.player);
+                this.player.setScale(1, 1);
+                this.justLanded = false;
+            }
+            if (movingLeft || movingRight) {
+                 if (this.player.anims.currentAnim?.key !== 'walk') this.player.play('walk');
+            } 
+            else {
+                this.player.anims.stop();
+                this.player.setFrame(0);
             }
         }
 
@@ -503,10 +542,23 @@ export default class GameplayPrototypeLevel2 extends Phaser.Scene {
 
         if ((this.cursors.up.isDown || this.touchJump) && onFloor) {
             this.isJumping = true;
+            this.justLanded = false;
+            this.tweens.killTweensOf(this.player); //stop current tweens
+            this.player.setScale(0.39, 0.18);
+            this.tweens.add({ //jump anim
+                targets: this.player,
+                scaleX: { from: 1.3, to: 0.75 },
+                scaleY: { from: 0.6, to: 1.4 },
+                duration: 250,
+                ease: 'Quad.Out'
+            });
+
             // Jump higher on mushroom platform in past mode
             if (this.past && this.player.body.touching.down && (this.platform.touching.up || this.platform2.touching.up || this.platform3.touching.up)) {
+                if (this.registry.get('sfxEnabled')) {
                 this.jumpSound.play({rate: 0.3 + Math.random() * 0.2});
                 mushroomCaption.setAlpha(1);
+                }
                 this.player.setVelocityY(-750);
                 this.tweens.add({
                     targets: mushroomCaption,
@@ -516,8 +568,8 @@ export default class GameplayPrototypeLevel2 extends Phaser.Scene {
                 });
             }
             else {
+                if (this.registry.get('sfxEnabled')) {
                 this.jumpSound.play({rate: 0.7 + Math.random() * 0.3});
-                jumpCaption.setAlpha(1);
                 this.player.setVelocityY(-475);
                 this.tweens.add({
                     targets: jumpCaption,

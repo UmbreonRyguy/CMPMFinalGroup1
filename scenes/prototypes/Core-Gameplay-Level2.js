@@ -577,7 +577,7 @@ export default class GameplayPrototypeLevel2 extends Phaser.Scene {
         } else if (onFloor) {
             if (this.justLanded) {
                 this.tweens.killTweensOf(this.player);
-                this.player.setScale(1, 1);
+                //this.player.setScale(1, 1);
                 this.justLanded = false;
             }
             if (movingLeft || movingRight) {
@@ -590,17 +590,17 @@ export default class GameplayPrototypeLevel2 extends Phaser.Scene {
         }
 
         // Jump
-        const jumpCaption = this.add.text(640, 600, 'boing', {
+        const jumpCaption = this.add.text(1280/2, 600, '*boing*', {
             color: "#ffffff",
             fontFamily: 'pixel',
-            fontSize: '20px'
+            fontSize: '50px'
         })
         .setOrigin(0.5).setAlpha(0);
 
-        const mushroomCaption = this.add.text(640, 600, 'bwoump', {
+        const mushroomCaption = this.add.text(1280/2, 600, '*bwoump*', {
             color: "#ffffff",
             fontFamily: 'pixel',
-            fontSize: '20px'
+            fontSize: '50px'
         })
         .setOrigin(0.5).setAlpha(0);
 
@@ -611,8 +611,10 @@ export default class GameplayPrototypeLevel2 extends Phaser.Scene {
             this.player.setScale(0.39, 0.18);
             this.tweens.add({ //jump anim
                 targets: this.player,
-                scaleX: { from: 1.3, to: 0.75 },
-                scaleY: { from: 0.6, to: 1.4 },
+                // scaleX: { from: 1.3, to: 0.75 },
+                scaleX: { from: 1.5, to: 1 },
+                // scaleY: { from: 0.6, to: 1.4 },
+                scaleY: { from: 0.3, to: 1 },
                 duration: 250,
                 ease: 'Quad.Out'
             });
@@ -642,6 +644,7 @@ export default class GameplayPrototypeLevel2 extends Phaser.Scene {
                     ease: 'linear',
                     duration: 1000
                 });
+                }
             }
         }
 
@@ -661,5 +664,4 @@ export default class GameplayPrototypeLevel2 extends Phaser.Scene {
             this.lever.setInteractive(); // can interact with lever
         }
     }
-}
 }

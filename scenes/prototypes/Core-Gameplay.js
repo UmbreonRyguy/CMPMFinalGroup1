@@ -236,6 +236,7 @@ export default class GameplayPrototype extends Phaser.Scene {
             // this.lever = this.physics.add.staticImage(40, 200, "levers", "lever");
 
             this.lever = this.physics.add.sprite(40, 202, "spriteAtlas", "lever");
+            this.leverOutline = this.add.sprite(40, 202, "spriteAtlas", "leverOutline").setAlpha(0);
             this.lever.body.setCircle(80, -80 , -20).setAllowGravity(false).setImmovable();
 
             // idk why the hitbox is in a weird position either - 
@@ -455,15 +456,13 @@ export default class GameplayPrototype extends Phaser.Scene {
         // }
 
         // lever
-        if (this.lever && this.leverOutline) { // only check if lever exists (level 1 only)
-            if (!this.physics.overlap(this.lever, this.player)) { // if the player is not in range of the lever
-                this.leverOutline.setAlpha(0); // lever has no outline
-                this.lever.disableInteractive(); // cannot click on lever
-            }
-            else {
-                this.leverOutline.setAlpha(1); // lever has outline
-                this.lever.setInteractive(); // can interact with lever
-            }
+        if (!this.physics.overlap(this.lever, this.player)) { // if the player is not in range of the lever
+            this.leverOutline.setAlpha(0); // lever has no outline
+            this.lever.disableInteractive(); // cannot click on lever
+        }
+        else {
+            this.leverOutline.setAlpha(1); // lever has outline
+            this.lever.setInteractive(); // can interact with lever
         }
     }
 }

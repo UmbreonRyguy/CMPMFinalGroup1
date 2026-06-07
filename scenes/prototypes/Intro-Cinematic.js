@@ -129,6 +129,7 @@ export default class IntroCinematic extends Phaser.Scene {
         this.load.audio('bgmusic', 'assets/prototype-bg-music.mp3');
         this.load.audio('shorthop', 'assets/ShortHop.wav');
         this.load.audio('mainMenuTheme', 'assets/MenuTheme.mp3');
+        this.load.audio('inGameTheme', 'assets/GameTheme.wav');
         this.load.image('mainMenubg', 'assets/ForestTrash-bg-correct-size.png');
         this.load.image('endScenebg', 'assets/Forest-bg-correct-size.png');
         this.load.start();

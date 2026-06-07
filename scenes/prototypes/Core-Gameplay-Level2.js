@@ -41,14 +41,64 @@ export default class GameplayPrototypeLevel2 extends Phaser.Scene {
         this.overlay = this.add.rectangle(this.CX, this.CY, this.W, this.H, 0xf9a039, 0.1);
     }
 
+    makeLeaves(num, size) {
+        let leaves = [];
+        for (let i = 0; i < num; i++) {
+            leaves[i] = this.add.image(i*1280/num, - 50, 'leaf').setOrigin(0, 1).setScale(size + Math.random());
+            if (Math.random() < 0.5) {
+                leaves[i].flipX = true;
+            }
+            if (Math.random() < 0.3) {
+                leaves[i].setTint(0xff9978);
+            }
+            if (Math.random() < 0.5) {
+                leaves[i].setTint(0xffc3af);
+            }
+            this.tweens.add({
+                targets: leaves[i],
+                delay: Math.random() * 10000 + (i % 2) * 1000,
+                y: 1280,
+                alpha: 0.3,
+                scale: 5,
+                duration: 5000 + Math.random() * 10000,
+                repeat: -1,
+            });
+            if (!leaves[i].flipX) {
+                this.tweens.add({
+                    targets: leaves[i],
+                    rotation: {from: 0.1, to: -1.4},
+                    x: {from: leaves[i].x - (100 + 50*Math.random()), to: leaves[i].x + (100 + 50*Math.random())},
+                    yoyo: true,
+                    duration: 2000 + Math.random() * 1000,
+                    repeat: -1,
+                    ease: 'Sine.easeInOut'
+                });
+            }
+            else {
+                this.tweens.add({
+                    targets: leaves[i],
+                    rotation: {from: 1.4, to: -0.1},
+                    x: {from: leaves[i].x - (100 + 50*Math.random()), to: leaves[i].x + (100 + 50*Math.random())},
+                    yoyo: true,
+                    duration: 2000 + Math.random() * 1000,
+                    repeat: -1,
+                    ease: 'Sine.easeInOut'
+                });
+            }
+        }
+    }
+
     create(){
         // var to keep track of which game state the player is in
         this.past = false;
-        this.itemsHeld = 0;      
+        this.itemsHeld = 0;
         this.jumpSound = this.sound.add('shorthop');
         this.isJumping = false;
         this.cursors = this.input.keyboard.createCursorKeys();
         this.prev_time = 0;
+        this.makeLeaves(50, 1);
+
+        this.future_bg = this.add.rectangle(1280/2, 720/2, 1280, 720, 0x203030);
 
         //MUSIC
         this.anySoundPlaying = this.sound.getAllPlaying().length > 0;
@@ -305,6 +355,12 @@ export default class GameplayPrototypeLevel2 extends Phaser.Scene {
         this.trash2 = new TrashInfo(this, 920, 80, 'trash2');
         this.treasure = new TreasureInfo(this, 160, 175, 'treasure') ;
 
+        this.timestatetext =this.add.text(40, 30, "FUTURE", {
+            color: "#ffffff",
+            fontFamily: 'pixel',
+            fontSize: '60px'
+        });
+
         this.lever.on('pointerdown', () => {
             console.log("Lever clicked! Current past state:", this.past);
             if (this.past == true) {
@@ -312,6 +368,10 @@ export default class GameplayPrototypeLevel2 extends Phaser.Scene {
                 this.leverOutline.flipX = false;
 
                 this.flipToFuture();
+
+                this.timestatetext.text = "FUTURE";
+
+                this.future_bg.setAlpha(1);
 
                 this.mush1.setAlpha(0);
                 this.mush2.setAlpha(0);
@@ -353,6 +413,10 @@ export default class GameplayPrototypeLevel2 extends Phaser.Scene {
 
                 this.flipToPast();
 
+                this.future_bg.setAlpha(0);
+
+                this.timestatetext.text = "PAST";
+
                 this.con1.setAlpha(0);
                 this.con2.setAlpha(0);
                 this.con3.setAlpha(0);
@@ -393,7 +457,7 @@ export default class GameplayPrototypeLevel2 extends Phaser.Scene {
         //UI
         //----------------------------------------
 
-        this.pauseButton = this.add.image(1200, 50, "pauseIcon").setOrigin(0.5).setScale(2).setInteractive();
+        this.pauseButton = this.add.image(1200, 70, "pauseIcon").setOrigin(0.5).setScale(2).setInteractive();
         //this.pauseButton.on('pointerover', () =>this.pauseButton.setTint(0xFF5C5));
         this.pauseButton.on('pointerup', ()=> {
             console.log("pause button clicked");
@@ -525,6 +589,20 @@ export default class GameplayPrototypeLevel2 extends Phaser.Scene {
         }
 
         // Jump
+        const jumpCaption = this.add.text(640, 600, 'boing', {
+            color: "#ffffff",
+            fontFamily: 'pixel',
+            fontSize: '20px'
+        })
+        .setOrigin(0.5).setAlpha(0);
+
+        const mushroomCaption = this.add.text(640, 600, 'bwoump', {
+            color: "#ffffff",
+            fontFamily: 'pixel',
+            fontSize: '20px'
+        })
+        .setOrigin(0.5).setAlpha(0);
+
         if ((this.cursors.up.isDown || this.touchJump) && onFloor) {
             this.isJumping = true;
             this.justLanded = false;
@@ -541,15 +619,28 @@ export default class GameplayPrototypeLevel2 extends Phaser.Scene {
             // Jump higher on mushroom platform in past mode
             if (this.past && this.player.body.touching.down && (this.platform.touching.up || this.platform2.touching.up || this.platform3.touching.up)) {
                 if (this.registry.get('sfxEnabled')) {
-                this.jumpSound.play({rate: 0.3 + Math.random() * 0.2});
+                    this.jumpSound.play({rate: 0.3 + Math.random() * 0.2});
+                    mushroomCaption.setAlpha(1);
+                    this.player.setVelocityY(-750);
+                    this.tweens.add({
+                        targets: mushroomCaption,
+                        alpha: 0,
+                        ease: 'linear',
+                        duration: 1000
+                    });
                 }
-                this.player.setVelocityY(-750);
             }
             else {
                 if (this.registry.get('sfxEnabled')) {
                 this.jumpSound.play({rate: 0.7 + Math.random() * 0.3});
-                }
+                jumpCaption.setAlpha(1);
                 this.player.setVelocityY(-475);
+                this.tweens.add({
+                    targets: jumpCaption,
+                    alpha: 0,
+                    ease: 'linear',
+                    duration: 1000
+                });
             }
         }
 
@@ -569,4 +660,5 @@ export default class GameplayPrototypeLevel2 extends Phaser.Scene {
             this.lever.setInteractive(); // can interact with lever
         }
     }
+}
 }

@@ -135,18 +135,7 @@ export default class GameplayPrototype extends Phaser.Scene {
 
         this.player.body.setMaxVelocity(600);
         this.player.body.setDragX(900);
-        // if the player hits the top of the conveyor belt, most fast to the left,
-        // if the player hits the top of the mushroom, bounce
-        this.physics.add.collider(this.player, this.platform, () => {
-            if (this.player.body.touching.down && this.platform.touching.up) {
-                if (this.past == true) {
-                    this.player.body.setVelocityY((this.player.body.velocity.y - 250));
-                }
-                else {
-                    this.player.body.setVelocityX((this.player.body.velocity.x - 50));
-                }
-            }
-        });
+
         //Keyboard input for player movement
 
         //------------------------------------------------
@@ -288,6 +277,7 @@ export default class GameplayPrototype extends Phaser.Scene {
             // this.lever = this.physics.add.staticImage(40, 200, "levers", "lever");
 
             this.lever = this.physics.add.sprite(40, 202, "spriteAtlas", "lever");
+            this.leverOutline = this.add.sprite(40, 202, "spriteAtlas", "leverOutline").setAlpha(0);
             this.lever.body.setCircle(80, -80 , -20).setAllowGravity(false).setImmovable();
 
             // idk why the hitbox is in a weird position either - 
@@ -486,8 +476,6 @@ export default class GameplayPrototype extends Phaser.Scene {
              this.treasureInventCheck.setText("Has the player collected all treasure? No")
         }
 
-        // Jump with keyboard
-        if (this.cursors.up.isDown && onFloor) {
         // Jump
         if ((this.cursors.up.isDown || this.touchJump) && onFloor) {
             this.isJumping = true;
@@ -509,15 +497,13 @@ export default class GameplayPrototype extends Phaser.Scene {
         // }
 
         // lever
-        if (this.lever && this.leverOutline) { // only check if lever exists (level 1 only)
-            if (!this.physics.overlap(this.lever, this.player)) { // if the player is not in range of the lever
-                this.leverOutline.setAlpha(0); // lever has no outline
-                this.lever.disableInteractive(); // cannot click on lever
-            }
-            else {
-                this.leverOutline.setAlpha(1); // lever has outline
-                this.lever.setInteractive(); // can interact with lever
-            }
+        if (!this.physics.overlap(this.lever, this.player)) { // if the player is not in range of the lever
+            this.leverOutline.setAlpha(0); // lever has no outline
+            this.lever.disableInteractive(); // cannot click on lever
+        }
+        else {
+            this.leverOutline.setAlpha(1); // lever has outline
+            this.lever.setInteractive(); // can interact with lever
         }
     }
-}}
+}

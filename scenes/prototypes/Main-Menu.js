@@ -70,7 +70,7 @@ export default class MainMenu extends Phaser.Scene {
         this.bg.setTint(0x888888);
 
         // leaves (BEHIND the buttons)
-        this.makeLeaves(25, 3.5);
+        this.makeLeaves(50, 3.5);
 
         const title = this.add.image(640, 200, 'signLong').setScale(3);
         const titleText =this.add.text(640, 200, "Back to \n the Forest", {
@@ -167,7 +167,7 @@ export default class MainMenu extends Phaser.Scene {
             this.buttonMove(start, 450);
             this.buttonMove(startText, 450);
         });
-        start.on('pointerup', ()=>{
+        start.once('pointerup', ()=>{
             const now = Tone.now();
             synth2.triggerAttackRelease("D3", "8n");
             synth2.triggerAttackRelease("G3", "8n", now + 0.1);
@@ -224,7 +224,7 @@ export default class MainMenu extends Phaser.Scene {
         });
 
         // leaves (in front of buttons)
-        this.makeLeaves(25, 4.5);
+        this.makeLeaves(8, 4.5);
 
         //--------------------------
         //Background audio

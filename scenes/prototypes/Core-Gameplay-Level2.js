@@ -1,264 +1,518 @@
-class Rock extends Phaser.Physics.Arcade.Sprite { //made these because my code started to hurt to look at
-    constructor(scene, x, y, ) {
-        super(scene, x, y, "spriteAtlas", "unbroken");
-        scene.add.existing(this);
-        scene.physics.add.existing(this);
-        this.body.setAllowGravity(false).setImmovable();
-        this.resetX = this.x;
-        this.resetY = this.y;
-        this.playerOff = true;
-        this.stoneOff = true;
-        this.setupCollider(scene.player, this.playerOff, 'playerOff');
-        this.setupCollider(scene.stone, this.stoneOff, 'stoneOff');
-    }
-
-    setupCollider(collidingObj, offBool, propName) {
-        this.scene.physics.add.collider(collidingObj, this, () => {
-            if (collidingObj.body.onFloor() && this[propName]) {
-                
-                switch (this.frame.customData.filename) {
-                    case 'unbroken':
-                        this.setFrame('broken1');
-                        break;
-                    case 'broken1': 
-                        this.setFrame('broken2');
-                        break;
-                    case 'broken2':
-                        this.setAlpha(0);
-                        this.disableBody();
-                        break;
-                }
-                this[propName] = false; //i want the actual property to update which is why this has to be written a bit weird
-            }
-        })
-    }
-}
-
-class Teleporter extends Phaser.Physics.Arcade.Sprite {
-    constructor(scene, x, y, to_X, to_Y, orientation) {
-        super(scene, x, y, "spriteAtlas", "teleporter");
-        scene.add.existing(this);
-        scene.physics.add.existing(this);
-        this.body.setAllowGravity(false).setImmovable();
-        this.setBodySize(240, 6);
-        switch (orientation) {
-            case 1: //upside down
-                this.setAngle(180);
-                this.body.setOffset(0, 0);
-                break;
-            default:
-                this.body.setOffset(0, 26);
-                break;
-        }
-        this.resetX = this.x;
-        this.resetY = this.y;
-        scene.physics.add.overlap(scene.stone, this, () => {
-            scene.stone.setPosition(to_X, to_Y); //sends stone to next teleporter
-        })
-
-    }
-}
-
 export default class GameplayPrototypeLevel2 extends Phaser.Scene {
     constructor() {
         super('core-gameplay-level2');
     }
 
-    init() {
-        this.past = true;
+    init(data) {
         this.W = this.game.config.width; // 1280 under normal circumstances
         this.H = this.game.config.height; // 720
         this.CX = this.W * 0.5; //center x and y
         this.CY = this.H * 0.5;
+        this.levelNum = data?.level || 1; // Get level from scene data, default to 1
     }
 
-    create() {
-        // ---------------------------------------------------------------------------------------------
-        // Tile map
-        // -----------------------------------------------------------------------------------------------
-        this.level2map = this.make.tilemap({key: "level2tilemap"});
-        this.level2tiles = this.level2map.addTilesetImage("level2tiles", "level2tiles", 80, 80);
-        this.layer1 = this.level2map.createLayer("Tile Layer 1", this.level2tiles, 0, 0);
+    flipToFuture() {
+        const flash = this.add.rectangle(this.CX, this.CY, this.W, this.H, 0xffffff) //screen flash
+            .setAlpha(0)
+            .setDepth(999);
+        this.tweens.add({
+            targets: flash,
+            alpha: { from: 0.85, to: 0 },
+            duration: 350,
+            ease: 'Expo.Out',
+            onComplete: () => flash.destroy()
+        });
+        console.log("hi");
+        this.overlay = this.add.rectangle(this.CX, this.CY, this.W, this.H, 0xf9a039, 0.1);
+    }
+
+    flipToPast() {
+        const flash = this.add.rectangle(this.CX, this.CY, this.W, this.H, 0xffffff) //screen flash
+            .setAlpha(0)
+            .setDepth(999);
+        this.tweens.add({
+            targets: flash,
+            alpha: { from: 0.85, to: 0 },
+            duration: 350,
+            ease: 'Expo.Out',
+            onComplete: () => flash.destroy()
+        });
+        if(this.overlay){
+            this.overlay.destroy();
+        }
+    }
+
+    create(){
+        // var to keep track of which game state the player is in
+        this.past = false;
+        this.itemsHeld = 0;      
+        this.jumpSound = this.sound.add('shorthop');
+        this.isJumping = false;
+        this.cursors = this.input.keyboard.createCursorKeys();
+        this.prev_time = 0;
+
+        //MUSIC
+        this.anySoundPlaying = this.sound.getAllPlaying().length > 0;
+        if(this.anySoundPlaying){
+            this.sound.stopByKey('mainMenuTheme');
+        }
+
+        this.music = this.sound.add('inGameTheme');
+        var musicPlaying = false;
+
+        if (this.registry.get('musicEnabled')) {
+            if (!musicPlaying) {
+                    this.music.loop = true;
+                    this.music.play();
+                    musicPlaying = true;
+                }
+            }
+        else{
+            this.sound.stopByKey('inGameTheme');
+            musicPlaying = false;
+            }
+
+        //Keyboard input for player movement
+
+        //------------------------------------------------
+        //Scene inventories 
+        //--------------------------------------------------------
+        this.trashInventory = [] //keep track of the trash here
+        this.treasureInventory = [] //keep track of the treasure here
+        //function to keep track of inventories----------------------------------------
+        //Test if the player has expected number of items in inventory.
+            /**
+            * @param {int} number number of expected items
+            * @param {array} Inventory, the inventory I'm checking
+            * @returns {boolean}
+            */
+            this.hasAllItem = (number, Inventory) => Inventory.length == number;
+
+        //------------------------------------------------------------
+        //Prefab class definition
+        //--------------------------------------------------
+        //base class 
+        class Collectible extends Phaser.GameObjects.Image{
+            constructor(scene, x, y, texture){
+                super(scene, x, y, texture)
+                .setInteractive()
+                .setScale(0.5)
+                scene.add.existing(this)
+            }
+
+            getInventory(){
+                //override in subclasses
+                return null;
+            }
+
+            gainItem(item){
+                let Inventory = this.getInventory();
+                if (Inventory.includes(item)) {
+                    console.warn('gaining item already held:', item);
+                    return;
+                }
+
+                const message = this.scene.add.text(this.x, this.y + 20, "You picked up a thing!").setAlpha(0).setColor('#ffffff');
+                this.scene.tweens.add({
+                    targets: message,
+                    alpha: {from:1, to: 0},
+                    duration: 3000,
+                    ease: 'linear' 
+                });
+                
+                Inventory.push(item);
+            }
+
+        }
+
+        //prefab for trash---------------------------------------------------------------------------------
+        class TrashInfo extends Collectible{
+            constructor(scene, x, y, keyword){
+                super(scene, x, y, 'trash');
+                let trashMessage = scene.add.text(this.x, this.y-10, "Someone left trash here.").setColor('#ffffff').setAlpha(0)
+                this.on('pointerover', () => trashMessage.setAlpha(1))
+                .on('pointerout', () => trashMessage.setAlpha(0))
+                .on('pointerdown', () => {
+                    trashMessage.setAlpha(0);
+                    this.gainItem(keyword);
+                    this.scene.tweens.add({
+                        targets: this, 
+                        alpha: {from: 1, to: 0},
+                        duration: 500,
+                        onComplete: ()=> {this.destroy(); 
+                            trashMessage.destroy();
+                        }
+                    });
+                })
+            }
+
+            //Don't know if this methood was overwritten correctly.
+            getInventory(){
+                //line below is causing errors
+                return this.scene.trashInventory;
+            }
+        }
+
+        //prefab for Treasure---------------------------------------------------------------------------------
+        class TreasureInfo extends Collectible{
+            constructor(scene, x, y, keyword){
+                super(scene, x, y, 'treasure');
+                scene.add.existing(this)
+                let treasureMessage = scene.add.text(this.x, this.y-10, "ooo treasure").setColor('#ffffff').setAlpha(0)
+                this.on('pointerover', () => treasureMessage.setAlpha(1))
+                .on('pointerout', () => treasureMessage.setAlpha(0))
+                .on('pointerdown', () => {
+                    treasureMessage.setAlpha(0);
+                    this.gainItem(keyword);
+                    this.scene.tweens.add({
+                        targets: this, 
+                        alpha: {from: 1, to: 0},
+                        duration: 500,
+                        onComplete: ()=> {this.destroy(); 
+                            treasureMessage.destroy();
+                        }
+                    });
+                })
+            }
+                
+            getInventory(){
+                return this.scene.treasureInventory;
+            }
+
+        }
+
+        //----------------------------------------
+        //TileMap
+        //----------------------------------------
+        const prototypeMap = this.make.tilemap({key: "lvl2tilemap"});
+        const prototypeTiles = prototypeMap.addTilesetImage("Prototype_Tiles", "Prototype_Tiles", 80, 80);
+        this.layer1 = prototypeMap.createLayer("Tile Layer 1", prototypeTiles, 0, 0);
         this.layer1.setCollisionFromCollisionGroup();
-        // ---------------------------------------------------------------------------------------------
-        // "present" stuff
-        // ----------------------------------------------------------------------------------------------
-        
-        //this.teleporter1 = this.physics.add.image(120, 336, "spriteAtlas", "teleporter").setAngle(180);
-        this.stone = this.physics.add.image(1160, 80, "spriteAtlas", "stone");
 
-        this.add.image(1160, 80, "spriteAtlas", "pipe");
+        this.add.rectangle(560, 460, 480, 60, 0x385a33);
+        this.overlay = this.add.rectangle(this.CX, this.CY, this.W, this.H, 0xf9a039, 0.1);
 
-        this.door = this.physics.add.image(240, 80, "spriteAtlas", "door");
-        this.door.body.setAllowGravity(false).setImmovable().setDirectControl();
+        // ------------------------
+        // PLAYER
+        // ------------------------
 
-        // --------------------------------------------------------------------------------------------------
-        // basic player stuff
-        // --------------------------------------------------------------------------------------------------
-        this.player = this.physics.add.sprite(80, 80, "player", 0).setScale(0.3);
-        
+        //Create Player sprite
+        this.player = this.physics.add.sprite(880, 720 - 250, "player", 0).setScale(0.3);
         //Player physics
         this.player.setCollideWorldBounds(true);
-        this.physics.add.collider(this.player, this.layer1);
-        this.physics.add.collider(this.player, this.door);
-        this.physics.add.collider(this.layer1, this.stone, () => {
-            this.stone.disableBody(); //there's actually supposed to be a button that the stone lands on to open the door, but im super tired rn
-            this.tweens.chain({
-                targets: this.door,
-                tweens: [
-                    {
-                        y: {from: this.door.y, to: this.door.y + 6},
-                        duration: 500,
-                        ease: "Cubic.easeOut"
-                    },
-                    {
-                        y: {from: this.door.y, to: -86},
-                        duration: 1000,
-                        ease: "Cubic.easeIn"
-                    }
-                ]
-            })
-
-        })
 
         this.player.body.setMaxVelocity(600);
         this.player.body.setDragX(900);
+        
+        // Add player collider now that the tilemap is created
+        this.physics.add.collider(this.player, this.layer1);
 
+        this.platform = this.physics.add.body(400 - 80, 400, 480, 30).setAllowGravity(false).setImmovable();
 
-        this.isJumping = false;
+        this.physics.add.collider(this.player, this.platform, () => {
+            if (this.player.body.touching.down) {
+                // small bounce while on mushroom
+                // the real bounce happens in update if you press jump
+                if (this.past == true) {
+                    this.player.body.setVelocityY((this.player.body.velocity.y - 150));
+                }
+                else {
+                    this.player.body.setVelocityX((this.player.body.velocity.x + 250));
+                }
+            }
+        });
 
-        //Keyboard input for player movement
-        this.cursors = this.input.keyboard.createCursorKeys();
+        this.platform2 = this.physics.add.body(1050 + 80, 275, 150, 28).setAllowGravity(false).setImmovable();
 
-        //-------------------------------------------------------------------------------------------
-        // adding breakable rock platforms & teleporters
-        // NOTE: need to be added after player because their construction references the player
-        //--------------------------------------------------------------------------------------------
-        this.testRock = new Rock(this, 1160, 680, this.px); 
-        this.rock1 = new Rock(this, 120, 680, this.px);     
-        this.rock2 = new Rock(this, 1160, 440, this.px);
-        this.teleporter1 = new Teleporter(this, 120, 336, 0, 0, 1);
-        this.teleporter2 = new Teleporter(this, 840, 384, 120, 336, 0);
-        this.teleporter3 = new Teleporter(this, 840, 16, 0, 0, 1);
-        this.teleporter4 = new Teleporter(this, 1160, 496, 840, 16, 0);
-        this.pastObjects = [this.rock1, this.rock2];
-        this.futureObjects = [this.teleporter1, this.teleporter2, this.teleporter3, this.teleporter4];
-        this.futureObjects.forEach((futureObject) => {
-            futureObject.disableBody();
-            futureObject.setAlpha(0);
-        })
-        //---------------------------------------------------------------------------------------------
-        // past and future switch stuff
-        //---------------------------------------------------------------------------------------------
-        this.lever = this.physics.add.sprite(120, 120, "spriteAtlas", "lever");
-        this.lever.body.setCircle(80, -40, -20).setAllowGravity(false).setImmovable();
+        this.physics.add.collider(this.player, this.platform2, () => {
+            if (this.player.body.touching.down) {
+                // small bounce while on mushroom
+                // the real bounce happens in update if you press jump
+                if (this.past == true) {
+                    this.player.body.setVelocityY((this.player.body.velocity.y - 150));
+                }
+                else {
+                    this.player.body.setVelocityX((this.player.body.velocity.x - 250));
+                }
+            }
+        });
+
+        this.platform3 = this.physics.add.body(50, 500, 220, 28).setAllowGravity(false).setImmovable();
+
+        this.physics.add.collider(this.player, this.platform3, () => {
+            if (this.player.body.touching.down) {
+                // small bounce while on mushroom
+                // the real bounce happens in update if you press jump
+                if (this.past == true) {
+                    this.player.body.setVelocityY((this.player.body.velocity.y - 250));
+                }
+                else {
+                    this.player.body.setVelocityX((this.player.body.velocity.x + 250));
+                }
+            }
+        });
+
+        this.lever = this.physics.add.sprite(570, 120, "spriteAtlas", "lever");
+        this.leverOutline = this.add.sprite(570, 120, "spriteAtlas", "leverOutline").setAlpha(0);
+        this.lever.body.setCircle(80, -40 , -25).setAllowGravity(false).setImmovable();
+
+        // mushroom - stored as instance properties for access from other methods
+        this.mush1 = this.add.image(400 - 40, 400 + 15, "Prototype_Tiles", 21).setAlpha(0);
+        this.mush2 = this.add.image(480 - 40, 400 + 15, "Prototype_Tiles", 22).setAlpha(0);
+        this.mush3 = this.add.image(560 - 40, 400 + 15, "Prototype_Tiles", 22).setAlpha(0);
+        this.mush4 = this.add.image(640 - 40, 400 + 15, "Prototype_Tiles", 22).setAlpha(0);
+        this.mush5 = this.add.image(720 - 40, 400 + 15, "Prototype_Tiles", 22).setAlpha(0);
+        this.mush6 = this.add.image(800 - 40, 400 + 15, "Prototype_Tiles", 23).setAlpha(0);
+
+        this.mush11 = this.add.image(1050 + 115, 275 + 15, "Prototype_Tiles", 21).setAlpha(0);
+        this.mush12 = this.add.image(1130 + 115, 275 + 15, "Prototype_Tiles", 23).setAlpha(0);
+
+        this.mush21 = this.add.image(50 + 25, 500 + 15, "Prototype_Tiles", 21).setAlpha(0);
+        this.mush22 = this.add.image(130 + 25, 500 + 15, "Prototype_Tiles", 22).setAlpha(0);
+        this.mush23 = this.add.image(210 + 25, 500 + 15, "Prototype_Tiles", 23).setAlpha(0);
+
+        // conveyor belt - stored as instance properties for access from other methods
+        this.con1 = this.add.image(400 - 40, 400 + 15, "Prototype_Tiles", 14);
+        this.con2 = this.add.image(480 - 40, 400 + 15, "Prototype_Tiles", 15);
+        this.con3 = this.add.image(560 - 40, 400 + 15, "Prototype_Tiles", 15);
+        this.con4 = this.add.image(640 - 40, 400 + 15, "Prototype_Tiles", 15);
+        this.con5 = this.add.image(720 - 40, 400 + 15, "Prototype_Tiles", 15);
+        this.con6 = this.add.image(800 - 40, 400 + 15, "Prototype_Tiles", 16);
+
+        this.con11 = this.add.image(1050 + 115, 275 + 15, "Prototype_Tiles", 14);
+        this.con12 = this.add.image(1130 + 115, 275 + 15, "Prototype_Tiles", 16);
+
+        this.con21 = this.add.image(50 + 25, 500 + 15, "Prototype_Tiles", 14);
+        this.con22 = this.add.image(130 + 25, 500 + 15, "Prototype_Tiles", 15);
+        this.con23 = this.add.image(210 + 25, 500 + 15, "Prototype_Tiles", 16);
+
+        // trash + treasure
+        this.trash = new TrashInfo(this, 1230, 350, 'trash') ;
+        this.trash2 = new TrashInfo(this, 920, 80, 'trash2');
+        this.treasure = new TreasureInfo(this, 160, 175, 'treasure') ;
+
         this.lever.on('pointerdown', () => {
-            if (this.past) {
-                this.pastObjects.forEach((pastObject) => {
-                    pastObject.disableBody();
-                    pastObject.setAlpha(0);
-                });
-                this.futureObjects.forEach((futureObject) => {
-                    futureObject.enableBody(true, futureObject.resetX, futureObject.resetY);
-                    futureObject.setAlpha(1);
-                })
+            console.log("Lever clicked! Current past state:", this.past);
+            if (this.past == true) {
+                this.lever.flipX = false;
+                this.leverOutline.flipX = false;
+
+                this.flipToFuture();
+
+                this.mush1.setAlpha(0);
+                this.mush2.setAlpha(0);
+                this.mush3.setAlpha(0);
+                this.mush4.setAlpha(0);
+                this.mush5.setAlpha(0);
+                this.mush6.setAlpha(0);
+
+                this.mush11.setAlpha(0);
+                this.mush12.setAlpha(0);
+
+                this.mush21.setAlpha(0);
+                this.mush22.setAlpha(0);
+                this.mush23.setAlpha(0);
+
+                this.platform.y -= 10;
+                this.platform2.y -= 10;
+                this.platform3.y -= 10;
+
+                this.con1.setAlpha(1);
+                this.con2.setAlpha(1);
+                this.con3.setAlpha(1);
+                this.con4.setAlpha(1);
+                this.con5.setAlpha(1);
+                this.con6.setAlpha(1);
+
+                this.con11.setAlpha(1);
+                this.con12.setAlpha(1);
+
+                this.con21.setAlpha(1);
+                this.con22.setAlpha(1);
+                this.con23.setAlpha(1);
+
                 this.past = false;
             }
             else {
-                this.futureObjects.forEach((futureObject) => {
-                    futureObject.disableBody();
-                    futureObject.setAlpha(0);
-                });
-                this.pastObjects.forEach((pastObject) => {
-                    pastObject.enableBody(true, pastObject.resetX, pastObject.resetY);
-                    pastObject.setAlpha(1);
-                })
+                this.lever.flipX = true;
+                this.leverOutline.flipX = true;
+
+                this.flipToPast();
+
+                this.con1.setAlpha(0);
+                this.con2.setAlpha(0);
+                this.con3.setAlpha(0);
+                this.con4.setAlpha(0);
+                this.con5.setAlpha(0);
+                this.con6.setAlpha(0);
+
+                this.con11.setAlpha(0);
+                this.con12.setAlpha(0);
+
+                this.con21.setAlpha(0);
+                this.con22.setAlpha(0);
+                this.con23.setAlpha(0);
+
+                this.platform.y += 10;
+                this.platform2.y += 10;
+                this.platform3.y += 10;
+
+                this.mush1.setAlpha(1);
+                this.mush2.setAlpha(1);
+                this.mush3.setAlpha(1);
+                this.mush4.setAlpha(1);
+                this.mush5.setAlpha(1);
+                this.mush6.setAlpha(1);
+
+                this.mush11.setAlpha(1);
+                this.mush12.setAlpha(1);
+
+                this.mush21.setAlpha(1);
+                this.mush22.setAlpha(1);
+                this.mush23.setAlpha(1);
+
                 this.past = true;
             }
-        })
-
-        //this.add.rectangle(100, 100, 100, 100, 0x00ff00);
-        
-        this.returnButton = this.add.rectangle(640, 650, 200, 50, 0x5a118a).setInteractive();
-        //returnButton.on('pointerdown', ()=> returnButton.setTint(0x965A0B));
-        this.returnButton.on('pointerup', ()=>{
-            this.scene.start('level-select');
         });
-        this.returnButtonText = this.add.text(640, 650, "Return to Menu", {color: "#000000"}).setOrigin(0.5).setSize(24);
 
-        this.pauseButton = this.add.rectangle(400, 300, 100, 100,0xFF0000).setInteractive();
+        //----------------------------------------
+        //UI
+        //----------------------------------------
+
+        this.pauseButton = this.add.image(1200, 50, "pauseIcon").setOrigin(0.5).setScale(2).setInteractive();
         //this.pauseButton.on('pointerover', () =>this.pauseButton.setTint(0xFF5C5));
-        this.pauseButton.once('pointerup', ()=> {
+        this.pauseButton.on('pointerup', ()=> {
             console.log("pause button clicked");
-            this.scene.transition({
-                target: 'pause',
-                duration: 2000,
-                sleep: true,
-            });
-
+            this.scene.pause();
+            this.scene.launch('pause', { resumeKey: 'core-gameplay-level2' });
         })
+        // --------------------
+        // touch UI
+        // --------------------
+        this.leftButton = this.add.image((1280*2/16), (720*4.7/6), 'arrowButton')
+            .setScale(4)
+            .setAlpha(0.5)
+            .setAngle(270)
+            .setInteractive();
+        this.touchLeft = false;
+
+        this.rightButton = this.add.image(1280*4.5/16, (720*4.7/6), 'arrowButton')
+            .setScale(4)
+            .setAlpha(0.5)
+            .setAngle(90)
+            .setInteractive();
+        this.touchRight = false;
+
+        this.jumpButton = this.add.image(1280*14/16, (720*4.7/6), 'jumpButton')
+            .setScale(4)
+            .setAlpha(0.5)
+            .setInteractive();
+        this.touchJump = false;
+
+        // this.interactButton = this.add.rectangle(1280*14/16, 720*3.5/6, 75, 75, 0xffff00)
+        //     .setScale(2)
+        //     .setAlpha(0.5)
+        //     .setInteractive();
+        
+        this.leftButton.on('pointerout', () => {
+            this.touchLeft = false;
+        });
+        this.leftButton.on('pointerup', () => {
+            this.touchLeft = false;
+        });
+        this.leftButton.on('pointerover', () => {
+            this.touchLeft = true;
+        });
+
+        this.rightButton.on('pointerout', () => {
+            this.touchRight = false;
+        });
+        this.rightButton.on('pointerup', () => {
+            this.touchRight = false;
+        });
+        this.rightButton.on('pointerover', () => {
+            this.touchRight = true;
+        });
+
+        this.jumpButton.on('pointerout', () => {
+            this.touchJump = false;
+        });
+        this.jumpButton.on('pointerup', () => {
+            this.touchJump = false;
+        });
+        this.jumpButton.on('pointerover', () => {
+            this.touchJump = true;
+        });
+
+        if (false) {
+            this.leftButton.x += -9999;
+            this.rightButton.x += -9999;
+            this.jumpButton.x += -9999;
+            //this.interactButton.x += -9999;
+        }
+
     }
 
+
     update() {
+        //
+        // player stuff
+        //
         const onFloor = this.player.body.onFloor();
         if (onFloor) {
             this.isJumping = false;
         }
 
-        if (this.stone.body.onFloor()) {
-            if ((this.stone.body.position.y == this.stone.body.prev.y)) {
-                this.tweens.add({
-                    targets: this.stone,
-                    alpha: 0,
-                    onComplete: () => {
-                        this.stone.setPosition(1160, 80);
-                        this.stone.body.setVelocityY(0);
-                        this.stone.setAlpha(1);
-                        this.rock1.stoneOff = true;
-                        this.rock2.stoneOff = true;
-                        this.testRock.stoneOff = true;
-                    }
-                });
-            }
-        }
-
         // Reduce horizontal drag while in-air so player retains momentum
         if (this.isJumping) {
-            this.rock1.playerOff = true;
-            this.rock2.playerOff = true;
-            this.testRock.playerOff = true;
             this.player.body.setDragX(500);
         } else {
             this.player.body.setDragX(900);
         }
 
-        // Keyboard movement
+        // Movement
         const moveSpeed = 250;
 
-        if (!(this.cursors.left.isDown && this.cursors.right.isDown)) {
-            if (this.cursors.left.isDown) {
+        if (!(this.cursors.left.isDown && this.cursors.right.isDown) && !(this.touchLeft && this.touchRight)) {
+            if (this.cursors.left.isDown || this.touchLeft) {
                 if (this.player.body.velocity.x > -moveSpeed) {
                     this.player.setVelocityX(this.player.body.velocity.x - (25));
                 }
             }
-            else if (this.cursors.right.isDown) {
+            else if (this.cursors.right.isDown || this.touchRight) {
                 if (this.player.body.velocity.x < moveSpeed) {
                     this.player.setVelocityX(this.player.body.velocity.x + (25));
                 }
             }
         }
 
-        if (this.cursors.up.isDown && onFloor) {
+        // Jump
+        if ((this.cursors.up.isDown || this.touchJump) && onFloor) {
             this.isJumping = true;
-            this.player.setVelocityY(-375);
+            // Jump higher on mushroom platform in past mode
+            if (this.past && this.player.body.touching.down && (this.platform.touching.up || this.platform2.touching.up || this.platform3.touching.up)) {
+                this.jumpSound.play({rate: 0.3 + Math.random() * 0.2});
+                this.player.setVelocityY(-750);
+            }
+            else {
+                this.jumpSound.play({rate: 0.7 + Math.random() * 0.3});
+                this.player.setVelocityY(-475);
+            }
         }
 
+        // variable jump is dead and phaser killed it
+        // if ((this.cursors.up.isDown || this.touchJump) && (Math.floor(time/10) != this.prev_time && Math.floor(time/10) % 5 == 0) && this.player.body.velocity.y < -100) {
+        //     this.prev_time = Math.floor(time/10);
+        //     this.player.setVelocityY(this.player.body.velocity.y - 13);
+        // }
+
+        // lever
         if (!this.physics.overlap(this.lever, this.player)) { // if the player is not in range of the lever
-            this.lever.setFrame("lever"); // lever has no outline
+            this.leverOutline.setAlpha(0); // lever has no outline
             this.lever.disableInteractive(); // cannot click on lever
         }
         else {
-            this.lever.setFrame("leverOutline"); // lever has outline
+            this.leverOutline.setAlpha(1); // lever has outline
             this.lever.setInteractive(); // can interact with lever
         }
     }

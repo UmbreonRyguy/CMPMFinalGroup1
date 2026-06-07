@@ -125,6 +125,26 @@ export default class GameplayPrototypeLevel3 extends Phaser.Scene {
         this.level2tiles = this.level2map.addTilesetImage("level2tiles", "level2tiles", 80, 80);
         this.layer1 = this.level2map.createLayer("Tile Layer 1", this.level2tiles, 0, 0);
         this.layer1.setCollisionFromCollisionGroup();
+        //MUSIC
+        this.anySoundPlaying = this.sound.getAllPlaying().length > 0;
+        if(this.anySoundPlaying){
+            this.sound.stopByKey('mainMenuTheme');
+        }
+
+        this.music = this.sound.add('inGameTheme');
+        var musicPlaying = false;
+
+        if (this.registry.get('musicEnabled')) {
+            if (!musicPlaying) {
+                    this.music.loop = true;
+                    this.music.play();
+                    musicPlaying = true;
+                }
+            }
+        else{
+            this.sound.stopByKey('inGameTheme');
+            musicPlaying = false;
+            }
         // ---------------------------------------------------------------------------------------------
         // "present" stuff
         // ----------------------------------------------------------------------------------------------

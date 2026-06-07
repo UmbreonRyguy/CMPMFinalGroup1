@@ -50,12 +50,53 @@ export default class GameplayPrototype extends Phaser.Scene {
 
     create(){
         // var to keep track of which game state the player is in
+
         this.past = false;
         this.itemsHeld = 0;      
         this.jumpSound = this.sound.add('shorthop');
         this.isJumping = false;
         this.cursors = this.input.keyboard.createCursorKeys();
         this.prev_time = 0;
+
+
+        //MUSIC
+
+        this.anySoundPlaying = this.sound.getAllPlaying().length > 0;
+        if(this.anySoundPlaying){
+            this.sound.stopByKey('mainMenuTheme');
+        }
+
+        this.music = this.sound.add('inGameTheme');
+        var musicPlaying = false;
+
+        if (this.registry.get('musicEnabled')) {
+            if (!musicPlaying) {
+                    this.music.loop = true;
+                    this.music.play();
+                    musicPlaying = true;
+                }
+            }
+        else{
+            this.sound.stopByKey('inGameTheme');
+            musicPlaying = false;
+            }
+
+        this.events.on('resume', (sys, data) => { //check again on scene resume
+            // Update global Tone mute on resume
+            Tone.Destination.mute = !this.registry.get('sfxEnabled');
+            
+            if (this.registry.get('musicEnabled')) {
+                if (!musicPlaying) {
+                    this.music.loop = true;
+                    this.music.play();
+                    musicPlaying = true;
+                }
+            }
+            else {
+                this.sound.stopByKey('mainMenuTheme');
+                musicPlaying = false;
+            }
+        });
         
         // const itemText = this.add.text(1200, 200, "item for player to pick up", {color: "#ffffff", backgroundColor: '#e03f3f', padding: { x: 20, y: 10}}).setInteractive();
         // this.itemText = this.add.text(640, 360, "The player has " + this.itemsHeld + " items right now", {color: "#ffffff"});

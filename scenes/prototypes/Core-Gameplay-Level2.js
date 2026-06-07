@@ -51,6 +51,27 @@ export default class GameplayPrototypeLevel2 extends Phaser.Scene {
         this.cursors = this.input.keyboard.createCursorKeys();
         this.prev_time = 0;
 
+        //MUSIC
+        this.anySoundPlaying = this.sound.getAllPlaying().length > 0;
+        if(this.anySoundPlaying){
+            this.sound.stopByKey('mainMenuTheme');
+        }
+
+        this.music = this.sound.add('inGameTheme');
+        var musicPlaying = false;
+
+        if (this.registry.get('musicEnabled')) {
+            if (!musicPlaying) {
+                    this.music.loop = true;
+                    this.music.play();
+                    musicPlaying = true;
+                }
+            }
+        else{
+            this.sound.stopByKey('inGameTheme');
+            musicPlaying = false;
+            }
+
         //Keyboard input for player movement
 
         //------------------------------------------------

@@ -152,6 +152,9 @@ export default class GameplayPrototypeLevel3 extends Phaser.Scene {
         //this.teleporter1 = this.physics.add.image(120 , 336 , "spriteAtlas", "teleporter").setAngle(180);
         this.stone = this.physics.add.image(1160 , 80 , "spriteAtlas", "stone");
 
+        this.button = this.physics.add.image(840, 635, "spriteAtlas", "button").setToBack();
+        this.button.body.setAllowGravity(0).setImmovable().setDirectControl();
+
         this.add.image(1160 , 80 , "spriteAtlas", "pipe");
         this.jumpSound = this.sound.add('shorthop');
 
@@ -179,17 +182,28 @@ export default class GameplayPrototypeLevel3 extends Phaser.Scene {
         this.player.setCollideWorldBounds(true);
         this.physics.add.collider(this.player, this.layer1);
         this.physics.add.collider(this.player, this.door);
-        this.physics.add.collider(this.layer1, this.stone, () => {
-            this.stone.disableBody(); //there's actually supposed to be a button that the stone lands on to open the door, but im super tired rn
+        this.physics.add.collider(this.button, this.stone, () => { //there's actually supposed to be a button that the stone lands on to open the door, but im super tired rn
             this.tweens.chain({
-                targets: this.door,
+                targets: [this.door, this.button, this.stone],
                 tweens: [
                     {
+                        targets: [this.button, this.stone],
+                        onStart: () => {
+                            this.stone.body.setAllowGravity(false);
+                            this.stone.setY(this.button.y - 13);
+                            this.stone.body.setDirectControl();
+                        },
+                        y: '+=10',
+                        duration: 100
+                    },
+                    {
+                        targets: this.door,
                         y: {from: this.door.y, to: this.door.y + 6 },
                         duration: 500,
                         ease: "Cubic.easeOut"
                     },
                     {
+                        targets: this.door,
                         y: {from: this.door.y, to: -86 },
                         duration: 1000,
                         ease: "Cubic.easeIn"
@@ -197,7 +211,8 @@ export default class GameplayPrototypeLevel3 extends Phaser.Scene {
                 ]
             })
 
-        })
+        });
+        this.physics.add.collider(this.stone, this.layer1);
 
         this.player.body.setMaxVelocity(600 );
         this.player.body.setDragX(900 );

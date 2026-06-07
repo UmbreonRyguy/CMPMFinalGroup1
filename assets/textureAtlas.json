@@ -129,7 +129,7 @@
             "image": "assets/level2sprites.png",
             "format": "ARGB8888",
             "size": {
-                "x": 240,
+                "x": 320,
                 "y": 240
             },
             "frames": [
@@ -215,6 +215,48 @@
                         "y": 0,
                         "w": 80,
                         "h": 160
+                    }
+                },
+                {
+                    "filename": "button",
+                    "rotated": false,
+                    "trimmed": true,
+                    "sourceSize": {
+                        "w": 36,
+                        "h": 10
+                    },
+                    "spriteSourceSize": {
+                        "x": 0,
+                        "y": 0,
+                        "w": 36,
+                        "h": 10
+                    },
+                    "frame": {
+                        "x": 262,
+                        "y": 34,
+                        "w": 36,
+                        "h": 10
+                    }
+                },
+                {
+                    "filename": "buttonBase",
+                    "rotated": false,
+                    "trimmed": true,
+                    "sourceSize": {
+                        "w": 52,
+                        "h": 8
+                    },
+                    "spriteSourceSize": {
+                        "x": 0,
+                        "y": 0,
+                        "w": 52,
+                        "h": 8
+                    },
+                    "frame": {
+                        "x": 254,
+                        "y": 116,
+                        "w": 52,
+                        "h": 8
                     }
                 }
             ]

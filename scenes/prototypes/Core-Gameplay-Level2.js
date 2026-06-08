@@ -100,7 +100,9 @@ export default class GameplayPrototypeLevel2 extends Phaser.Scene {
 
         this.future_bg = this.add.rectangle(1280/2, 720/2, 1280, 720, 0x203030);
 
-        //MUSIC
+        // --------------------------------------------------------------------------------------------------------
+        // MUSIC
+        // --------------------------------------------------------------------------------------------------------
         this.anySoundPlaying = this.sound.getAllPlaying().length > 0;
         if(this.anySoundPlaying){
             this.sound.stopByKey('mainMenuTheme');
@@ -119,34 +121,42 @@ export default class GameplayPrototypeLevel2 extends Phaser.Scene {
         else{
             this.sound.stopByKey('inGameTheme');
             musicPlaying = false;
-            }
+        }
 
         //Keyboard input for player movement
 
-        //------------------------------------------------
-        //Scene inventories 
-        //--------------------------------------------------------
+        // --------------------------------------------------------------------------------------------------------
+        // Scene inventories 
+        // --------------------------------------------------------------------------------------------------------
         this.trashInventory = [] //keep track of the trash here
         this.treasureInventory = [] //keep track of the treasure here
-        //function to keep track of inventories----------------------------------------
-        //Test if the player has expected number of items in inventory.
-            /**
-            * @param {int} number number of expected items
-            * @param {array} Inventory, the inventory I'm checking
-            * @returns {boolean}
-            */
-            this.hasAllItem = (number, Inventory) => Inventory.length == number;
+        
+        // -------------------------------------------------------------------
+        // function to keep track of inventories
+        // -------------------------------------------------------------------
 
-        //------------------------------------------------------------
-        //Prefab class definition
-        //--------------------------------------------------
+        /**
+        * Test if the player has expected number of items in inventory.
+        * @param {int} number number of expected items
+        * @param {array} Inventory the inventory I'm checking
+        * @returns {boolean}
+        */
+        this.hasAllItem = (number, Inventory) => Inventory.length == number;
+
+        // --------------------------------------------------------------------------------------------------------
+        // Prefab class definition
+        // --------------------------------------------------------------------------------------------------------
+
         //base class 
-        class Collectible extends Phaser.GameObjects.Image{
+        class Collectible extends Phaser.Physics.Arcade.Image{
             constructor(scene, x, y, texture){
                 super(scene, x, y, texture)
                 .setInteractive()
                 .setScale(0.5)
                 scene.add.existing(this)
+                scene.physics.add.existing(this)
+                this.body.allowGravity = false
+                this.pickupWord = texture;
             }
 
             getInventory(){
@@ -161,7 +171,7 @@ export default class GameplayPrototypeLevel2 extends Phaser.Scene {
                     return;
                 }
 
-                const message = this.scene.add.text(this.x, this.y + 20, "You picked up a thing!").setAlpha(0).setColor('#ffffff');
+                const message = this.scene.add.text(this.x, this.y + 20, "You picked up some " + this.pickupWord + "!").setAlpha(0).setColor('#ffffff');
                 this.scene.tweens.add({
                     targets: message,
                     alpha: {from:1, to: 0},
@@ -174,43 +184,85 @@ export default class GameplayPrototypeLevel2 extends Phaser.Scene {
 
         }
 
-        //prefab for trash---------------------------------------------------------------------------------
+        // --------------------------------------------------------------------------------------------------------
+        // Prefab for trash
+        // --------------------------------------------------------------------------------------------------------
+
         class TrashInfo extends Collectible{
             constructor(scene, x, y, keyword){
                 super(scene, x, y, 'trash');
-                let trashMessage = scene.add.text(this.x, this.y-10, "Someone left trash here.").setColor('#ffffff').setAlpha(0)
-                this.on('pointerover', () => trashMessage.setAlpha(1))
-                .on('pointerout', () => trashMessage.setAlpha(0))
-                .on('pointerdown', () => {
-                    trashMessage.setAlpha(0);
+                //let trashMessage = scene.add.text(this.x, this.y-10, "Someone left trash here.").setColor('#ffffff').setAlpha(0)
+                //this.on('pointerover', () => trashMessage.setAlpha(1))
+                this.on('pointerdown', () =>{
+                    this.scene.tweens.add({
+                        targets: this,
+                        angle: {from: 0, to: 7},
+                        duration: 100,
+                        yoyo: true,
+                        repeat: 3
+                    });
+                })
+                .on('pointerout', () => this.setAngle(0));
+                //scene.trashGroup.add(this)
+                //let overlapped = false;
+                
+                scene.physics.add.overlap(scene.player, this, ()=>{
                     this.gainItem(keyword);
                     this.scene.tweens.add({
                         targets: this, 
                         alpha: {from: 1, to: 0},
                         duration: 500,
-                        onComplete: ()=> {this.destroy(); 
-                            trashMessage.destroy();
+                        onComplete: ()=> {this.destroy()
                         }
                     });
-                })
+                });
             }
 
-            //Don't know if this methood was overwritten correctly.
             getInventory(){
-                //line below is causing errors
                 return this.scene.trashInventory;
             }
         }
 
-        //prefab for Treasure---------------------------------------------------------------------------------
+        // --------------------------------------------------------------------------------------------------------
+        // Prefab for Treasure
+        // --------------------------------------------------------------------------------------------------------
+
         class TreasureInfo extends Collectible{
             constructor(scene, x, y, keyword){
                 super(scene, x, y, 'treasure');
-                scene.add.existing(this)
-                let treasureMessage = scene.add.text(this.x, this.y-10, "ooo treasure").setColor('#ffffff').setAlpha(0)
-                this.on('pointerover', () => treasureMessage.setAlpha(1))
-                .on('pointerout', () => treasureMessage.setAlpha(0))
-                .on('pointerdown', () => {
+                this.resetX = x;
+                this.resetY = y;
+                this.active = false;
+                //scene.add.existing(this)
+                //let treasureMessage = scene.add.text(this.x, this.y-10, "ooo treasure").setColor('#ffffff').setAlpha(0)
+                //this.on('pointerover', () => treasureMessage.setAlpha(1))
+                //.on('pointerout', () => treasureMessage.setAlpha(0))
+                this.on('pointerdown', () =>{
+                    this.scene.tweens.add({
+                        targets: this,
+                        angle: {from: 0, to: 360},
+                        duration: 300,
+                        repeat: 3
+                    })
+                });
+                
+                scene.physics.add.overlap(scene.player, this, ()=>{
+                    this.gainItem(keyword);
+                    this.scene.tweens.add({
+                        targets: this, 
+                        alpha: {from: 1, to: 0},
+                        duration: 500,
+                        onComplete: ()=> {
+                            //this.destroy(); 
+                            this.scene.scene.start('end-scene');
+                        }
+                    });
+
+                });
+
+                this.setAlpha(0).setInteractive(false).disableBody();
+
+                /*.on('pointerdown', () => {
                     treasureMessage.setAlpha(0);
                     this.gainItem(keyword);
                     this.scene.tweens.add({
@@ -221,18 +273,24 @@ export default class GameplayPrototypeLevel2 extends Phaser.Scene {
                             treasureMessage.destroy();
                         }
                     });
-                })
+                })*/
             }
                 
             getInventory(){
                 return this.scene.treasureInventory;
             }
 
+            appear() {
+                this.setAlpha(1).setInteractive(true).enableBody(true, this.resetX, this.resetY);
+                this.active = true;
+            }
+
         }
 
-        //----------------------------------------
-        //TileMap
-        //----------------------------------------
+        // --------------------------------------------------------------------------------------------------------
+        // TileMap
+        // --------------------------------------------------------------------------------------------------------
+
         const prototypeMap = this.make.tilemap({key: "lvl2tilemap"});
         const prototypeTiles = prototypeMap.addTilesetImage("Prototype_Tiles", "Prototype_Tiles", 80, 80);
         this.layer1 = prototypeMap.createLayer("Tile Layer 1", prototypeTiles, 0, 0);
@@ -241,9 +299,9 @@ export default class GameplayPrototypeLevel2 extends Phaser.Scene {
         this.add.rectangle(560, 460, 480, 60, 0x385a33);
         this.overlay = this.add.rectangle(this.CX, this.CY, this.W, this.H, 0xf9a039, 0.1);
 
-        // ------------------------
+        // --------------------------------------------------------------------------------------------------------
         // PLAYER
-        // ------------------------
+        // --------------------------------------------------------------------------------------------------------
 
         //Create Player sprite
         this.player = this.physics.add.sprite(880, 720 - 250, "playerS", 0).setScale(1);
@@ -260,9 +318,13 @@ export default class GameplayPrototypeLevel2 extends Phaser.Scene {
             repeat: 0
         });
 
+        // -------------------------------------------------------------------
+        // Player physics
+        // -------------------------------------------------------------------
+
         this.isJumping = false;
         this.justLanded = false;
-        //Player physics
+
         this.player.setCollideWorldBounds(true);
 
         this.player.body.setMaxVelocity(600);
@@ -272,8 +334,10 @@ export default class GameplayPrototypeLevel2 extends Phaser.Scene {
         this.physics.add.collider(this.player, this.layer1);
 
         this.platform = this.physics.add.body(400 - 80, 400, 480, 30).setAllowGravity(false).setImmovable();
+        this.platform2 = this.physics.add.body(1050 + 80, 275, 150, 28).setAllowGravity(false).setImmovable();
+        this.platform3 = this.physics.add.body(50, 500, 220, 28).setAllowGravity(false).setImmovable();
 
-        this.physics.add.collider(this.player, this.platform, () => {
+        this.physics.add.collider(this.player, [this.platform, this.platform2, this.platform3], () => {
             if (this.player.body.touching.down) {
                 // small bounce while on mushroom
                 // the real bounce happens in update if you press jump
@@ -281,14 +345,17 @@ export default class GameplayPrototypeLevel2 extends Phaser.Scene {
                     this.player.body.setVelocityY((this.player.body.velocity.y - 150));
                 }
                 else {
-                    this.player.body.setVelocityX((this.player.body.velocity.x + 250));
+                    if (this.platform2.touching.up) { //platform 2 runs the opposite way
+                        this.player.body.setVelocityX((this.player.body.velocity.x - 250));
+                    }
+                    else {
+                        this.player.body.setVelocityX((this.player.body.velocity.x + 250));
+                    }
                 }
             }
         });
 
-        this.platform2 = this.physics.add.body(1050 + 80, 275, 150, 28).setAllowGravity(false).setImmovable();
-
-        this.physics.add.collider(this.player, this.platform2, () => {
+        /*this.physics.add.collider(this.player, this.platform2, () => {
             if (this.player.body.touching.down) {
                 // small bounce while on mushroom
                 // the real bounce happens in update if you press jump
@@ -299,61 +366,70 @@ export default class GameplayPrototypeLevel2 extends Phaser.Scene {
                     this.player.body.setVelocityX((this.player.body.velocity.x - 250));
                 }
             }
-        });
+        });*/
 
-        this.platform3 = this.physics.add.body(50, 500, 220, 28).setAllowGravity(false).setImmovable();
 
-        this.physics.add.collider(this.player, this.platform3, () => {
+        /*this.physics.add.collider(this.player, this.platform3, () => {
             if (this.player.body.touching.down) {
                 // small bounce while on mushroom
                 // the real bounce happens in update if you press jump
                 if (this.past == true) {
-                    this.player.body.setVelocityY((this.player.body.velocity.y - 250));
+                    this.player.body.setVelocityY((this.player.body.velocity.y - 150));
                 }
                 else {
                     this.player.body.setVelocityX((this.player.body.velocity.x + 250));
                 }
             }
-        });
+        });*/
 
         this.lever = this.physics.add.sprite(570, 120, "spriteAtlas", "lever");
-        this.leverOutline = this.add.sprite(570, 120, "spriteAtlas", "leverOutline").setAlpha(0);
         this.lever.body.setCircle(80, -40 , -25).setAllowGravity(false).setImmovable();
 
         // mushroom - stored as instance properties for access from other methods
-        this.mush1 = this.add.image(400 - 40, 400 + 15, "Prototype_Tiles", 21).setAlpha(0);
+
+        this.mush1 = this.addSpriteWithTiles(6, 360, 400 + 15, 21, 23, 0);
+        /*this.mush1 = this.add.image(400 - 40, 400 + 15, "Prototype_Tiles", 21).setAlpha(0);
         this.mush2 = this.add.image(480 - 40, 400 + 15, "Prototype_Tiles", 22).setAlpha(0);
         this.mush3 = this.add.image(560 - 40, 400 + 15, "Prototype_Tiles", 22).setAlpha(0);
         this.mush4 = this.add.image(640 - 40, 400 + 15, "Prototype_Tiles", 22).setAlpha(0);
         this.mush5 = this.add.image(720 - 40, 400 + 15, "Prototype_Tiles", 22).setAlpha(0);
-        this.mush6 = this.add.image(800 - 40, 400 + 15, "Prototype_Tiles", 23).setAlpha(0);
+        this.mush6 = this.add.image(800 - 40, 400 + 15, "Prototype_Tiles", 23).setAlpha(0);*/
 
-        this.mush11 = this.add.image(1050 + 115, 275 + 15, "Prototype_Tiles", 21).setAlpha(0);
-        this.mush12 = this.add.image(1130 + 115, 275 + 15, "Prototype_Tiles", 23).setAlpha(0);
 
-        this.mush21 = this.add.image(50 + 25, 500 + 15, "Prototype_Tiles", 21).setAlpha(0);
-        this.mush22 = this.add.image(130 + 25, 500 + 15, "Prototype_Tiles", 22).setAlpha(0);
-        this.mush23 = this.add.image(210 + 25, 500 + 15, "Prototype_Tiles", 23).setAlpha(0);
+        this.mush2 = this.addSpriteWithTiles(2, 1050 + 115, 275 + 15, 21, 23, 0);
+        //this.mush11 = this.add.image(1050 + 115, 275 + 15, "Prototype_Tiles", 21).setAlpha(0);
+        //this.mush12 = this.add.image(1130 + 115, 275 + 15, "Prototype_Tiles", 23).setAlpha(0);
+
+        this.mush3 = this.addSpriteWithTiles(3, 50 + 25, 500 + 15, 21, 23, 0);
+        //this.mush21 = this.add.image(50 + 25, 500 + 15, "Prototype_Tiles", 21).setAlpha(0);
+        //this.mush22 = this.add.image(130 + 25, 500 + 15, "Prototype_Tiles", 22).setAlpha(0);
+        //this.mush23 = this.add.image(210 + 25, 500 + 15, "Prototype_Tiles", 23).setAlpha(0);
 
         // conveyor belt - stored as instance properties for access from other methods
-        this.con1 = this.add.image(400 - 40, 400 + 15, "Prototype_Tiles", 14);
+        this.con1 = this.addSpriteWithTiles(6, 360, 400 + 15, 14, 16, 1);
+        /*this.con1 = this.add.image(400 - 40, 400 + 15, "Prototype_Tiles", 14);
         this.con2 = this.add.image(480 - 40, 400 + 15, "Prototype_Tiles", 15);
         this.con3 = this.add.image(560 - 40, 400 + 15, "Prototype_Tiles", 15);
         this.con4 = this.add.image(640 - 40, 400 + 15, "Prototype_Tiles", 15);
         this.con5 = this.add.image(720 - 40, 400 + 15, "Prototype_Tiles", 15);
-        this.con6 = this.add.image(800 - 40, 400 + 15, "Prototype_Tiles", 16);
+        this.con6 = this.add.image(800 - 40, 400 + 15, "Prototype_Tiles", 16);*/
 
-        this.con11 = this.add.image(1050 + 115, 275 + 15, "Prototype_Tiles", 14);
-        this.con12 = this.add.image(1130 + 115, 275 + 15, "Prototype_Tiles", 16);
+        this.con2 = this.addSpriteWithTiles(2, 1050 + 115, 275 + 15, 14, 16, 1);
+        //this.con11 = this.add.image(1050 + 115, 275 + 15, "Prototype_Tiles", 14);
+        //this.con12 = this.add.image(1130 + 115, 275 + 15, "Prototype_Tiles", 16);
 
-        this.con21 = this.add.image(50 + 25, 500 + 15, "Prototype_Tiles", 14);
+        this.con3 = this.addSpriteWithTiles(3, 50 + 25, 500 + 15, 14, 16, 1);
+        /*this.con21 = this.add.image(50 + 25, 500 + 15, "Prototype_Tiles", 14);
         this.con22 = this.add.image(130 + 25, 500 + 15, "Prototype_Tiles", 15);
-        this.con23 = this.add.image(210 + 25, 500 + 15, "Prototype_Tiles", 16);
+        this.con23 = this.add.image(210 + 25, 500 + 15, "Prototype_Tiles", 16);*/
 
         // trash + treasure
-        this.trash = new TrashInfo(this, 1230, 350, 'trash') ;
+        this.trash = new TrashInfo(this, 1230, 350, 'trash');
         this.trash2 = new TrashInfo(this, 920, 80, 'trash2');
-        this.treasure = new TreasureInfo(this, 160, 175, 'treasure') ;
+        this.treasure = new TreasureInfo(this, 160, 175, 'treasure');
+
+        this.trashInventCheck = this.add.text( 600, 200, "Has the player collected all trash?").setAlpha(0);
+        this.treasureInventCheck = this.add.text(600, 220, "Has the player collected all treasure?").setAlpha(0);
 
         this.timestatetext =this.add.text(40, 30, "FUTURE", {
             color: "#ffffff",
@@ -365,7 +441,7 @@ export default class GameplayPrototypeLevel2 extends Phaser.Scene {
             console.log("Lever clicked! Current past state:", this.past);
             if (this.past == true) {
                 this.lever.flipX = false;
-                this.leverOutline.flipX = false;
+                //this.leverOutline.flipX = false;
 
                 this.flipToFuture();
 
@@ -373,43 +449,39 @@ export default class GameplayPrototypeLevel2 extends Phaser.Scene {
 
                 this.future_bg.setAlpha(1);
 
-                this.mush1.setAlpha(0);
-                this.mush2.setAlpha(0);
-                this.mush3.setAlpha(0);
-                this.mush4.setAlpha(0);
-                this.mush5.setAlpha(0);
-                this.mush6.setAlpha(0);
+                this.mush1.forEach((part) => {
+                    part.setAlpha(0);
+                })
 
-                this.mush11.setAlpha(0);
-                this.mush12.setAlpha(0);
+                this.mush2.forEach((part) => {
+                    part.setAlpha(0);
+                });
 
-                this.mush21.setAlpha(0);
-                this.mush22.setAlpha(0);
-                this.mush23.setAlpha(0);
+                this.mush3.forEach((part) => {
+                    part.setAlpha(0);
+                })
 
                 this.platform.y -= 10;
                 this.platform2.y -= 10;
                 this.platform3.y -= 10;
 
-                this.con1.setAlpha(1);
-                this.con2.setAlpha(1);
-                this.con3.setAlpha(1);
-                this.con4.setAlpha(1);
-                this.con5.setAlpha(1);
-                this.con6.setAlpha(1);
+                this.con1.forEach((part) => {
+                    part.setAlpha(1);
+                })
 
-                this.con11.setAlpha(1);
-                this.con12.setAlpha(1);
+                this.con2.forEach((part) => {
+                    part.setAlpha(1);
+                })
 
-                this.con21.setAlpha(1);
-                this.con22.setAlpha(1);
-                this.con23.setAlpha(1);
+                this.con3.forEach((part) => {
+                    part.setAlpha(1);
+                })
 
                 this.past = false;
             }
             else {
                 this.lever.flipX = true;
-                this.leverOutline.flipX = true;
+                //this.leverOutline.flipX = true;
 
                 this.flipToPast();
 
@@ -417,45 +489,43 @@ export default class GameplayPrototypeLevel2 extends Phaser.Scene {
 
                 this.timestatetext.text = "PAST";
 
-                this.con1.setAlpha(0);
-                this.con2.setAlpha(0);
-                this.con3.setAlpha(0);
-                this.con4.setAlpha(0);
-                this.con5.setAlpha(0);
-                this.con6.setAlpha(0);
 
-                this.con11.setAlpha(0);
-                this.con12.setAlpha(0);
+                this.con1.forEach((part) => {
+                    part.setAlpha(0); 
+                });
 
-                this.con21.setAlpha(0);
-                this.con22.setAlpha(0);
-                this.con23.setAlpha(0);
+                this.con2.forEach((part) => {
+                    part.setAlpha(0);
+                })
+
+                this.con3.forEach((part) => {
+                    part.setAlpha(0);
+                })
+
 
                 this.platform.y += 10;
                 this.platform2.y += 10;
                 this.platform3.y += 10;
 
-                this.mush1.setAlpha(1);
-                this.mush2.setAlpha(1);
-                this.mush3.setAlpha(1);
-                this.mush4.setAlpha(1);
-                this.mush5.setAlpha(1);
-                this.mush6.setAlpha(1);
+                this.mush1.forEach((part) => {
+                    part.setAlpha(1);
+                })
 
-                this.mush11.setAlpha(1);
-                this.mush12.setAlpha(1);
+                this.mush2.forEach((part) => {
+                    part.setAlpha(1);
+                })
 
-                this.mush21.setAlpha(1);
-                this.mush22.setAlpha(1);
-                this.mush23.setAlpha(1);
+                this.mush3.forEach((part) => {
+                    part.setAlpha(1);
+                })
 
                 this.past = true;
             }
         });
 
-        //----------------------------------------
-        //UI
-        //----------------------------------------
+        // --------------------------------------------------------------------------------------------------------
+        // UI
+        // --------------------------------------------------------------------------------------------------------
 
         this.pauseButton = this.add.image(1200, 70, "pauseIcon").setOrigin(0.5).setScale(2).setInteractive();
         //this.pauseButton.on('pointerover', () =>this.pauseButton.setTint(0xFF5C5));
@@ -463,10 +533,12 @@ export default class GameplayPrototypeLevel2 extends Phaser.Scene {
             console.log("pause button clicked");
             this.scene.pause();
             this.scene.launch('pause', { resumeKey: 'core-gameplay-level2' });
-        })
-        // --------------------
+        });
+
+        // -------------------------------------------------------------------
         // touch UI
-        // --------------------
+        // -------------------------------------------------------------------
+
         this.leftButton = this.add.image((1280*2/16), (720*4.7/6), 'arrowButton')
             .setScale(4)
             .setAlpha(0.5)
@@ -533,9 +605,11 @@ export default class GameplayPrototypeLevel2 extends Phaser.Scene {
 
 
     update() {
-        //
+
+        // --------------------------------------------------------------------------------------------------------
         // player stuff
-        //
+        // --------------------------------------------------------------------------------------------------------
+
         const onFloor = this.player.body.onFloor();
         if (onFloor && this.isJumping) {
             this.isJumping = false;
@@ -551,7 +625,10 @@ export default class GameplayPrototypeLevel2 extends Phaser.Scene {
             this.player.body.setDragX(900);
         }
 
+        // -------------------------------------------------------------------
         // Movement
+        // -------------------------------------------------------------------
+
         const moveSpeed = 250;
         const movingLeft  = this.cursors.left.isDown  || this.touchLeft;
         const movingRight = this.cursors.right.isDown || this.touchRight;
@@ -588,7 +665,10 @@ export default class GameplayPrototypeLevel2 extends Phaser.Scene {
             }
         }
 
+        // -------------------------------------------------------------------
         // Jump
+        // -------------------------------------------------------------------
+
         const jumpCaption = this.add.text(1280/2, 600, '*boing*', {
             color: "#ffffff",
             fontFamily: 'pixel',
@@ -653,14 +733,58 @@ export default class GameplayPrototypeLevel2 extends Phaser.Scene {
         //     this.player.setVelocityY(this.player.body.velocity.y - 13);
         // }
 
-        // lever
+
+        // --------------------------------------------------------------------------------------------------------
+        // lever interactions
+        // --------------------------------------------------------------------------------------------------------
         if (!this.physics.overlap(this.lever, this.player)) { // if the player is not in range of the lever
-            this.leverOutline.setAlpha(0); // lever has no outline
+            this.lever.setFrame("lever"); // lever has no outline
             this.lever.disableInteractive(); // cannot click on lever
         }
         else {
-            this.leverOutline.setAlpha(1); // lever has outline
+            this.lever.setFrame("leverOutline"); // lever has outline
             this.lever.setInteractive(); // can interact with lever
         }
+
+        // --------------------------------------------------------------------------------------------------------
+        // checking inventory
+        // --------------------------------------------------------------------------------------------------------
+        
+        if (this.hasAllItem(2, this.trashInventory)){
+            this.trashInventCheck.setText("Has the player collected all trash? Yes!")
+            if (this.treasure.active == false) {
+                this.treasure.appear();
+            }
+        } else {
+            this.trashInventCheck.setText("Has the player collected all trash? No")
+        }
+
+        if(this.hasAllItem(1, this.treasureInventory)){
+            this.treasureInventCheck.setText("Has the player collected all treasure? Yes!")
+        }else{
+            this.treasureInventCheck.setText("Has the player collected all treasure? No")
+        }
+    }
+
+    // makes a line of images and adds them to an array which gets returned; used to make long conveyor belts and mushrooms
+    addSpriteWithTiles(num_tiles, startingX, y, indexLeft, indexRight, alpha) { // num_tiles is how long you want your conveyour belt or mushroom or whatever
+        let arr = [];
+        for (let i = 0; i < num_tiles; ++i) {
+            let indexToAdd = null;
+            switch (i) {
+                case 0:
+                    indexToAdd = indexLeft;
+                    break;
+                case num_tiles - 1:
+                    indexToAdd = indexRight;
+                    break;
+                default:
+                    indexToAdd = indexLeft + 1;
+                    break;
+
+            }
+            arr.push(this.add.image(startingX + (i * 80), y, "Prototype_Tiles", indexToAdd).setAlpha(alpha));
+        }
+        return arr;
     }
 }

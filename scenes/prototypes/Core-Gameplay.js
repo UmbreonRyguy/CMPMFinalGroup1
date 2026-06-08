@@ -106,11 +106,12 @@ export default class GameplayPrototype extends Phaser.Scene {
         this.makeLeaves(50, 1);
         this.future_bg = this.add.rectangle(1280/2, 720/2, 1280, 720, 0x203030);
 
-
-        //MUSIC
+        // --------------------------------------------------------------------------------------------------------
+        // MUSIC
+        // --------------------------------------------------------------------------------------------------------
 
         this.anySoundPlaying = this.sound.getAllPlaying().length > 0;
-        if(this.anySoundPlaying){
+        if (this.anySoundPlaying){
             this.sound.stopByKey('mainMenuTheme');
         }
 
@@ -127,7 +128,7 @@ export default class GameplayPrototype extends Phaser.Scene {
         else{
             this.sound.stopByKey('inGameTheme');
             musicPlaying = false;
-            }
+        }
 
         this.events.on('resume', (sys, data) => { //check again on scene resume
             // Update global Tone mute on resume
@@ -172,9 +173,9 @@ export default class GameplayPrototype extends Phaser.Scene {
         // leftButton.angle = 90;
         // leftButton.setAlpha(0.5);
         
-        // ------------------------
+        // --------------------------------------------------------------------------------------------------------
         // PLAYER
-        // ------------------------
+        // --------------------------------------------------------------------------------------------------------
     
         //Create Player sprite
         this.player = this.physics.add.sprite(600, 500, "playerS", 0).setScale(1);
@@ -202,23 +203,29 @@ export default class GameplayPrototype extends Phaser.Scene {
 
         //Keyboard input for player movement
 
-        //------------------------------------------------
-        //Scene inventories 
-        //--------------------------------------------------------
+        // --------------------------------------------------------------------------------------------------------
+        // Scene inventories 
+        // --------------------------------------------------------------------------------------------------------
+        
         this.trashInventory = [] //keep track of the trash here
         this.treasureInventory = [] //keep track of the treasure here
-        //function to keep track of inventories----------------------------------------
-        //Test if the player has expected number of items in inventory.
-            /**
-            * @param {int} number number of expected items
-            * @param {array} Inventory, the inventory I'm checking
-            * @returns {boolean}
-            */
-            this.hasAllItem = (number, Inventory) => Inventory.length == number;
 
-        //------------------------------------------------------------
-        //Prefab class definition
-        //--------------------------------------------------
+        // -------------------------------------------------------------------
+        // function to keep track of inventories
+        // -------------------------------------------------------------------
+
+        /**
+        * Tests if the player has expected number of items in inventory.
+        * @param {int} number number of expected items
+        * @param {array} Inventory the inventory I'm checking
+        * @returns {boolean}
+        */
+        this.hasAllItem = (number, Inventory) => Inventory.length == number;
+
+        // --------------------------------------------------------------------------------------------------------
+        // Prefab class definition
+        // --------------------------------------------------------------------------------------------------------
+
         //base class 
         class Collectible extends Phaser.Physics.Arcade.Image{
             constructor(scene, x, y, texture){
@@ -228,6 +235,7 @@ export default class GameplayPrototype extends Phaser.Scene {
                 scene.add.existing(this)
                 scene.physics.add.existing(this)
                 this.body.allowGravity = false
+                this.pickupWord = texture;
             }
 
             getInventory(){
@@ -242,7 +250,7 @@ export default class GameplayPrototype extends Phaser.Scene {
                     return;
                 }
 
-                const message = this.scene.add.text(this.x, this.y + 20, "You picked up some trash!").setAlpha(0).setColor('#ffffff');
+                const message = this.scene.add.text(this.x, this.y + 20, "You picked up some " + this.pickupWord + "!").setAlpha(0).setColor('#ffffff');
                 this.scene.tweens.add({
                     targets: message,
                     alpha: {from:1, to: 0},
@@ -256,7 +264,11 @@ export default class GameplayPrototype extends Phaser.Scene {
         }
         //adding a group for trash so they all get collected when overlapping with player
         //this.trashGroup = this.physics.add.group();
-        //prefab for trash---------------------------------------------------------------------------------
+
+        // --------------------------------------------------------------------------------------------------------
+        // prefab for trash
+        // --------------------------------------------------------------------------------------------------------
+
         class TrashInfo extends Collectible{
             constructor(scene, x, y, keyword){
                 super(scene, x, y, 'trash');
@@ -292,22 +304,28 @@ export default class GameplayPrototype extends Phaser.Scene {
             }
         }
 
-        //prefab for Treasure---------------------------------------------------------------------------------
+        // --------------------------------------------------------------------------------------------------------
+        // prefab for Treasure
+        // --------------------------------------------------------------------------------------------------------
+
         class TreasureInfo extends Collectible{
             constructor(scene, x, y, keyword){
                 super(scene, x, y, 'treasure');
-                scene.add.existing(this)
+                this.resetX = x;
+                this.resetY = y;
+                this.active = false;
+                //scene.add.existing(this)
                 //let treasureMessage = scene.add.text(this.x, this.y-10, "ooo treasure").setColor('#ffffff').setAlpha(0)
                 //this.on('pointerover', () => treasureMessage.setAlpha(1))
                 //.on('pointerout', () => treasureMessage.setAlpha(0))
-                .on('pointerdown', () =>{
+                this.on('pointerdown', () =>{
                     this.scene.tweens.add({
                         targets: this,
                         angle: {from: 0, to: 360},
                         duration: 300,
                         repeat: 3
                     })
-                })
+                });
                 
                 scene.physics.add.overlap(scene.player, this, ()=>{
                     this.gainItem(keyword);
@@ -322,6 +340,8 @@ export default class GameplayPrototype extends Phaser.Scene {
                     });
 
                 });
+
+                this.setAlpha(0).setInteractive(false).disableBody();
 
                 /*.on('pointerdown', () => {
                     treasureMessage.setAlpha(0);
@@ -341,6 +361,11 @@ export default class GameplayPrototype extends Phaser.Scene {
                 return this.scene.treasureInventory;
             }
 
+            appear() {
+                this.setAlpha(1).setInteractive(true).enableBody(true, this.resetX, this.resetY);
+                this.active = true;
+            }
+
         }
 
         //Platform? maybe should be in Level 1?
@@ -358,51 +383,55 @@ export default class GameplayPrototype extends Phaser.Scene {
                 }
             }
         });
-        //----------------------------------------
-        //TileMap
-        //----------------------------------------
-            const prototypeMap = this.make.tilemap({key: "prototypeTilemap"});
-            const prototypeTiles = prototypeMap.addTilesetImage("Prototype_Tiles", "Prototype_Tiles", 80, 80);
-            this.layer1 = prototypeMap.createLayer("Tile Layer 1", prototypeTiles, 0, 0);
-            this.layer1.setCollisionFromCollisionGroup();
-            this.overlay = this.add.rectangle(this.CX, this.CY, this.W, this.H, 0xf9a039, 0.1);
-            
-            // Add player collider now that the tilemap is created
-            this.physics.add.collider(this.player, this.layer1);
 
-            this.lever = this.physics.add.sprite(60, 202, "spriteAtlas", "lever");
-            this.leverOutline = this.add.sprite(60, 202, "spriteAtlas", "leverOutline").setAlpha(0);
-            this.lever.body.setCircle(80, -40 , -25).setAllowGravity(false).setImmovable();
+        // --------------------------------------------------------------------------------------------------------
+        // TileMap
+        // --------------------------------------------------------------------------------------------------------
 
-            // mushroom - stored as instance properties for access from other methods
-            this.mush1 = this.add.image(480, 400, "Prototype_Tiles", 21).setAlpha(0);
-            this.mush2 = this.add.image(560, 400, "Prototype_Tiles", 22).setAlpha(0);
-            this.mush3 = this.add.image(640, 400, "Prototype_Tiles", 23).setAlpha(0);
+        const prototypeMap = this.make.tilemap({key: "prototypeTilemap"});
+        const prototypeTiles = prototypeMap.addTilesetImage("Prototype_Tiles", "Prototype_Tiles", 80, 80);
+        this.layer1 = prototypeMap.createLayer("Tile Layer 1", prototypeTiles, 0, 0);
+        this.layer1.setCollisionFromCollisionGroup();
+        this.overlay = this.add.rectangle(this.CX, this.CY, this.W, this.H, 0xf9a039, 0.1);
+        
+        // Add player collider now that the tilemap is created
+        this.physics.add.collider(this.player, this.layer1);
 
-            // conveyor belt - stored as instance properties for access from other methods
-            this.con1 = this.add.image(480, 400, "Prototype_Tiles", 14);
-            this.con2 = this.add.image(560, 400, "Prototype_Tiles", 15);
-            this.con3 = this.add.image(640, 400, "Prototype_Tiles", 16);
+        this.lever = this.physics.add.sprite(60, 202, "spriteAtlas", "lever");
+        
+        this.lever.body.setCircle(80, -40 , -25).setAllowGravity(false).setImmovable();
 
-            //added trash object for player to interact with
-            //let trash = this.add.image(100, 220, "trash")
-            this.trash = new TrashInfo(this, 100, 220, 'trash'); 
+        // mushroom - stored as instance properties for access from other methods
+        this.mush = this.addSpriteWithTiles(3, 480, 400, 21, 23, 0);
+        //this.mush1 = this.add.image(480, 400, "Prototype_Tiles", 21).setAlpha(0);
+        //this.mush2 = this.add.image(560, 400, "Prototype_Tiles", 22).setAlpha(0);
+        //this.mush3 = this.add.image(640, 400, "Prototype_Tiles", 23).setAlpha(0);
 
-            this.trash2 = new TrashInfo(this, 950, 370, 'trash2') ;
-    
+        // conveyor belt - stored as instance properties for access from other methods
+        this.con = this.addSpriteWithTiles(3, 480, 400, 14, 16, 1);
+        //this.con1 = this.add.image(480, 400, "Prototype_Tiles", 14);
+        //this.con2 = this.add.image(560, 400, "Prototype_Tiles", 15);
+        //this.con3 = this.add.image(640, 400, "Prototype_Tiles", 16);
 
-            this.trashInventCheck = this.add.text( 600, 200, "Has the player collected all trash?").setAlpha(0);
-            this.treasureInventCheck = this.add.text(600, 220, "Has the player collected all treasure?").setAlpha(0);
+        //added trash object for player to interact with
+        //let trash = this.add.image(100, 220, "trash")
+
+        // --------------------------------------------------------------------------------------------------------
+        // Adding trash and treasure
+        // --------------------------------------------------------------------------------------------------------
+
+        this.trash = new TrashInfo(this, 100, 220, 'trash'); 
+        this.trash2 = new TrashInfo(this, 950, 370, 'trash2');
+
+        this.treasure = new TreasureInfo(this, 1000, 130, 'treasure');
+
+        this.trashInventCheck = this.add.text( 600, 200, "Has the player collected all trash?").setAlpha(0);
+        this.treasureInventCheck = this.add.text(600, 220, "Has the player collected all treasure?").setAlpha(0);
 
 
-
-            this.treasure = new TreasureInfo(this, 1000, 130, 'treasure');
-
-            //need to check for overlaps
-            /*scene.physics.add.overlap(this.player, this.trashGroup, ()=>{
-
-
-            });*/
+        // --------------------------------------------------------------------------------------------------------
+        // Past & Future Switch Stuff
+        // --------------------------------------------------------------------------------------------------------
         
         this.timestatetext =this.add.text(40, 30, "FUTURE", {
             color: "#ffffff",
@@ -415,17 +444,24 @@ export default class GameplayPrototype extends Phaser.Scene {
             if (this.past == true) {
                 this.future_bg.setAlpha(1);
                 this.lever.flipX = false;
-                this.leverOutline.flipX = false;
+                //this.leverOutline.flipX = false;
                 console.log("Switching to future - hiding mushrooms, showing conveyors");
                 this.timestatetext.text = "FUTURE";
                 this.flipToFuture();
-                this.mush1.setAlpha(0);
-                this.mush2.setAlpha(0);
-                this.mush3.setAlpha(0);
 
-                this.con1.setAlpha(1);
-                this.con2.setAlpha(1);
-                this.con3.setAlpha(1);
+                this.mush.forEach((part) => {
+                    part.setAlpha(0);
+                });
+                //this.mush1.setAlpha(0);
+                //this.mush2.setAlpha(0);
+                //this.mush3.setAlpha(0);
+
+                this.con.forEach((part) => {
+                    part.setAlpha(1);
+                });
+                //this.con1.setAlpha(1);
+                //this.con2.setAlpha(1);
+                //this.con3.setAlpha(1);
 
                 this.platform.setSize(240, 28).reset(440, 386);
 
@@ -436,24 +472,33 @@ export default class GameplayPrototype extends Phaser.Scene {
                 this.timestatetext.text = "PAST";
                 this.future_bg.setAlpha(0);
                 this.lever.flipX = true;
-                this.leverOutline.flipX = true;
+                //this.leverOutline.flipX = true;
                 this.flipToPast();
-                this.con1.setAlpha(0);
-                this.con2.setAlpha(0);
-                this.con3.setAlpha(0);
+                this.mush.forEach((part) => {
+                    part.setAlpha(1);
+                });
 
-                this.mush1.setAlpha(1);
-                this.mush2.setAlpha(1);
-                this.mush3.setAlpha(1);
+                this.con.forEach((part) => {
+                    part.setAlpha(0);
+                })
+
+                //this.con1.setAlpha(0);
+                //this.con2.setAlpha(0);
+                //this.con3.setAlpha(0);
+
+                //this.mush1.setAlpha(1);
+                //this.mush2.setAlpha(1);
+                //this.mush3.setAlpha(1);
 
                 this.platform.setSize(240, 28).reset(440, 391);
 
                 this.past = true;
             }
         });
-        //----------------------------------------
-        //UI
-        //----------------------------------------
+
+        // --------------------------------------------------------------------------------------------------------
+        // UI
+        // --------------------------------------------------------------------------------------------------------
 
         // const returnButtonText = this.add.text(1200, 100, "Return to Menu", {color: "#fffcfc", backgroundColor: '#3f1352', padding: { x: 20, y: 10 }}).setOrigin(0.5).setInteractive();
         // returnButtonText.on('pointerdown', ()=> returnButtonText.setTint(0x965A0B));
@@ -475,9 +520,11 @@ export default class GameplayPrototype extends Phaser.Scene {
             this.scene.pause();
             this.scene.launch('pause', { resumeKey: 'core-gameplay' });
         })
-        // --------------------
+
+        // -------------------------------------------------------------------
         // touch UI
-        // --------------------
+        // -------------------------------------------------------------------
+
         this.leftButton = this.add.image((1280*2/16), (720*4.7/6), 'arrowButton')
             .setScale(4)
             .setAlpha(0.5)
@@ -549,9 +596,9 @@ export default class GameplayPrototype extends Phaser.Scene {
 
 
     update() {
-        //
+        // --------------------------------------------------------------------------------------------------------
         // player stuff
-        //
+        // --------------------------------------------------------------------------------------------------------
         const onFloor = this.player.body.onFloor();
 
         if (onFloor && this.isJumping) {
@@ -568,7 +615,10 @@ export default class GameplayPrototype extends Phaser.Scene {
             this.player.body.setDragX(900);
         }
 
+        // -------------------------------------------------------------------
         // Movement
+        // -------------------------------------------------------------------
+
         const moveSpeed = 250;
         const movingLeft  = this.cursors.left.isDown  || this.touchLeft;
         const movingRight = this.cursors.right.isDown || this.touchRight;
@@ -588,8 +638,10 @@ export default class GameplayPrototype extends Phaser.Scene {
             }
         }
 
+        // -------------------------------------------------------------------
+        // Animations
+        // -------------------------------------------------------------------
 
-        //Animations
         if (this.isJumping) {
             if (this.player.anims.currentAnim?.key !== 'jump') this.player.play('jump');
         } else if (onFloor) {
@@ -598,7 +650,7 @@ export default class GameplayPrototype extends Phaser.Scene {
                 this.justLanded = false;
             }
             if (movingLeft || movingRight) {
-                 if (this.player.anims.currentAnim?.key !== 'walk') this.player.play('walk');
+                if (this.player.anims.currentAnim?.key !== 'walk') this.player.play('walk');
             } 
             else {
                 this.player.anims.stop();
@@ -606,20 +658,10 @@ export default class GameplayPrototype extends Phaser.Scene {
             }
         }
 
-        //Checking if inventory is full
-        if (this.hasAllItem(2, this.trashInventory)){
-            this.trashInventCheck.setText("Has the player collected all trash? Yes!")
-        } else {
-            this.trashInventCheck.setText("Has the player collected all trash? No")
-        }
-
-        if(this.hasAllItem(1, this.treasureInventory)){
-            this.treasureInventCheck.setText("Has the player collected all treasure? Yes!")
-        }else{
-             this.treasureInventCheck.setText("Has the player collected all treasure? No")
-        }
-
+        // -------------------------------------------------------------------
         // Jump
+        // -------------------------------------------------------------------
+
         const jumpCaption = this.add.text(1280/2, 600, '*boing*', {
             color: "#ffffff",
             fontFamily: 'pixel',
@@ -684,18 +726,61 @@ export default class GameplayPrototype extends Phaser.Scene {
         //     this.player.setVelocityY(this.player.body.velocity.y - 13);
         // }
 
-        // lever
+        // --------------------------------------------------------------------------------------------------------
+        // lever interactions
+        // --------------------------------------------------------------------------------------------------------
+
         if (!this.physics.overlap(this.lever, this.player)) { // if the player is not in range of the lever
-            this.leverOutline.setAlpha(0); // lever has no outline
+            this.lever.setFrame("lever"); // lever has no outline
             this.lever.disableInteractive(); // cannot click on lever
         }
         else {
-            this.leverOutline.setAlpha(1); // lever has outline
+            this.lever.setFrame("leverOutline"); // lever has outline
             this.lever.setInteractive(); // can interact with lever
+        }
+
+        // --------------------------------------------------------------------------------------------------------
+        // Checking if inventory is full
+        // --------------------------------------------------------------------------------------------------------
+        if (this.hasAllItem(2, this.trashInventory)){
+            this.trashInventCheck.setText("Has the player collected all trash? Yes!")
+            if (this.treasure.active == false) {
+                this.treasure.appear();
+            }
+        } else {
+            this.trashInventCheck.setText("Has the player collected all trash? No")
+        }
+
+        if(this.hasAllItem(1, this.treasureInventory)){
+            this.treasureInventCheck.setText("Has the player collected all treasure? Yes!")
+        }else{
+            this.treasureInventCheck.setText("Has the player collected all treasure? No")
         }
 
         /*if(this.physics.overlap(this.trashGroup, this.player)){
 
         }*/
+    }
+
+    // makes a line of images and adds them to an array which gets returned; used to make long conveyor belts and mushrooms
+    addSpriteWithTiles(num_tiles, startingX, y, indexLeft, indexRight, alpha) { // num_tiles is how long you want your conveyour belt or mushroom or whatever
+        let arr = [];
+        for (let i = 0; i < num_tiles; ++i) {
+            let indexToAdd = null;
+            switch (i) {
+                case 0:
+                    indexToAdd = indexLeft;
+                    break;
+                case num_tiles - 1:
+                    indexToAdd = indexRight;
+                    break;
+                default:
+                    indexToAdd = indexLeft + 1;
+                    break;
+
+            }
+            arr.push(this.add.image(startingX + (i * 80), y, "Prototype_Tiles", indexToAdd).setAlpha(alpha));
+        }
+        return arr;
     }
 }

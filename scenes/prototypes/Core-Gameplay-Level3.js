@@ -82,10 +82,10 @@ export default class GameplayPrototypeLevel3 extends Phaser.Scene {
         this.past = true;
         this.W = this.game.config.width; // 1280 under normal circumstances
         this.H = this.game.config.height; // 720
-        this.W / 1280;
         this.CX = this.W * 0.5; //center x and y
         this.CY = this.H * 0.5;
     }
+
     flipToFuture() {
         const flash = this.add.rectangle(this.CX, this.CY, this.W, this.H, 0xffffff) //screen flash
             .setAlpha(0)
@@ -166,14 +166,20 @@ export default class GameplayPrototypeLevel3 extends Phaser.Scene {
     create() {
         this.makeLeaves(50, 1);
         this.future_bg = this.add.rectangle(1280/2, 720/2, 1280, 720, 0x203030).setAlpha(0);
-        // ---------------------------------------------------------------------------------------------
+
+        // --------------------------------------------------------------------------------------------------------
         // Tile map
-        // -----------------------------------------------------------------------------------------------
-        this.level2map = this.make.tilemap({key: "level2tilemap"});
-        this.level2tiles = this.level2map.addTilesetImage("level2tiles", "level2tiles", 80, 80);
-        this.layer1 = this.level2map.createLayer("Tile Layer 1", this.level2tiles, 0, 0);
+        // --------------------------------------------------------------------------------------------------------
+
+        this.level3map = this.make.tilemap({key: "level3tilemap"});
+        this.level3tiles = this.level3map.addTilesetImage("level3tiles", "level3tiles", 80, 80);
+        this.layer1 = this.level3map.createLayer("Tile Layer 1", this.level3tiles, 0, 0);
         this.layer1.setCollisionFromCollisionGroup();
-        //MUSIC
+
+        // --------------------------------------------------------------------------------------------------------
+        // MUSIC
+        // --------------------------------------------------------------------------------------------------------
+
         this.anySoundPlaying = this.sound.getAllPlaying().length > 0;
         if(this.anySoundPlaying){
             this.sound.stopByKey('mainMenuTheme');
@@ -192,13 +198,19 @@ export default class GameplayPrototypeLevel3 extends Phaser.Scene {
         else{
             this.sound.stopByKey('inGameTheme');
             musicPlaying = false;
-            }
-        // ---------------------------------------------------------------------------------------------
+        }
+
+        // --------------------------------------------------------------------------------------------------------
         // "present" stuff
-        // ----------------------------------------------------------------------------------------------
+        // --------------------------------------------------------------------------------------------------------
         
         //this.teleporter1 = this.physics.add.image(120 , 336 , "spriteAtlas", "teleporter").setAngle(180);
         this.stone = this.physics.add.image(1160 , 80 , "spriteAtlas", "stone");
+
+        this.button = this.physics.add.image(840, 631, "spriteAtlas", "button").setToBack();
+        this.button.body.setAllowGravity(0).setImmovable().setDirectControl();
+
+        this.buttonBase = this.add.image(840, 636, "spriteAtlas", "buttonBase");
 
         this.add.image(1160 , 80 , "spriteAtlas", "pipe");
         this.jumpSound = this.sound.add('shorthop');
@@ -206,9 +218,10 @@ export default class GameplayPrototypeLevel3 extends Phaser.Scene {
         this.door = this.physics.add.image(240 , 80 , "spriteAtlas", "door");
         this.door.body.setAllowGravity(false).setImmovable().setDirectControl();
 
-        // --------------------------------------------------------------------------------------------------
+        // --------------------------------------------------------------------------------------------------------
         // basic player stuff
-        // --------------------------------------------------------------------------------------------------
+        // --------------------------------------------------------------------------------------------------------
+
         this.player = this.physics.add.sprite(80 , 80 , "playerS", 0).setScale(1);
         this.anims.create({
             key: 'walk',
@@ -227,28 +240,39 @@ export default class GameplayPrototypeLevel3 extends Phaser.Scene {
         this.player.setCollideWorldBounds(true);
         this.physics.add.collider(this.player, this.layer1);
         this.physics.add.collider(this.player, this.door);
-        this.physics.add.collider(this.layer1, this.stone, () => {
-            this.stone.disableBody(); //there's actually supposed to be a button that the stone lands on to open the door, but im super tired rn
+        this.physics.add.collider(this.button, this.stone, () => {
             this.tweens.chain({
-                targets: this.door,
+                targets: [this.door, this.button, this.stone],
                 tweens: [
                     {
+                        targets: [this.button, this.stone],
+                        onStart: () => {
+                            this.stone.body.setAllowGravity(false);
+                            this.stone.setY(this.button.y - 13);
+                            this.stone.body.setDirectControl();
+                        },
+                        y: '+=10',
+                        duration: 100
+                    },
+                    {
+                        targets: this.door,
                         y: {from: this.door.y, to: this.door.y + 6 },
                         duration: 500,
                         ease: "Cubic.easeOut"
                     },
                     {
-                        y: {from: this.door.y, to: -86 },
+                        targets: this.door,
+                        y: {from: this.door.y + 6, to: -86 },
                         duration: 1000,
                         ease: "Cubic.easeIn"
                     }
                 ]
-            })
+            });
+        });
+        this.physics.add.collider(this.stone, this.layer1);
 
-        })
-
-        this.player.body.setMaxVelocity(600 );
-        this.player.body.setDragX(900 );
+        this.player.body.setMaxVelocity(600);
+        this.player.body.setDragX(900);
 
 
         this.isJumping = false;
@@ -257,11 +281,188 @@ export default class GameplayPrototypeLevel3 extends Phaser.Scene {
         //Keyboard input for player movement
         this.cursors = this.input.keyboard.createCursorKeys();
 
-        //-------------------------------------------------------------------------------------------
-        // adding breakable rock platforms & teleporters
+        // --------------------------------------------------------------------------------------------------------
+        // Scene inventories 
+        // --------------------------------------------------------------------------------------------------------
+        
+        this.trashInventory = [] //keep track of the trash here
+        this.treasureInventory = [] //keep track of the treasure here
+
+        // -------------------------------------------------------------------
+        // function to keep track of inventories
+        // -------------------------------------------------------------------
+
+        /**
+        * Tests if the player has expected number of items in inventory.
+        * @param {int} number number of expected items
+        * @param {array} Inventory the inventory I'm checking
+        * @returns {boolean}
+        */
+        this.hasAllItem = (number, Inventory) => Inventory.length == number;
+
+        // --------------------------------------------------------------------------------------------------------
+        // Prefab class definition
+        // --------------------------------------------------------------------------------------------------------
+
+        //base class 
+        class Collectible extends Phaser.Physics.Arcade.Image{
+            constructor(scene, x, y, texture){
+                super(scene, x, y, texture)
+                .setInteractive()
+                .setScale(0.5)
+                scene.add.existing(this)
+                scene.physics.add.existing(this)
+                this.body.allowGravity = false
+                this.pickupWord = texture;
+            }
+
+            getInventory(){
+                //override in subclasses
+                return null;
+            }
+
+            gainItem(item){
+                let Inventory = this.getInventory();
+                if (Inventory.includes(item)) {
+                    console.warn('gaining item already held:', item);
+                    return;
+                }
+
+                const message = this.scene.add.text(this.x, this.y + 20, "You picked up some " + this.pickupWord + "!").setAlpha(0).setColor('#ffffff');
+                this.scene.tweens.add({
+                    targets: message,
+                    alpha: {from:1, to: 0},
+                    duration: 3000,
+                    ease: 'linear' 
+                });
+                
+                Inventory.push(item);
+            }
+
+        }
+        //adding a group for trash so they all get collected when overlapping with player
+        //this.trashGroup = this.physics.add.group();
+
+        // --------------------------------------------------------------------------------------------------------
+        // prefab for trash
+        // --------------------------------------------------------------------------------------------------------
+
+        class TrashInfo extends Collectible{
+            constructor(scene, x, y, keyword){
+                super(scene, x, y, 'trash');
+                //let trashMessage = scene.add.text(this.x, this.y-10, "Someone left trash here.").setColor('#ffffff').setAlpha(0)
+                //this.on('pointerover', () => trashMessage.setAlpha(1))
+                this.on('pointerdown', () =>{
+                    this.scene.tweens.add({
+                        targets: this,
+                        angle: {from: 0, to: 7},
+                        duration: 100,
+                        yoyo: true,
+                        repeat: 3
+                    })
+                })
+                .on('pointerout', () => this.setAngle(0))
+                //scene.trashGroup.add(this)
+                //let overlapped = false;
+                
+                scene.physics.add.overlap(scene.player, this, ()=>{
+                    this.gainItem(keyword);
+                    this.scene.tweens.add({
+                        targets: this, 
+                        alpha: {from: 1, to: 0},
+                        duration: 500,
+                        onComplete: ()=> {this.destroy()
+                        }
+                      });
+                });
+            }
+
+            getInventory(){
+                return this.scene.trashInventory;
+            }
+        }
+
+        // --------------------------------------------------------------------------------------------------------
+        // prefab for Treasure
+        // --------------------------------------------------------------------------------------------------------
+
+        class TreasureInfo extends Collectible{
+            constructor(scene, x, y, keyword){
+                super(scene, x, y, 'treasure');
+                this.resetX = x;
+                this.resetY = y;
+                this.active = false;
+                //scene.add.existing(this)
+                //let treasureMessage = scene.add.text(this.x, this.y-10, "ooo treasure").setColor('#ffffff').setAlpha(0)
+                //this.on('pointerover', () => treasureMessage.setAlpha(1))
+                //.on('pointerout', () => treasureMessage.setAlpha(0))
+                this.on('pointerdown', () =>{
+                    this.scene.tweens.add({
+                        targets: this,
+                        angle: {from: 0, to: 360},
+                        duration: 300,
+                        repeat: 3
+                    })
+                });
+                
+                scene.physics.add.overlap(scene.player, this, ()=>{
+                    this.gainItem(keyword);
+                    this.scene.tweens.add({
+                        targets: this, 
+                        alpha: {from: 1, to: 0},
+                        duration: 500,
+                        onComplete: ()=> {
+                            //this.destroy(); 
+                            this.scene.scene.start('end-scene');
+                        }
+                    });
+
+                });
+
+                this.setAlpha(0).setInteractive(false).disableBody();
+
+                /*.on('pointerdown', () => {
+                    treasureMessage.setAlpha(0);
+                    this.gainItem(keyword);
+                    this.scene.tweens.add({
+                        targets: this, 
+                        alpha: {from: 1, to: 0},
+                        duration: 500,
+                        onComplete: ()=> {this.destroy(); 
+                            treasureMessage.destroy();
+                        }
+                    });
+                })*/
+            }
+                
+            getInventory(){
+                return this.scene.treasureInventory;
+            }
+
+            appear() {
+                this.setAlpha(1).setInteractive(true).enableBody(true, this.resetX, this.resetY);
+                this.active = true;
+            }
+
+        }
+
+        // --------------------------------------------------------------------------------------------------------
+        // Adding trash and treasure
+        // --------------------------------------------------------------------------------------------------------
+
+        this.trash = new TrashInfo(this, 300, 530, 'trash'); 
+        this.trash2 = new TrashInfo(this, 920, 610, 'trash2');
+
+        this.treasure = new TreasureInfo(this, 600, 230, 'treasure');
+
+        this.trashInventCheck = this.add.text(600, 200, "Has the player collected all trash?").setAlpha(0);
+        this.treasureInventCheck = this.add.text(600, 220, "Has the player collected all treasure?").setAlpha(0);
+
+        // --------------------------------------------------------------------------------------------------------
+        // Adding breakable rock platforms & teleporters
         // NOTE: need to be added after player because their construction references the player
-        //--------------------------------------------------------------------------------------------
-        this.testRock = new Rock(this, 1160, 680); 
+        // --------------------------------------------------------------------------------------------------------
+
         this.rock1 = new Rock(this, 120, 680);     
         this.rock2 = new Rock(this, 1160, 440);
         this.teleporter1 = new Teleporter(this, 120, 336, 0, 0, 1);
@@ -273,10 +474,12 @@ export default class GameplayPrototypeLevel3 extends Phaser.Scene {
         this.futureObjects.forEach((futureObject) => {
             futureObject.disableBody();
             futureObject.setAlpha(0);
-        })
-        //---------------------------------------------------------------------------------------------
+        });
+
+        // --------------------------------------------------------------------------------------------------------
         // past and future switch stuff
-        //---------------------------------------------------------------------------------------------
+        // --------------------------------------------------------------------------------------------------------
+
         this.timestatetext =this.add.text(40, 30, "PAST", {
             color: "#ffffff",
             fontFamily: 'pixel',
@@ -317,8 +520,9 @@ export default class GameplayPrototypeLevel3 extends Phaser.Scene {
             }
         })
 
-
-        //UI
+        // --------------------------------------------------------------------------------------------------------
+        // UI
+        // --------------------------------------------------------------------------------------------------------
 
         this.pauseButton = this.add.image(1200, 70, "pauseIcon").setOrigin(0.5).setScale(2).setInteractive();
         //this.pauseButton.on('pointerover', () =>this.pauseButton.setTint(0xFF5C5));
@@ -326,10 +530,12 @@ export default class GameplayPrototypeLevel3 extends Phaser.Scene {
             console.log("pause button clicked");
             this.scene.pause();
             this.scene.launch('pause', { resumeKey: 'core-gameplay-level3' });
-        })
-        // --------------------
+        });
+
+        // -------------------------------------------------------------------
         // touch UI
-        // --------------------
+        // -------------------------------------------------------------------
+
         this.leftButton = this.add.image((1280*2/16), (720*4.7/6), 'arrowButton')
             .setScale(4)
             .setAlpha(0.5)
@@ -427,7 +633,6 @@ export default class GameplayPrototypeLevel3 extends Phaser.Scene {
                         this.stone.setAlpha(1);
                         this.rock1.stoneOff = true;
                         this.rock2.stoneOff = true;
-                        this.testRock.stoneOff = true;
                     }
                 });
             }
@@ -438,13 +643,15 @@ export default class GameplayPrototypeLevel3 extends Phaser.Scene {
         if (this.isJumping) {
             this.rock1.playerOff = true;
             this.rock2.playerOff = true;
-            this.testRock.playerOff = true;
             this.player.body.setDragX(500);
         } else {
             this.player.body.setDragX(900);
         }
         
+        // --------------------------------------------------------------------------------------------------------
         // Movement
+        // --------------------------------------------------------------------------------------------------------
+
         const moveSpeed = 250;
         const movingLeft  = this.cursors.left.isDown  || this.touchLeft;
         const movingRight = this.cursors.right.isDown || this.touchRight;
@@ -464,7 +671,11 @@ export default class GameplayPrototypeLevel3 extends Phaser.Scene {
                 this.player.setFlipX(false);
             }
         }
-        //Anims
+
+        // --------------------------------------------------------------------------------------------------------
+        // Anims
+        // --------------------------------------------------------------------------------------------------------
+
         if (this.isJumping) {
             if (this.player.anims.currentAnim?.key !== 'jump') this.player.play('jump');
         } else if (onFloor) {
@@ -482,7 +693,10 @@ export default class GameplayPrototypeLevel3 extends Phaser.Scene {
             }
         }
 
+        // --------------------------------------------------------------------------------------------------------
         // Jump
+        // --------------------------------------------------------------------------------------------------------
+
         const jumpCaption = this.add.text(1280/2, 600, '*boing*', {
             color: "#ffffff",
             fontFamily: 'pixel',
@@ -511,6 +725,7 @@ export default class GameplayPrototypeLevel3 extends Phaser.Scene {
                 ease: 'Quad.Out'
             });
             // Jump higher on mushroom platform in past mode
+            /*
             if (this.past && this.player.body.touching.down && this.platform.touching.up) {
                     if (this.registry.get('sfxEnabled')) {
                     this.jumpSound.play({rate: 0.3 + Math.random() * 0.2});
@@ -537,7 +752,24 @@ export default class GameplayPrototypeLevel3 extends Phaser.Scene {
                     });
                 }
             }
+                */
+            if (this.registry.get('sfxEnabled')) {
+                this.jumpSound.play({rate: 0.7 + Math.random() * 0.3});
+                jumpCaption.setAlpha(1);
+                this.player.setVelocityY(-475);
+                this.tweens.add({
+                    targets: jumpCaption,
+                    alpha: 0,
+                    ease: 'linear',
+                    duration: 1000
+                });
+            }
         }
+
+        // --------------------------------------------------------------------------------------------------------
+        // lever interactions
+        // --------------------------------------------------------------------------------------------------------
+
         if (!this.physics.overlap(this.lever, this.player)) { // if the player is not in range of the lever
             this.lever.setFrame("lever"); // lever has no outline
             this.lever.disableInteractive(); // cannot click on lever
@@ -546,5 +778,28 @@ export default class GameplayPrototypeLevel3 extends Phaser.Scene {
             this.lever.setFrame("leverOutline"); // lever has outline
             this.lever.setInteractive(); // can interact with lever
         }
+
+        // --------------------------------------------------------------------------------------------------------
+        // Checking if inventory is full
+        // --------------------------------------------------------------------------------------------------------
+
+        if (this.hasAllItem(2, this.trashInventory)){
+            this.trashInventCheck.setText("Has the player collected all trash? Yes!")
+            if (this.treasure.active == false) {
+                this.treasure.appear();
+            }
+        } else {
+            this.trashInventCheck.setText("Has the player collected all trash? No")
+        }
+
+        if(this.hasAllItem(1, this.treasureInventory)){
+            this.treasureInventCheck.setText("Has the player collected all treasure? Yes!")
+        }else{
+            this.treasureInventCheck.setText("Has the player collected all treasure? No")
+        }
+
+        /*if(this.physics.overlap(this.trashGroup, this.player)){
+
+        }*/
     }
 }

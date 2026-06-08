@@ -142,12 +142,14 @@ export default class GameplayPrototypeLevel2 extends Phaser.Scene {
         //Prefab class definition
         //--------------------------------------------------
         //base class 
-        class Collectible extends Phaser.GameObjects.Image{
+        class Collectible extends Phaser.Physics.Arcade.Image{
             constructor(scene, x, y, texture){
                 super(scene, x, y, texture)
                 .setInteractive()
                 .setScale(0.5)
                 scene.add.existing(this)
+                scene.physics.add.existing(this)
+                this.body.allowGravity = false
             }
 
             getInventory(){
@@ -176,29 +178,37 @@ export default class GameplayPrototypeLevel2 extends Phaser.Scene {
         }
 
         //prefab for trash---------------------------------------------------------------------------------
-        class TrashInfo extends Collectible{
+         class TrashInfo extends Collectible{
             constructor(scene, x, y, keyword){
                 super(scene, x, y, 'trash');
-                let trashMessage = scene.add.text(this.x, this.y-10, "Someone left trash here.").setColor('#ffffff').setAlpha(0)
-                this.on('pointerover', () => trashMessage.setAlpha(1))
-                .on('pointerout', () => trashMessage.setAlpha(0))
-                .on('pointerdown', () => {
-                    trashMessage.setAlpha(0);
+                //let trashMessage = scene.add.text(this.x, this.y-10, "Someone left trash here.").setColor('#ffffff').setAlpha(0)
+                //this.on('pointerover', () => trashMessage.setAlpha(1))
+                this.on('pointerdown', () =>{
+                    this.scene.tweens.add({
+                        targets: this,
+                        angle: {from: 0, to: 7},
+                        duration: 100,
+                        yoyo: true,
+                        repeat: 3
+                    })
+                })
+                .on('pointerout', () => this.setAngle(0))
+                //scene.trashGroup.add(this)
+                //let overlapped = false;
+                
+                scene.physics.add.overlap(scene.player, this, ()=>{
                     this.gainItem(keyword);
                     this.scene.tweens.add({
                         targets: this, 
                         alpha: {from: 1, to: 0},
                         duration: 500,
-                        onComplete: ()=> {this.destroy(); 
-                            trashMessage.destroy();
+                        onComplete: ()=> {this.destroy()
                         }
-                    });
-                })
+                      });
+                });
             }
 
-            //Don't know if this methood was overwritten correctly.
             getInventory(){
-                //line below is causing errors
                 return this.scene.trashInventory;
             }
         }
@@ -208,10 +218,31 @@ export default class GameplayPrototypeLevel2 extends Phaser.Scene {
             constructor(scene, x, y, keyword){
                 super(scene, x, y, 'treasure');
                 scene.add.existing(this)
-                let treasureMessage = scene.add.text(this.x, this.y-10, "ooo treasure").setColor('#ffffff').setAlpha(0)
-                this.on('pointerover', () => treasureMessage.setAlpha(1))
-                .on('pointerout', () => treasureMessage.setAlpha(0))
-                .on('pointerdown', () => {
+                //let treasureMessage = scene.add.text(this.x, this.y-10, "ooo treasure").setColor('#ffffff').setAlpha(0)
+                //this.on('pointerover', () => treasureMessage.setAlpha(1))
+                //.on('pointerout', () => treasureMessage.setAlpha(0))
+                .on('pointerdown', () =>{
+                    this.scene.tweens.add({
+                        targets: this,
+                        angle: {from: 0, to: 360},
+                        duration: 300,
+                        repeat: 3
+                    })
+                })
+                
+                scene.physics.add.overlap(scene.player, this, ()=>{
+                    this.gainItem(keyword);
+                    this.scene.tweens.add({
+                        targets: this, 
+                        alpha: {from: 1, to: 0},
+                        duration: 500,
+                        onComplete: ()=> {this.destroy(); 
+                        }
+                    });
+
+                });
+
+                /*.on('pointerdown', () => {
                     treasureMessage.setAlpha(0);
                     this.gainItem(keyword);
                     this.scene.tweens.add({
@@ -222,7 +253,7 @@ export default class GameplayPrototypeLevel2 extends Phaser.Scene {
                             treasureMessage.destroy();
                         }
                     });
-                })
+                })*/
             }
                 
             getInventory(){

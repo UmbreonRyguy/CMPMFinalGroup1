@@ -100,7 +100,9 @@ export default class GameplayPrototypeLevel2 extends Phaser.Scene {
 
         this.future_bg = this.add.rectangle(1280/2, 720/2, 1280, 720, 0x203030);
 
-        //MUSIC
+        // --------------------------------------------------------------------------------------------------------
+        // MUSIC
+        // --------------------------------------------------------------------------------------------------------
         this.anySoundPlaying = this.sound.getAllPlaying().length > 0;
         if(this.anySoundPlaying){
             this.sound.stopByKey('mainMenuTheme');
@@ -119,27 +121,32 @@ export default class GameplayPrototypeLevel2 extends Phaser.Scene {
         else{
             this.sound.stopByKey('inGameTheme');
             musicPlaying = false;
-            }
+        }
 
         //Keyboard input for player movement
 
-        //------------------------------------------------
-        //Scene inventories 
-        //--------------------------------------------------------
+        // --------------------------------------------------------------------------------------------------------
+        // Scene inventories 
+        // --------------------------------------------------------------------------------------------------------
         this.trashInventory = [] //keep track of the trash here
         this.treasureInventory = [] //keep track of the treasure here
-        //function to keep track of inventories----------------------------------------
-        //Test if the player has expected number of items in inventory.
-            /**
-            * @param {int} number number of expected items
-            * @param {array} Inventory, the inventory I'm checking
-            * @returns {boolean}
-            */
-            this.hasAllItem = (number, Inventory) => Inventory.length == number;
+        
+        // -------------------------------------------------------------------
+        // function to keep track of inventories
+        // -------------------------------------------------------------------
 
-        //------------------------------------------------------------
-        //Prefab class definition
-        //--------------------------------------------------
+        /**
+        * Test if the player has expected number of items in inventory.
+        * @param {int} number number of expected items
+        * @param {array} Inventory the inventory I'm checking
+        * @returns {boolean}
+        */
+        this.hasAllItem = (number, Inventory) => Inventory.length == number;
+
+        // --------------------------------------------------------------------------------------------------------
+        // Prefab class definition
+        // --------------------------------------------------------------------------------------------------------
+
         //base class 
         class Collectible extends Phaser.Physics.Arcade.Image{
             constructor(scene, x, y, texture){
@@ -177,7 +184,10 @@ export default class GameplayPrototypeLevel2 extends Phaser.Scene {
 
         }
 
-        //prefab for trash---------------------------------------------------------------------------------
+        // --------------------------------------------------------------------------------------------------------
+        // Prefab for trash
+        // --------------------------------------------------------------------------------------------------------
+
         class TrashInfo extends Collectible{
             constructor(scene, x, y, keyword){
                 super(scene, x, y, 'trash');
@@ -190,9 +200,9 @@ export default class GameplayPrototypeLevel2 extends Phaser.Scene {
                         duration: 100,
                         yoyo: true,
                         repeat: 3
-                    })
+                    });
                 })
-                .on('pointerout', () => this.setAngle(0))
+                .on('pointerout', () => this.setAngle(0));
                 //scene.trashGroup.add(this)
                 //let overlapped = false;
                 
@@ -204,7 +214,7 @@ export default class GameplayPrototypeLevel2 extends Phaser.Scene {
                         duration: 500,
                         onComplete: ()=> {this.destroy()
                         }
-                      });
+                    });
                 });
             }
 
@@ -213,7 +223,10 @@ export default class GameplayPrototypeLevel2 extends Phaser.Scene {
             }
         }
 
-        //prefab for Treasure---------------------------------------------------------------------------------
+        // --------------------------------------------------------------------------------------------------------
+        // Prefab for Treasure
+        // --------------------------------------------------------------------------------------------------------
+
         class TreasureInfo extends Collectible{
             constructor(scene, x, y, keyword){
                 super(scene, x, y, 'treasure');
@@ -274,9 +287,10 @@ export default class GameplayPrototypeLevel2 extends Phaser.Scene {
 
         }
 
-        //----------------------------------------
-        //TileMap
-        //----------------------------------------
+        // --------------------------------------------------------------------------------------------------------
+        // TileMap
+        // --------------------------------------------------------------------------------------------------------
+
         const prototypeMap = this.make.tilemap({key: "lvl2tilemap"});
         const prototypeTiles = prototypeMap.addTilesetImage("Prototype_Tiles", "Prototype_Tiles", 80, 80);
         this.layer1 = prototypeMap.createLayer("Tile Layer 1", prototypeTiles, 0, 0);
@@ -285,9 +299,9 @@ export default class GameplayPrototypeLevel2 extends Phaser.Scene {
         this.add.rectangle(560, 460, 480, 60, 0x385a33);
         this.overlay = this.add.rectangle(this.CX, this.CY, this.W, this.H, 0xf9a039, 0.1);
 
-        // ------------------------
+        // --------------------------------------------------------------------------------------------------------
         // PLAYER
-        // ------------------------
+        // --------------------------------------------------------------------------------------------------------
 
         //Create Player sprite
         this.player = this.physics.add.sprite(880, 720 - 250, "playerS", 0).setScale(1);
@@ -304,9 +318,13 @@ export default class GameplayPrototypeLevel2 extends Phaser.Scene {
             repeat: 0
         });
 
+        // -------------------------------------------------------------------
+        // Player physics
+        // -------------------------------------------------------------------
+
         this.isJumping = false;
         this.justLanded = false;
-        //Player physics
+
         this.player.setCollideWorldBounds(true);
 
         this.player.body.setMaxVelocity(600);
@@ -505,9 +523,9 @@ export default class GameplayPrototypeLevel2 extends Phaser.Scene {
             }
         });
 
-        //----------------------------------------
-        //UI
-        //----------------------------------------
+        // --------------------------------------------------------------------------------------------------------
+        // UI
+        // --------------------------------------------------------------------------------------------------------
 
         this.pauseButton = this.add.image(1200, 70, "pauseIcon").setOrigin(0.5).setScale(2).setInteractive();
         //this.pauseButton.on('pointerover', () =>this.pauseButton.setTint(0xFF5C5));
@@ -515,10 +533,12 @@ export default class GameplayPrototypeLevel2 extends Phaser.Scene {
             console.log("pause button clicked");
             this.scene.pause();
             this.scene.launch('pause', { resumeKey: 'core-gameplay-level2' });
-        })
-        // --------------------
+        });
+
+        // -------------------------------------------------------------------
         // touch UI
-        // --------------------
+        // -------------------------------------------------------------------
+
         this.leftButton = this.add.image((1280*2/16), (720*4.7/6), 'arrowButton')
             .setScale(4)
             .setAlpha(0.5)
@@ -585,9 +605,11 @@ export default class GameplayPrototypeLevel2 extends Phaser.Scene {
 
 
     update() {
-        //
+
+        // --------------------------------------------------------------------------------------------------------
         // player stuff
-        //
+        // --------------------------------------------------------------------------------------------------------
+
         const onFloor = this.player.body.onFloor();
         if (onFloor && this.isJumping) {
             this.isJumping = false;
@@ -603,7 +625,10 @@ export default class GameplayPrototypeLevel2 extends Phaser.Scene {
             this.player.body.setDragX(900);
         }
 
+        // -------------------------------------------------------------------
         // Movement
+        // -------------------------------------------------------------------
+
         const moveSpeed = 250;
         const movingLeft  = this.cursors.left.isDown  || this.touchLeft;
         const movingRight = this.cursors.right.isDown || this.touchRight;
@@ -640,22 +665,10 @@ export default class GameplayPrototypeLevel2 extends Phaser.Scene {
             }
         }
 
-        if (this.hasAllItem(2, this.trashInventory)){
-            this.trashInventCheck.setText("Has the player collected all trash? Yes!")
-            if (this.treasure.active == false) {
-                this.treasure.appear();
-            }
-        } else {
-            this.trashInventCheck.setText("Has the player collected all trash? No")
-        }
-
-        if(this.hasAllItem(1, this.treasureInventory)){
-            this.treasureInventCheck.setText("Has the player collected all treasure? Yes!")
-        }else{
-            this.treasureInventCheck.setText("Has the player collected all treasure? No")
-        }
-
+        // -------------------------------------------------------------------
         // Jump
+        // -------------------------------------------------------------------
+
         const jumpCaption = this.add.text(1280/2, 600, '*boing*', {
             color: "#ffffff",
             fontFamily: 'pixel',
@@ -720,7 +733,10 @@ export default class GameplayPrototypeLevel2 extends Phaser.Scene {
         //     this.player.setVelocityY(this.player.body.velocity.y - 13);
         // }
 
-        // lever
+
+        // --------------------------------------------------------------------------------------------------------
+        // lever interactions
+        // --------------------------------------------------------------------------------------------------------
         if (!this.physics.overlap(this.lever, this.player)) { // if the player is not in range of the lever
             this.lever.setFrame("lever"); // lever has no outline
             this.lever.disableInteractive(); // cannot click on lever
@@ -728,6 +744,25 @@ export default class GameplayPrototypeLevel2 extends Phaser.Scene {
         else {
             this.lever.setFrame("leverOutline"); // lever has outline
             this.lever.setInteractive(); // can interact with lever
+        }
+
+        // --------------------------------------------------------------------------------------------------------
+        // checking inventory
+        // --------------------------------------------------------------------------------------------------------
+        
+        if (this.hasAllItem(2, this.trashInventory)){
+            this.trashInventCheck.setText("Has the player collected all trash? Yes!")
+            if (this.treasure.active == false) {
+                this.treasure.appear();
+            }
+        } else {
+            this.trashInventCheck.setText("Has the player collected all trash? No")
+        }
+
+        if(this.hasAllItem(1, this.treasureInventory)){
+            this.treasureInventCheck.setText("Has the player collected all treasure? Yes!")
+        }else{
+            this.treasureInventCheck.setText("Has the player collected all treasure? No")
         }
     }
 

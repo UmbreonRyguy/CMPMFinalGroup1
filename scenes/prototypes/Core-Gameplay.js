@@ -106,8 +106,9 @@ export default class GameplayPrototype extends Phaser.Scene {
         this.makeLeaves(50, 1);
         this.future_bg = this.add.rectangle(1280/2, 720/2, 1280, 720, 0x203030);
 
-
-        //MUSIC
+        // --------------------------------------------------------------------------------------------------------
+        // MUSIC
+        // --------------------------------------------------------------------------------------------------------
 
         this.anySoundPlaying = this.sound.getAllPlaying().length > 0;
         if (this.anySoundPlaying){
@@ -172,9 +173,9 @@ export default class GameplayPrototype extends Phaser.Scene {
         // leftButton.angle = 90;
         // leftButton.setAlpha(0.5);
         
-        // ------------------------
+        // --------------------------------------------------------------------------------------------------------
         // PLAYER
-        // ------------------------
+        // --------------------------------------------------------------------------------------------------------
     
         //Create Player sprite
         this.player = this.physics.add.sprite(600, 500, "playerS", 0).setScale(1);
@@ -202,23 +203,29 @@ export default class GameplayPrototype extends Phaser.Scene {
 
         //Keyboard input for player movement
 
-        //------------------------------------------------
-        //Scene inventories 
-        //--------------------------------------------------------
+        // --------------------------------------------------------------------------------------------------------
+        // Scene inventories 
+        // --------------------------------------------------------------------------------------------------------
+        
         this.trashInventory = [] //keep track of the trash here
         this.treasureInventory = [] //keep track of the treasure here
-        //function to keep track of inventories----------------------------------------
-        //Test if the player has expected number of items in inventory.
-            /**
-            * @param {int} number number of expected items
-            * @param {array} Inventory, the inventory I'm checking
-            * @returns {boolean}
-            */
-            this.hasAllItem = (number, Inventory) => Inventory.length == number;
 
-        //------------------------------------------------------------
-        //Prefab class definition
-        //--------------------------------------------------
+        // -------------------------------------------------------------------
+        // function to keep track of inventories
+        // -------------------------------------------------------------------
+
+        /**
+        * Tests if the player has expected number of items in inventory.
+        * @param {int} number number of expected items
+        * @param {array} Inventory the inventory I'm checking
+        * @returns {boolean}
+        */
+        this.hasAllItem = (number, Inventory) => Inventory.length == number;
+
+        // --------------------------------------------------------------------------------------------------------
+        // Prefab class definition
+        // --------------------------------------------------------------------------------------------------------
+
         //base class 
         class Collectible extends Phaser.Physics.Arcade.Image{
             constructor(scene, x, y, texture){
@@ -257,7 +264,11 @@ export default class GameplayPrototype extends Phaser.Scene {
         }
         //adding a group for trash so they all get collected when overlapping with player
         //this.trashGroup = this.physics.add.group();
-        //prefab for trash---------------------------------------------------------------------------------
+
+        // --------------------------------------------------------------------------------------------------------
+        // prefab for trash
+        // --------------------------------------------------------------------------------------------------------
+
         class TrashInfo extends Collectible{
             constructor(scene, x, y, keyword){
                 super(scene, x, y, 'trash');
@@ -293,7 +304,10 @@ export default class GameplayPrototype extends Phaser.Scene {
             }
         }
 
-        //prefab for Treasure---------------------------------------------------------------------------------
+        // --------------------------------------------------------------------------------------------------------
+        // prefab for Treasure
+        // --------------------------------------------------------------------------------------------------------
+
         class TreasureInfo extends Collectible{
             constructor(scene, x, y, keyword){
                 super(scene, x, y, 'treasure');
@@ -369,53 +383,55 @@ export default class GameplayPrototype extends Phaser.Scene {
                 }
             }
         });
-        //----------------------------------------
-        //TileMap
-        //----------------------------------------
-            const prototypeMap = this.make.tilemap({key: "prototypeTilemap"});
-            const prototypeTiles = prototypeMap.addTilesetImage("Prototype_Tiles", "Prototype_Tiles", 80, 80);
-            this.layer1 = prototypeMap.createLayer("Tile Layer 1", prototypeTiles, 0, 0);
-            this.layer1.setCollisionFromCollisionGroup();
-            this.overlay = this.add.rectangle(this.CX, this.CY, this.W, this.H, 0xf9a039, 0.1);
-            
-            // Add player collider now that the tilemap is created
-            this.physics.add.collider(this.player, this.layer1);
 
-            this.lever = this.physics.add.sprite(60, 202, "spriteAtlas", "lever");
-            
-            this.lever.body.setCircle(80, -40 , -25).setAllowGravity(false).setImmovable();
+        // --------------------------------------------------------------------------------------------------------
+        // TileMap
+        // --------------------------------------------------------------------------------------------------------
 
-            // mushroom - stored as instance properties for access from other methods
-            this.mush = this.addSpriteWithTiles(3, 480, 400, 21, 23, 0);
-            //this.mush1 = this.add.image(480, 400, "Prototype_Tiles", 21).setAlpha(0);
-            //this.mush2 = this.add.image(560, 400, "Prototype_Tiles", 22).setAlpha(0);
-            //this.mush3 = this.add.image(640, 400, "Prototype_Tiles", 23).setAlpha(0);
+        const prototypeMap = this.make.tilemap({key: "prototypeTilemap"});
+        const prototypeTiles = prototypeMap.addTilesetImage("Prototype_Tiles", "Prototype_Tiles", 80, 80);
+        this.layer1 = prototypeMap.createLayer("Tile Layer 1", prototypeTiles, 0, 0);
+        this.layer1.setCollisionFromCollisionGroup();
+        this.overlay = this.add.rectangle(this.CX, this.CY, this.W, this.H, 0xf9a039, 0.1);
+        
+        // Add player collider now that the tilemap is created
+        this.physics.add.collider(this.player, this.layer1);
 
-            // conveyor belt - stored as instance properties for access from other methods
-            this.con = this.addSpriteWithTiles(3, 480, 400, 14, 16, 1);
-            //this.con1 = this.add.image(480, 400, "Prototype_Tiles", 14);
-            //this.con2 = this.add.image(560, 400, "Prototype_Tiles", 15);
-            //this.con3 = this.add.image(640, 400, "Prototype_Tiles", 16);
+        this.lever = this.physics.add.sprite(60, 202, "spriteAtlas", "lever");
+        
+        this.lever.body.setCircle(80, -40 , -25).setAllowGravity(false).setImmovable();
 
-            //added trash object for player to interact with
-            //let trash = this.add.image(100, 220, "trash")
-            this.trash = new TrashInfo(this, 100, 220, 'trash'); 
+        // mushroom - stored as instance properties for access from other methods
+        this.mush = this.addSpriteWithTiles(3, 480, 400, 21, 23, 0);
+        //this.mush1 = this.add.image(480, 400, "Prototype_Tiles", 21).setAlpha(0);
+        //this.mush2 = this.add.image(560, 400, "Prototype_Tiles", 22).setAlpha(0);
+        //this.mush3 = this.add.image(640, 400, "Prototype_Tiles", 23).setAlpha(0);
 
-            this.trash2 = new TrashInfo(this, 950, 370, 'trash2') ;
-    
+        // conveyor belt - stored as instance properties for access from other methods
+        this.con = this.addSpriteWithTiles(3, 480, 400, 14, 16, 1);
+        //this.con1 = this.add.image(480, 400, "Prototype_Tiles", 14);
+        //this.con2 = this.add.image(560, 400, "Prototype_Tiles", 15);
+        //this.con3 = this.add.image(640, 400, "Prototype_Tiles", 16);
 
-            this.trashInventCheck = this.add.text( 600, 200, "Has the player collected all trash?").setAlpha(0);
-            this.treasureInventCheck = this.add.text(600, 220, "Has the player collected all treasure?").setAlpha(0);
+        //added trash object for player to interact with
+        //let trash = this.add.image(100, 220, "trash")
+
+        // --------------------------------------------------------------------------------------------------------
+        // Adding trash and treasure
+        // --------------------------------------------------------------------------------------------------------
+
+        this.trash = new TrashInfo(this, 100, 220, 'trash'); 
+        this.trash2 = new TrashInfo(this, 950, 370, 'trash2');
+
+        this.treasure = new TreasureInfo(this, 1000, 130, 'treasure');
+
+        this.trashInventCheck = this.add.text( 600, 200, "Has the player collected all trash?").setAlpha(0);
+        this.treasureInventCheck = this.add.text(600, 220, "Has the player collected all treasure?").setAlpha(0);
 
 
-
-            this.treasure = new TreasureInfo(this, 1000, 130, 'treasure');
-
-            //need to check for overlaps
-            /*scene.physics.add.overlap(this.player, this.trashGroup, ()=>{
-
-
-            });*/
+        // --------------------------------------------------------------------------------------------------------
+        // Past & Future Switch Stuff
+        // --------------------------------------------------------------------------------------------------------
         
         this.timestatetext =this.add.text(40, 30, "FUTURE", {
             color: "#ffffff",
@@ -432,6 +448,7 @@ export default class GameplayPrototype extends Phaser.Scene {
                 console.log("Switching to future - hiding mushrooms, showing conveyors");
                 this.timestatetext.text = "FUTURE";
                 this.flipToFuture();
+
                 this.mush.forEach((part) => {
                     part.setAlpha(0);
                 });
@@ -478,9 +495,10 @@ export default class GameplayPrototype extends Phaser.Scene {
                 this.past = true;
             }
         });
-        //----------------------------------------
-        //UI
-        //----------------------------------------
+
+        // --------------------------------------------------------------------------------------------------------
+        // UI
+        // --------------------------------------------------------------------------------------------------------
 
         // const returnButtonText = this.add.text(1200, 100, "Return to Menu", {color: "#fffcfc", backgroundColor: '#3f1352', padding: { x: 20, y: 10 }}).setOrigin(0.5).setInteractive();
         // returnButtonText.on('pointerdown', ()=> returnButtonText.setTint(0x965A0B));
@@ -502,9 +520,11 @@ export default class GameplayPrototype extends Phaser.Scene {
             this.scene.pause();
             this.scene.launch('pause', { resumeKey: 'core-gameplay' });
         })
-        // --------------------
+
+        // -------------------------------------------------------------------
         // touch UI
-        // --------------------
+        // -------------------------------------------------------------------
+
         this.leftButton = this.add.image((1280*2/16), (720*4.7/6), 'arrowButton')
             .setScale(4)
             .setAlpha(0.5)
@@ -576,9 +596,9 @@ export default class GameplayPrototype extends Phaser.Scene {
 
 
     update() {
-        //
+        // --------------------------------------------------------------------------------------------------------
         // player stuff
-        //
+        // --------------------------------------------------------------------------------------------------------
         const onFloor = this.player.body.onFloor();
 
         if (onFloor && this.isJumping) {
@@ -595,7 +615,10 @@ export default class GameplayPrototype extends Phaser.Scene {
             this.player.body.setDragX(900);
         }
 
+        // -------------------------------------------------------------------
         // Movement
+        // -------------------------------------------------------------------
+
         const moveSpeed = 250;
         const movingLeft  = this.cursors.left.isDown  || this.touchLeft;
         const movingRight = this.cursors.right.isDown || this.touchRight;
@@ -615,8 +638,10 @@ export default class GameplayPrototype extends Phaser.Scene {
             }
         }
 
+        // -------------------------------------------------------------------
+        // Animations
+        // -------------------------------------------------------------------
 
-        //Animations
         if (this.isJumping) {
             if (this.player.anims.currentAnim?.key !== 'jump') this.player.play('jump');
         } else if (onFloor) {
@@ -633,23 +658,10 @@ export default class GameplayPrototype extends Phaser.Scene {
             }
         }
 
-        //Checking if inventory is full
-        if (this.hasAllItem(2, this.trashInventory)){
-            this.trashInventCheck.setText("Has the player collected all trash? Yes!")
-            if (this.treasure.active == false) {
-                this.treasure.appear();
-            }
-        } else {
-            this.trashInventCheck.setText("Has the player collected all trash? No")
-        }
-
-        if(this.hasAllItem(1, this.treasureInventory)){
-            this.treasureInventCheck.setText("Has the player collected all treasure? Yes!")
-        }else{
-            this.treasureInventCheck.setText("Has the player collected all treasure? No")
-        }
-
+        // -------------------------------------------------------------------
         // Jump
+        // -------------------------------------------------------------------
+
         const jumpCaption = this.add.text(1280/2, 600, '*boing*', {
             color: "#ffffff",
             fontFamily: 'pixel',
@@ -714,7 +726,10 @@ export default class GameplayPrototype extends Phaser.Scene {
         //     this.player.setVelocityY(this.player.body.velocity.y - 13);
         // }
 
-        // lever
+        // --------------------------------------------------------------------------------------------------------
+        // lever interactions
+        // --------------------------------------------------------------------------------------------------------
+
         if (!this.physics.overlap(this.lever, this.player)) { // if the player is not in range of the lever
             this.lever.setFrame("lever"); // lever has no outline
             this.lever.disableInteractive(); // cannot click on lever
@@ -722,6 +737,24 @@ export default class GameplayPrototype extends Phaser.Scene {
         else {
             this.lever.setFrame("leverOutline"); // lever has outline
             this.lever.setInteractive(); // can interact with lever
+        }
+
+        // --------------------------------------------------------------------------------------------------------
+        // Checking if inventory is full
+        // --------------------------------------------------------------------------------------------------------
+        if (this.hasAllItem(2, this.trashInventory)){
+            this.trashInventCheck.setText("Has the player collected all trash? Yes!")
+            if (this.treasure.active == false) {
+                this.treasure.appear();
+            }
+        } else {
+            this.trashInventCheck.setText("Has the player collected all trash? No")
+        }
+
+        if(this.hasAllItem(1, this.treasureInventory)){
+            this.treasureInventCheck.setText("Has the player collected all treasure? Yes!")
+        }else{
+            this.treasureInventCheck.setText("Has the player collected all treasure? No")
         }
 
         /*if(this.physics.overlap(this.trashGroup, this.player)){

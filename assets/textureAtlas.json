@@ -126,7 +126,7 @@
             ]
         },
         {
-            "image": "assets/level2sprites.png",
+            "image": "assets/level3sprites.png",
             "format": "ARGB8888",
             "size": {
                 "x": 320,

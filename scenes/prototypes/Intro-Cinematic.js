@@ -110,8 +110,8 @@ export default class IntroCinematic extends Phaser.Scene {
         this.load.image('leaf', 'assets/leaf.png');
         this.load.tilemapTiledJSON("prototypeTilemap", "assets/prototypeTilemap.json");
         this.load.tilemapTiledJSON("lvl2tilemap", "assets/lvl2tilemap.json");
-        this.load.tilemapTiledJSON("level2tilemap", "assets/level2tilemap.json");
-        this.load.spritesheet("level2tiles", "assets/level2tiles.png", {frameWidth: 80, frameHeight: 80});
+        this.load.tilemapTiledJSON("level3tilemap", "assets/level3tilemap.json");
+        this.load.spritesheet("level3tiles", "assets/level3tiles.png", {frameWidth: 80, frameHeight: 80});
         this.load.spritesheet("Prototype_Tiles", "assets/Prototype_Tiles.png", {frameWidth: 80, frameHeight: 80});
         this.load.multiatlas("spriteAtlas", "assets/textureAtlas.json");
         this.load.image('player', 'assets/PlaceholderPlayer.png');

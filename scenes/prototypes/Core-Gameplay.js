@@ -268,7 +268,12 @@ export default class GameplayPrototype extends Phaser.Scene {
                         targets: this, 
                         alpha: {from: 1, to: 0},
                         duration: 500,
-                        onComplete: ()=> {this.destroy(); 
+                        onComplete: ()=> {
+                            this.destroy(); 
+                            this.cameras.main.fadeOut(500, 0, 0, 0);
+                            this.cameras.main.once('camerafadeoutcomplete', () => {
+                                this.scene.start('end-scene');
+                            });
                         }
                     });
 

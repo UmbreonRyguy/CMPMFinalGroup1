@@ -26,6 +26,7 @@
 - `rockForPrototypeCinematic.png` - Sydney Osako - Procreate - */assets
 - `rockShardForPrototype.png` - Sydney Osako - Procreate - */assets
 - `dustCloud.png` - Sydney Osako - Procreate - */assets
+- `logotext.png` - Quetzal Theobald - Inkscape - */assets
 - `leafs/leaf1.png` - Ryan Funk - Piskel - */assets/leafs
 - `leafs/leaf2.png` - Ryan Funk - Piskel - */assets/leafs
 - `leafs/leaf3.png` - Ryan Funk - Piskel - */assets/leafs

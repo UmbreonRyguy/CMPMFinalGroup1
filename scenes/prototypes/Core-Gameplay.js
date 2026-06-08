@@ -28,7 +28,6 @@ export default class GameplayPrototype extends Phaser.Scene {
             ease: 'Expo.Out',
             onComplete: () => flash.destroy()
         });
-        console.log("hi");
         this.overlay = this.add.rectangle(this.CX, this.CY, this.W, this.H, 0xf9a039, 0.1);
     }
 
@@ -48,6 +47,53 @@ export default class GameplayPrototype extends Phaser.Scene {
         }
     }
 
+    makeLeaves(num, size) {
+        let leaves = [];
+        for (let i = 0; i < num; i++) {
+            leaves[i] = this.add.image(i*1280/num, - 50, 'leaf').setOrigin(0, 1).setScale(size + Math.random());
+            if (Math.random() < 0.5) {
+                leaves[i].flipX = true;
+            }
+            if (Math.random() < 0.3) {
+                leaves[i].setTint(0xff9978);
+            }
+            if (Math.random() < 0.5) {
+                leaves[i].setTint(0xffc3af);
+            }
+            this.tweens.add({
+                targets: leaves[i],
+                delay: Math.random() * 10000 + (i % 2) * 1000,
+                y: 1280,
+                alpha: 0.3,
+                scale: 5,
+                duration: 5000 + Math.random() * 10000,
+                repeat: -1,
+            });
+            if (!leaves[i].flipX) {
+                this.tweens.add({
+                    targets: leaves[i],
+                    rotation: {from: 0.1, to: -1.4},
+                    x: {from: leaves[i].x - (100 + 50*Math.random()), to: leaves[i].x + (100 + 50*Math.random())},
+                    yoyo: true,
+                    duration: 2000 + Math.random() * 1000,
+                    repeat: -1,
+                    ease: 'Sine.easeInOut'
+                });
+            }
+            else {
+                this.tweens.add({
+                    targets: leaves[i],
+                    rotation: {from: 1.4, to: -0.1},
+                    x: {from: leaves[i].x - (100 + 50*Math.random()), to: leaves[i].x + (100 + 50*Math.random())},
+                    yoyo: true,
+                    duration: 2000 + Math.random() * 1000,
+                    repeat: -1,
+                    ease: 'Sine.easeInOut'
+                });
+            }
+        }
+    }
+
     create(){
         // var to keep track of which game state the player is in
 
@@ -57,6 +103,8 @@ export default class GameplayPrototype extends Phaser.Scene {
         this.isJumping = false;
         this.cursors = this.input.keyboard.createCursorKeys();
         this.prev_time = 0;
+        this.makeLeaves(50, 1);
+        this.future_bg = this.add.rectangle(1280/2, 720/2, 1280, 720, 0x203030);
 
 
         //MUSIC
@@ -129,7 +177,7 @@ export default class GameplayPrototype extends Phaser.Scene {
         // ------------------------
     
         //Create Player sprite
-        this.player = this.physics.add.sprite(800, 500, "playerS", 0).setScale(1);
+        this.player = this.physics.add.sprite(600, 500, "playerS", 0).setScale(1);
 
         this.anims.create({
             key: 'walk',
@@ -172,12 +220,14 @@ export default class GameplayPrototype extends Phaser.Scene {
         //Prefab class definition
         //--------------------------------------------------
         //base class 
-        class Collectible extends Phaser.GameObjects.Image{
+        class Collectible extends Phaser.Physics.Arcade.Image{
             constructor(scene, x, y, texture){
                 super(scene, x, y, texture)
                 .setInteractive()
                 .setScale(0.5)
                 scene.add.existing(this)
+                scene.physics.add.existing(this)
+                this.body.allowGravity = false
             }
 
             getInventory(){
@@ -192,7 +242,7 @@ export default class GameplayPrototype extends Phaser.Scene {
                     return;
                 }
 
-                const message = this.scene.add.text(this.x, this.y + 20, "You picked up a thing!").setAlpha(0).setColor('#ffffff');
+                const message = this.scene.add.text(this.x, this.y + 20, "You picked up some trash!").setAlpha(0).setColor('#ffffff');
                 this.scene.tweens.add({
                     targets: message,
                     alpha: {from:1, to: 0},
@@ -204,31 +254,40 @@ export default class GameplayPrototype extends Phaser.Scene {
             }
 
         }
-
+        //adding a group for trash so they all get collected when overlapping with player
+        //this.trashGroup = this.physics.add.group();
         //prefab for trash---------------------------------------------------------------------------------
         class TrashInfo extends Collectible{
             constructor(scene, x, y, keyword){
                 super(scene, x, y, 'trash');
-                let trashMessage = scene.add.text(this.x, this.y-10, "Someone left trash here.").setColor('#ffffff').setAlpha(0)
-                this.on('pointerover', () => trashMessage.setAlpha(1))
-                .on('pointerout', () => trashMessage.setAlpha(0))
-                .on('pointerdown', () => {
-                    trashMessage.setAlpha(0);
+                //let trashMessage = scene.add.text(this.x, this.y-10, "Someone left trash here.").setColor('#ffffff').setAlpha(0)
+                //this.on('pointerover', () => trashMessage.setAlpha(1))
+                this.on('pointerdown', () =>{
+                    this.scene.tweens.add({
+                        targets: this,
+                        angle: {from: 0, to: 7},
+                        duration: 100,
+                        yoyo: true,
+                        repeat: 3
+                    })
+                })
+                .on('pointerout', () => this.setAngle(0))
+                //scene.trashGroup.add(this)
+                //let overlapped = false;
+                
+                scene.physics.add.overlap(scene.player, this, ()=>{
                     this.gainItem(keyword);
                     this.scene.tweens.add({
                         targets: this, 
                         alpha: {from: 1, to: 0},
                         duration: 500,
-                        onComplete: ()=> {this.destroy(); 
-                            trashMessage.destroy();
+                        onComplete: ()=> {this.destroy()
                         }
-                    });
-                })
+                      });
+                });
             }
 
-            //Don't know if this methood was overwritten correctly.
             getInventory(){
-                //line below is causing errors
                 return this.scene.trashInventory;
             }
         }
@@ -238,10 +297,33 @@ export default class GameplayPrototype extends Phaser.Scene {
             constructor(scene, x, y, keyword){
                 super(scene, x, y, 'treasure');
                 scene.add.existing(this)
-                let treasureMessage = scene.add.text(this.x, this.y-10, "ooo treasure").setColor('#ffffff').setAlpha(0)
-                this.on('pointerover', () => treasureMessage.setAlpha(1))
-                .on('pointerout', () => treasureMessage.setAlpha(0))
-                .on('pointerdown', () => {
+                //let treasureMessage = scene.add.text(this.x, this.y-10, "ooo treasure").setColor('#ffffff').setAlpha(0)
+                //this.on('pointerover', () => treasureMessage.setAlpha(1))
+                //.on('pointerout', () => treasureMessage.setAlpha(0))
+                .on('pointerdown', () =>{
+                    this.scene.tweens.add({
+                        targets: this,
+                        angle: {from: 0, to: 360},
+                        duration: 300,
+                        repeat: 3
+                    })
+                })
+                
+                scene.physics.add.overlap(scene.player, this, ()=>{
+                    this.gainItem(keyword);
+                    this.scene.tweens.add({
+                        targets: this, 
+                        alpha: {from: 1, to: 0},
+                        duration: 500,
+                        onComplete: ()=> {
+                            //this.destroy(); 
+                            this.scene.scene.start('end-scene');
+                        }
+                    });
+
+                });
+
+                /*.on('pointerdown', () => {
                     treasureMessage.setAlpha(0);
                     this.gainItem(keyword);
                     this.scene.tweens.add({
@@ -252,7 +334,7 @@ export default class GameplayPrototype extends Phaser.Scene {
                             treasureMessage.destroy();
                         }
                     });
-                })
+                })*/
             }
                 
             getInventory(){
@@ -283,22 +365,14 @@ export default class GameplayPrototype extends Phaser.Scene {
             const prototypeTiles = prototypeMap.addTilesetImage("Prototype_Tiles", "Prototype_Tiles", 80, 80);
             this.layer1 = prototypeMap.createLayer("Tile Layer 1", prototypeTiles, 0, 0);
             this.layer1.setCollisionFromCollisionGroup();
+            this.overlay = this.add.rectangle(this.CX, this.CY, this.W, this.H, 0xf9a039, 0.1);
             
             // Add player collider now that the tilemap is created
             this.physics.add.collider(this.player, this.layer1);
 
-            // was there a better way to figure out how to add an outline to the lever?
-            // probably. Do I care? No. It is 12 AM. Did I try a better way? Yes. For much too long.
-            // this.leverOutline = this.add.image(40, 202, "levers", "leverOutline").setAlpha(0);
-            // this.lever = this.physics.add.staticImage(40, 200, "levers", "lever");
-
-            this.lever = this.physics.add.sprite(40, 202, "spriteAtlas", "lever");
-            this.leverOutline = this.add.sprite(40, 202, "spriteAtlas", "leverOutline").setAlpha(0);
-            this.lever.body.setCircle(80, -80 , -20).setAllowGravity(false).setImmovable();
-
-            // idk why the hitbox is in a weird position either - 
-            // changing x or y has seemed to have little effect so I just left it alone
-            //this.lever.body.setCircle(80, -80, -40);
+            this.lever = this.physics.add.sprite(60, 202, "spriteAtlas", "lever");
+            this.leverOutline = this.add.sprite(60, 202, "spriteAtlas", "leverOutline").setAlpha(0);
+            this.lever.body.setCircle(80, -40 , -25).setAllowGravity(false).setImmovable();
 
             // mushroom - stored as instance properties for access from other methods
             this.mush1 = this.add.image(480, 400, "Prototype_Tiles", 21).setAlpha(0);
@@ -312,20 +386,38 @@ export default class GameplayPrototype extends Phaser.Scene {
 
             //added trash object for player to interact with
             //let trash = this.add.image(100, 220, "trash")
-            this.trash = new TrashInfo(this, 100, 220, 'trash') 
+            this.trash = new TrashInfo(this, 100, 220, 'trash'); 
 
-            this.trash2 = new TrashInfo(this, 950, 370, 'trash2') 
+            this.trash2 = new TrashInfo(this, 950, 370, 'trash2') ;
     
 
-            this.trashInventCheck = this.add.text( 600, 200, "Has the player collected all trash?")
-            this.treasureInventCheck = this.add.text(600, 220, "Has the player collected all treasure?")
+            this.trashInventCheck = this.add.text( 600, 200, "Has the player collected all trash?").setAlpha(0);
+            this.treasureInventCheck = this.add.text(600, 220, "Has the player collected all treasure?").setAlpha(0);
 
-            this.treasure = new TreasureInfo(this, 1000, 130, 'treasure') 
+
+
+            this.treasure = new TreasureInfo(this, 1000, 130, 'treasure');
+
+            //need to check for overlaps
+            /*scene.physics.add.overlap(this.player, this.trashGroup, ()=>{
+
+
+            });*/
+        
+        this.timestatetext =this.add.text(40, 30, "FUTURE", {
+            color: "#ffffff",
+            fontFamily: 'pixel',
+            fontSize: '60px'
+        });
 
         this.lever.on('pointerdown', () => {
             console.log("Lever clicked! Current past state:", this.past);
             if (this.past == true) {
+                this.future_bg.setAlpha(1);
+                this.lever.flipX = false;
+                this.leverOutline.flipX = false;
                 console.log("Switching to future - hiding mushrooms, showing conveyors");
+                this.timestatetext.text = "FUTURE";
                 this.flipToFuture();
                 this.mush1.setAlpha(0);
                 this.mush2.setAlpha(0);
@@ -341,6 +433,10 @@ export default class GameplayPrototype extends Phaser.Scene {
             }
             else {
                 console.log("Switching to past - showing mushrooms, hiding conveyors");
+                this.timestatetext.text = "PAST";
+                this.future_bg.setAlpha(0);
+                this.lever.flipX = true;
+                this.leverOutline.flipX = true;
                 this.flipToPast();
                 this.con1.setAlpha(0);
                 this.con2.setAlpha(0);
@@ -372,7 +468,7 @@ export default class GameplayPrototype extends Phaser.Scene {
         //     this.scene.start('end-scene', { itemsHeld: this.itemsHeld });
         // });
 
-        this.pauseButton = this.add.image(1200, 50, "pauseIcon").setOrigin(0.5).setScale(2).setInteractive();
+        this.pauseButton = this.add.image(1200, 70, "pauseIcon").setOrigin(0.5).setScale(2).setInteractive();
         //this.pauseButton.on('pointerover', () =>this.pauseButton.setTint(0xFF5C5));
         this.pauseButton.on('pointerup', ()=> {
             console.log("pause button clicked");
@@ -444,6 +540,11 @@ export default class GameplayPrototype extends Phaser.Scene {
             //this.interactButton.x += -9999;
         }
 
+        this.helpTip = this.add.text(this.W/2, 25, "Collect the trash and reveal the treasure to finish the level!", {
+            fontSize: '18px',
+            fontFamily: 'pixel'
+        }).setAlpha(1).setOrigin(0.5);
+
     }
 
 
@@ -494,7 +595,6 @@ export default class GameplayPrototype extends Phaser.Scene {
         } else if (onFloor) {
             if (this.justLanded) {
                 this.tweens.killTweensOf(this.player);
-                this.player.setScale(1, 1);
                 this.justLanded = false;
             }
             if (movingLeft || movingRight) {
@@ -520,6 +620,20 @@ export default class GameplayPrototype extends Phaser.Scene {
         }
 
         // Jump
+        const jumpCaption = this.add.text(1280/2, 600, '*boing*', {
+            color: "#ffffff",
+            fontFamily: 'pixel',
+            fontSize: '50px'
+        })
+        .setOrigin(0.5).setAlpha(0);
+
+        const mushroomCaption = this.add.text(1280/2, 600, '*bwoump*', {
+            color: "#ffffff",
+            fontFamily: 'pixel',
+            fontSize: '50px'
+        })
+        .setOrigin(0.5).setAlpha(0);
+
         if ((this.cursors.up.isDown || this.touchJump) && onFloor) {
             this.isJumping = true;
             this.justLanded = false;
@@ -528,26 +642,42 @@ export default class GameplayPrototype extends Phaser.Scene {
             this.player.setScale(0.39, 0.18);
             this.tweens.add({ //jump anim
                 targets: this.player,
-                scaleX: { from: 1.3, to: 0.75 },
-                scaleY: { from: 0.6, to: 1.4 },
+                // i dont know if this looks as good BUT
+                // bringing the scales to 1 makes the jump not feel awful when you land
+                // which i think is a bigger issue
+                scaleX: { from: 1.5, to: 1 },
+                scaleY: { from: 0.3, to: 1 },
                 duration: 250,
                 ease: 'Quad.Out'
             });
             // Jump higher on mushroom platform in past mode
             if (this.past && this.player.body.touching.down && this.platform.touching.up) {
                 if (this.registry.get('sfxEnabled')) {
-                this.jumpSound.play({rate: 0.3 + Math.random() * 0.2});
+                    this.jumpSound.play({rate: 0.3 + Math.random() * 0.2});
+                    mushroomCaption.setAlpha(1);
+                    this.player.setVelocityY(-700);
+                    this.tweens.add({
+                        targets: mushroomCaption,
+                        alpha: 0,
+                        ease: 'linear',
+                        duration: 1000
+                    });
                 }
-                this.player.setVelocityY(-700);
             }
             else {
                 if (this.registry.get('sfxEnabled')) {
-                this.jumpSound.play({rate: 0.7 + Math.random() * 0.3});
+                    this.jumpSound.play({rate: 0.7 + Math.random() * 0.3});
+                    jumpCaption.setAlpha(1);
+                    this.player.setVelocityY(-475);
+                    this.tweens.add({
+                        targets: jumpCaption,
+                        alpha: 0,
+                        ease: 'linear',
+                        duration: 1000
+                    });
                 }
-                this.player.setVelocityY(-475);
             }
         }
-
         // variable jump is dead and phaser killed it
         // if ((this.cursors.up.isDown || this.touchJump) && (Math.floor(time/10) != this.prev_time && Math.floor(time/10) % 5 == 0) && this.player.body.velocity.y < -100) {
         //     this.prev_time = Math.floor(time/10);
@@ -563,5 +693,9 @@ export default class GameplayPrototype extends Phaser.Scene {
             this.leverOutline.setAlpha(1); // lever has outline
             this.lever.setInteractive(); // can interact with lever
         }
+
+        /*if(this.physics.overlap(this.trashGroup, this.player)){
+
+        }*/
     }
 }

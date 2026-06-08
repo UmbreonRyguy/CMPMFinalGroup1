@@ -8,6 +8,7 @@ export default class EndScene extends Phaser.Scene {
         this.itemsHeld = data.itemsHeld || 0; // Default to 0 if itemsHeld is not provided
     }
     create() {
+        this.anySoundPlaying = this.sound.getAllPlaying().length > 0;
         const fadeIn = (button, delayTime) =>{
             this.tweens.add({
                 targets: button,
@@ -21,20 +22,21 @@ export default class EndScene extends Phaser.Scene {
         this.bg = this.add.image(640, 360, 'endScenebg');
 
         const endSign = this.add.image(640, 200, 'signLong').setScale(3);
-        const theEnd = this.add.text(640, 200, "The End", {
+        const theEnd = this.add.text(640, 200, "Level \nComplete!", {
             color: "#ffffff",
             fontFamily: "pixel",
-            fontSize: '100px'
+            fontSize: '60px',
+            align: 'center'
         }).setOrigin(0.5).setAlpha(0);
 
-        fadeIn(endSign,0);
+        fadeIn(endSign,0); 
         fadeIn(theEnd, 0);
 
         const returnButton = this.add.image(640, 500, 'signSmall').setAlpha(0).setScale(2).setOrigin(0.5, 0.5).setInteractive();
-        const returnText =this.add.text(640, 500, " Return \nto  Menu", {
+        const returnText =this.add.text(640, 500, " Return to \nLevel Select", {
             color: "#ffffff",
             fontFamily: 'pixel',
-            fontSize: '40px'
+            fontSize: '30px'
         }).setOrigin(0.5).setAlpha(0);
 
         this.buttonMove = (button, y) => {
@@ -53,7 +55,10 @@ export default class EndScene extends Phaser.Scene {
         returnButton.on('pointerout', ()=> returnButton.clearTint());
         
         returnButton.on('pointerup', ()=>{
-            this.scene.start('main-menu');
+            if(this.anySoundPlaying){
+                this.sound.stopByKey('inGameTheme');
+            }
+            this.scene.start('level-select');
         });
         fadeIn(returnButton, 0);
         fadeIn(returnText, 0);

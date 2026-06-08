@@ -97,9 +97,7 @@ export default class GameplayPrototypeLevel3 extends Phaser.Scene {
             ease: 'Expo.Out',
             onComplete: () => flash.destroy()
         });
-        if(this.overlay){
-            this.overlay.destroy();
-        }
+        this.overlay = this.add.rectangle(this.CX, this.CY, this.W, this.H, 0xf9a039, 0.1);
     }
 
     flipToPast() {
@@ -113,11 +111,61 @@ export default class GameplayPrototypeLevel3 extends Phaser.Scene {
             ease: 'Expo.Out',
             onComplete: () => flash.destroy()
         });
-        this.overlay = this.add.rectangle(this.CX, this.CY, this.W, this.H, 0xf9a039, 0.1);
-        
+        if(this.overlay){
+            this.overlay.destroy();
+        }
+    }
+
+    makeLeaves(num, size) {
+        let leaves = [];
+        for (let i = 0; i < num; i++) {
+            leaves[i] = this.add.image(i*1280/num, - 50, 'leaf').setOrigin(0, 1).setScale(size + Math.random());
+            if (Math.random() < 0.5) {
+                leaves[i].flipX = true;
+            }
+            if (Math.random() < 0.3) {
+                leaves[i].setTint(0xff9978);
+            }
+            if (Math.random() < 0.5) {
+                leaves[i].setTint(0xffc3af);
+            }
+            this.tweens.add({
+                targets: leaves[i],
+                delay: Math.random() * 10000 + (i % 2) * 1000,
+                y: 1280,
+                alpha: 0.3,
+                scale: 5,
+                duration: 5000 + Math.random() * 10000,
+                repeat: -1,
+            });
+            if (!leaves[i].flipX) {
+                this.tweens.add({
+                    targets: leaves[i],
+                    rotation: {from: 0.1, to: -1.4},
+                    x: {from: leaves[i].x - (100 + 50*Math.random()), to: leaves[i].x + (100 + 50*Math.random())},
+                    yoyo: true,
+                    duration: 2000 + Math.random() * 1000,
+                    repeat: -1,
+                    ease: 'Sine.easeInOut'
+                });
+            }
+            else {
+                this.tweens.add({
+                    targets: leaves[i],
+                    rotation: {from: 1.4, to: -0.1},
+                    x: {from: leaves[i].x - (100 + 50*Math.random()), to: leaves[i].x + (100 + 50*Math.random())},
+                    yoyo: true,
+                    duration: 2000 + Math.random() * 1000,
+                    repeat: -1,
+                    ease: 'Sine.easeInOut'
+                });
+            }
+        }
     }
 
     create() {
+        this.makeLeaves(50, 1);
+        this.future_bg = this.add.rectangle(1280/2, 720/2, 1280, 720, 0x203030).setAlpha(0);
         // ---------------------------------------------------------------------------------------------
         // Tile map
         // -----------------------------------------------------------------------------------------------
@@ -229,10 +277,18 @@ export default class GameplayPrototypeLevel3 extends Phaser.Scene {
         //---------------------------------------------------------------------------------------------
         // past and future switch stuff
         //---------------------------------------------------------------------------------------------
+        this.timestatetext =this.add.text(40, 30, "PAST", {
+            color: "#ffffff",
+            fontFamily: 'pixel',
+            fontSize: '60px'
+        });
         this.lever = this.physics.add.sprite(120, 120, "spriteAtlas", "lever");
         this.lever.body.setCircle(80, -40 , -20 ).setAllowGravity(false).setImmovable();
         this.lever.on('pointerdown', () => {
             if (this.past) {
+                this.future_bg.setAlpha(1);
+                this.lever.flipX = true;
+                this.timestatetext.text = "FUTURE";
                 this.flipToFuture();
                 this.pastObjects.forEach((pastObject) => {
                     pastObject.disableBody();
@@ -245,6 +301,9 @@ export default class GameplayPrototypeLevel3 extends Phaser.Scene {
                 this.past = false;
             }
             else {
+                this.future_bg.setAlpha(0);
+                this.lever.flipX = false;
+                this.timestatetext.text = "PAST";
                 this.flipToPast();
                 this.futureObjects.forEach((futureObject) => {
                     futureObject.disableBody();
@@ -261,7 +320,7 @@ export default class GameplayPrototypeLevel3 extends Phaser.Scene {
 
         //UI
 
-        this.pauseButton = this.add.image(1200, 50, "pauseIcon").setOrigin(0.5).setScale(2).setInteractive();
+        this.pauseButton = this.add.image(1200, 70, "pauseIcon").setOrigin(0.5).setScale(2).setInteractive();
         //this.pauseButton.on('pointerover', () =>this.pauseButton.setTint(0xFF5C5));
         this.pauseButton.on('pointerup', ()=> {
             console.log("pause button clicked");
@@ -424,17 +483,17 @@ export default class GameplayPrototypeLevel3 extends Phaser.Scene {
         }
 
         // Jump
-        const jumpCaption = this.add.text(640, 600, 'boing', {
+        const jumpCaption = this.add.text(1280/2, 600, '*boing*', {
             color: "#ffffff",
             fontFamily: 'pixel',
-            fontSize: '20px'
+            fontSize: '50px'
         })
         .setOrigin(0.5).setAlpha(0);
 
-        const mushroomCaption = this.add.text(640, 600, 'bwoump', {
+        const mushroomCaption = this.add.text(1280/2, 600, '*bwoump*', {
             color: "#ffffff",
             fontFamily: 'pixel',
-            fontSize: '20px'
+            fontSize: '50px'
         })
         .setOrigin(0.5).setAlpha(0);
 
@@ -478,7 +537,7 @@ export default class GameplayPrototypeLevel3 extends Phaser.Scene {
                     });
                 }
             }
-
+        }
         if (!this.physics.overlap(this.lever, this.player)) { // if the player is not in range of the lever
             this.lever.setFrame("lever"); // lever has no outline
             this.lever.disableInteractive(); // cannot click on lever
@@ -488,5 +547,4 @@ export default class GameplayPrototypeLevel3 extends Phaser.Scene {
             this.lever.setInteractive(); // can interact with lever
         }
     }
-}
 }

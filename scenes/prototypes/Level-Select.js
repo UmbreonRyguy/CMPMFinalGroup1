@@ -226,7 +226,12 @@ export default class LevelSelect extends Phaser.Scene {
             this.buttonMove(levelThree, 500);
             this.buttonMove(levelThreeText, 500);
         });
-
+        this.anySoundPlaying = this.sound.getAllPlaying().length > 0;
+        this.music = this.sound.add('mainMenuTheme');
+        if (this.registry.get('musicEnabled') && (!this.anySoundPlaying)) {
+                    this.music.loop = true;
+                    this.music.play();
+            }
 
         // const lvl1 = this.add.text(100, 200, "level 1", {color: "#000000"}).setInteractive();
         // lvl1.on('pointerhover', ()=> lvl1.setTint(0xb66d0f));

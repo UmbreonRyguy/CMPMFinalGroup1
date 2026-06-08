@@ -29,7 +29,10 @@ export default class GameplayPrototype extends Phaser.Scene {
             onComplete: () => flash.destroy()
         });
         console.log("hi");
-        this.overlay = this.add.rectangle(this.CX, this.CY, this.W, this.H, 0xf9a039, 0.1);
+        if(this.overlay){
+            this.overlay.destroy();
+        }
+        
     }
 
     flipToPast() {
@@ -43,9 +46,7 @@ export default class GameplayPrototype extends Phaser.Scene {
             ease: 'Expo.Out',
             onComplete: () => flash.destroy()
         });
-        if(this.overlay){
-            this.overlay.destroy();
-        }
+        this.overlay = this.add.rectangle(this.CX, this.CY, this.W, this.H, 0xf9a039, 0.1);
     }
 
     create(){
@@ -129,7 +130,7 @@ export default class GameplayPrototype extends Phaser.Scene {
         // ------------------------
     
         //Create Player sprite
-        this.player = this.physics.add.sprite(800, 500, "playerS", 0).setScale(1);
+        this.player = this.physics.add.sprite(600, 500, "playerS", 0).setScale(1);
 
         this.anims.create({
             key: 'walk',
@@ -194,7 +195,7 @@ export default class GameplayPrototype extends Phaser.Scene {
                     return;
                 }
 
-                const message = this.scene.add.text(this.x, this.y + 20, "You picked up a thing!").setAlpha(0).setColor('#ffffff');
+                const message = this.scene.add.text(this.x, this.y + 20, "You picked up some trash!").setAlpha(0).setColor('#ffffff');
                 this.scene.tweens.add({
                     targets: message,
                     alpha: {from:1, to: 0},
@@ -267,7 +268,12 @@ export default class GameplayPrototype extends Phaser.Scene {
                         targets: this, 
                         alpha: {from: 1, to: 0},
                         duration: 500,
-                        onComplete: ()=> {this.destroy(); 
+                        onComplete: ()=> {
+                            this.destroy(); 
+                            this.cameras.main.fadeOut(500, 0, 0, 0);
+                            this.cameras.main.once('camerafadeoutcomplete', () => {
+                                this.scene.start('end-scene');
+                            });
                         }
                     });
 
@@ -344,15 +350,17 @@ export default class GameplayPrototype extends Phaser.Scene {
 
             //added trash object for player to interact with
             //let trash = this.add.image(100, 220, "trash")
-            this.trash = new TrashInfo(this, 100, 220, 'trash') 
+            this.trash = new TrashInfo(this, 100, 220, 'trash'); 
 
-            this.trash2 = new TrashInfo(this, 950, 370, 'trash2') 
+            this.trash2 = new TrashInfo(this, 950, 370, 'trash2') ;
     
 
-            this.trashInventCheck = this.add.text( 600, 200, "Has the player collected all trash?")
-            this.treasureInventCheck = this.add.text(600, 220, "Has the player collected all treasure?")
+            this.trashInventCheck = this.add.text( 600, 200, "Has the player collected all trash?").setAlpha(0);
+            this.treasureInventCheck = this.add.text(600, 220, "Has the player collected all treasure?").setAlpha(0);
 
-            this.treasure = new TreasureInfo(this, 1000, 130, 'treasure') 
+
+
+            this.treasure = new TreasureInfo(this, 1000, 130, 'treasure');
 
             //need to check for overlaps
             /*scene.physics.add.overlap(this.player, this.trashGroup, ()=>{
@@ -481,6 +489,11 @@ export default class GameplayPrototype extends Phaser.Scene {
             this.jumpButton.x += -9999;
             //this.interactButton.x += -9999;
         }
+
+        this.helpTip = this.add.text(this.W/2, 25, "Collect the trash and reveal the treasure to finish the level!", {
+            fontSize: '18px',
+            fontFamily: 'pixel'
+        }).setAlpha(1).setOrigin(0.5);
 
     }
 

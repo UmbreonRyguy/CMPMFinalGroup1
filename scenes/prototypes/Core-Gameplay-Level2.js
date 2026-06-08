@@ -22,8 +22,9 @@ export default class GameplayPrototypeLevel2 extends Phaser.Scene {
             ease: 'Expo.Out',
             onComplete: () => flash.destroy()
         });
-        console.log("hi");
-        this.overlay = this.add.rectangle(this.CX, this.CY, this.W, this.H, 0xf9a039, 0.1);
+        if(this.overlay){
+            this.overlay.destroy();
+        }
     }
 
     flipToPast() {
@@ -37,9 +38,7 @@ export default class GameplayPrototypeLevel2 extends Phaser.Scene {
             ease: 'Expo.Out',
             onComplete: () => flash.destroy()
         });
-        if(this.overlay){
-            this.overlay.destroy();
-        }
+        this.overlay = this.add.rectangle(this.CX, this.CY, this.W, this.H, 0xf9a039, 0.1);
     }
 
     makeLeaves(num, size) {

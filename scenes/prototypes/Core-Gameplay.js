@@ -110,7 +110,7 @@ export default class GameplayPrototype extends Phaser.Scene {
         //MUSIC
 
         this.anySoundPlaying = this.sound.getAllPlaying().length > 0;
-        if(this.anySoundPlaying){
+        if (this.anySoundPlaying){
             this.sound.stopByKey('mainMenuTheme');
         }
 
@@ -127,7 +127,7 @@ export default class GameplayPrototype extends Phaser.Scene {
         else{
             this.sound.stopByKey('inGameTheme');
             musicPlaying = false;
-            }
+        }
 
         this.events.on('resume', (sys, data) => { //check again on scene resume
             // Update global Tone mute on resume
@@ -228,6 +228,7 @@ export default class GameplayPrototype extends Phaser.Scene {
                 scene.add.existing(this)
                 scene.physics.add.existing(this)
                 this.body.allowGravity = false
+                this.pickupWord = texture;
             }
 
             getInventory(){
@@ -242,7 +243,7 @@ export default class GameplayPrototype extends Phaser.Scene {
                     return;
                 }
 
-                const message = this.scene.add.text(this.x, this.y + 20, "You picked up some trash!").setAlpha(0).setColor('#ffffff');
+                const message = this.scene.add.text(this.x, this.y + 20, "You picked up some " + this.pickupWord + "!").setAlpha(0).setColor('#ffffff');
                 this.scene.tweens.add({
                     targets: message,
                     alpha: {from:1, to: 0},
@@ -296,18 +297,21 @@ export default class GameplayPrototype extends Phaser.Scene {
         class TreasureInfo extends Collectible{
             constructor(scene, x, y, keyword){
                 super(scene, x, y, 'treasure');
-                scene.add.existing(this)
+                this.resetX = x;
+                this.resetY = y;
+                this.active = false;
+                //scene.add.existing(this)
                 //let treasureMessage = scene.add.text(this.x, this.y-10, "ooo treasure").setColor('#ffffff').setAlpha(0)
                 //this.on('pointerover', () => treasureMessage.setAlpha(1))
                 //.on('pointerout', () => treasureMessage.setAlpha(0))
-                .on('pointerdown', () =>{
+                this.on('pointerdown', () =>{
                     this.scene.tweens.add({
                         targets: this,
                         angle: {from: 0, to: 360},
                         duration: 300,
                         repeat: 3
                     })
-                })
+                });
                 
                 scene.physics.add.overlap(scene.player, this, ()=>{
                     this.gainItem(keyword);
@@ -322,6 +326,8 @@ export default class GameplayPrototype extends Phaser.Scene {
                     });
 
                 });
+
+                this.setAlpha(0).setInteractive(false).disableBody();
 
                 /*.on('pointerdown', () => {
                     treasureMessage.setAlpha(0);
@@ -339,6 +345,11 @@ export default class GameplayPrototype extends Phaser.Scene {
                 
             getInventory(){
                 return this.scene.treasureInventory;
+            }
+
+            appear() {
+                this.setAlpha(1).setInteractive(true).enableBody(true, this.resetX, this.resetY);
+                this.active = true;
             }
 
         }
@@ -371,18 +382,20 @@ export default class GameplayPrototype extends Phaser.Scene {
             this.physics.add.collider(this.player, this.layer1);
 
             this.lever = this.physics.add.sprite(60, 202, "spriteAtlas", "lever");
-            this.leverOutline = this.add.sprite(60, 202, "spriteAtlas", "leverOutline").setAlpha(0);
+            
             this.lever.body.setCircle(80, -40 , -25).setAllowGravity(false).setImmovable();
 
             // mushroom - stored as instance properties for access from other methods
-            this.mush1 = this.add.image(480, 400, "Prototype_Tiles", 21).setAlpha(0);
-            this.mush2 = this.add.image(560, 400, "Prototype_Tiles", 22).setAlpha(0);
-            this.mush3 = this.add.image(640, 400, "Prototype_Tiles", 23).setAlpha(0);
+            this.mush = this.addSpriteWithTiles(3, 480, 400, 21, 23, 0);
+            //this.mush1 = this.add.image(480, 400, "Prototype_Tiles", 21).setAlpha(0);
+            //this.mush2 = this.add.image(560, 400, "Prototype_Tiles", 22).setAlpha(0);
+            //this.mush3 = this.add.image(640, 400, "Prototype_Tiles", 23).setAlpha(0);
 
             // conveyor belt - stored as instance properties for access from other methods
-            this.con1 = this.add.image(480, 400, "Prototype_Tiles", 14);
-            this.con2 = this.add.image(560, 400, "Prototype_Tiles", 15);
-            this.con3 = this.add.image(640, 400, "Prototype_Tiles", 16);
+            this.con = this.addSpriteWithTiles(3, 480, 400, 14, 16, 1);
+            //this.con1 = this.add.image(480, 400, "Prototype_Tiles", 14);
+            //this.con2 = this.add.image(560, 400, "Prototype_Tiles", 15);
+            //this.con3 = this.add.image(640, 400, "Prototype_Tiles", 16);
 
             //added trash object for player to interact with
             //let trash = this.add.image(100, 220, "trash")
@@ -415,17 +428,23 @@ export default class GameplayPrototype extends Phaser.Scene {
             if (this.past == true) {
                 this.future_bg.setAlpha(1);
                 this.lever.flipX = false;
-                this.leverOutline.flipX = false;
+                //this.leverOutline.flipX = false;
                 console.log("Switching to future - hiding mushrooms, showing conveyors");
                 this.timestatetext.text = "FUTURE";
                 this.flipToFuture();
-                this.mush1.setAlpha(0);
-                this.mush2.setAlpha(0);
-                this.mush3.setAlpha(0);
+                this.mush.forEach((part) => {
+                    part.setAlpha(0);
+                });
+                //this.mush1.setAlpha(0);
+                //this.mush2.setAlpha(0);
+                //this.mush3.setAlpha(0);
 
-                this.con1.setAlpha(1);
-                this.con2.setAlpha(1);
-                this.con3.setAlpha(1);
+                this.con.forEach((part) => {
+                    part.setAlpha(1);
+                });
+                //this.con1.setAlpha(1);
+                //this.con2.setAlpha(1);
+                //this.con3.setAlpha(1);
 
                 this.platform.setSize(240, 28).reset(440, 386);
 
@@ -436,15 +455,23 @@ export default class GameplayPrototype extends Phaser.Scene {
                 this.timestatetext.text = "PAST";
                 this.future_bg.setAlpha(0);
                 this.lever.flipX = true;
-                this.leverOutline.flipX = true;
+                //this.leverOutline.flipX = true;
                 this.flipToPast();
-                this.con1.setAlpha(0);
-                this.con2.setAlpha(0);
-                this.con3.setAlpha(0);
+                this.mush.forEach((part) => {
+                    part.setAlpha(1);
+                });
 
-                this.mush1.setAlpha(1);
-                this.mush2.setAlpha(1);
-                this.mush3.setAlpha(1);
+                this.con.forEach((part) => {
+                    part.setAlpha(0);
+                })
+
+                //this.con1.setAlpha(0);
+                //this.con2.setAlpha(0);
+                //this.con3.setAlpha(0);
+
+                //this.mush1.setAlpha(1);
+                //this.mush2.setAlpha(1);
+                //this.mush3.setAlpha(1);
 
                 this.platform.setSize(240, 28).reset(440, 391);
 
@@ -598,7 +625,7 @@ export default class GameplayPrototype extends Phaser.Scene {
                 this.justLanded = false;
             }
             if (movingLeft || movingRight) {
-                 if (this.player.anims.currentAnim?.key !== 'walk') this.player.play('walk');
+                if (this.player.anims.currentAnim?.key !== 'walk') this.player.play('walk');
             } 
             else {
                 this.player.anims.stop();
@@ -609,6 +636,9 @@ export default class GameplayPrototype extends Phaser.Scene {
         //Checking if inventory is full
         if (this.hasAllItem(2, this.trashInventory)){
             this.trashInventCheck.setText("Has the player collected all trash? Yes!")
+            if (this.treasure.active == false) {
+                this.treasure.appear();
+            }
         } else {
             this.trashInventCheck.setText("Has the player collected all trash? No")
         }
@@ -616,7 +646,7 @@ export default class GameplayPrototype extends Phaser.Scene {
         if(this.hasAllItem(1, this.treasureInventory)){
             this.treasureInventCheck.setText("Has the player collected all treasure? Yes!")
         }else{
-             this.treasureInventCheck.setText("Has the player collected all treasure? No")
+            this.treasureInventCheck.setText("Has the player collected all treasure? No")
         }
 
         // Jump
@@ -686,16 +716,38 @@ export default class GameplayPrototype extends Phaser.Scene {
 
         // lever
         if (!this.physics.overlap(this.lever, this.player)) { // if the player is not in range of the lever
-            this.leverOutline.setAlpha(0); // lever has no outline
+            this.lever.setFrame("lever"); // lever has no outline
             this.lever.disableInteractive(); // cannot click on lever
         }
         else {
-            this.leverOutline.setAlpha(1); // lever has outline
+            this.lever.setFrame("leverOutline"); // lever has outline
             this.lever.setInteractive(); // can interact with lever
         }
 
         /*if(this.physics.overlap(this.trashGroup, this.player)){
 
         }*/
+    }
+
+    // makes a line of images and adds them to an array which gets returned; used to make long conveyor belts and mushrooms
+    addSpriteWithTiles(num_tiles, startingX, y, indexLeft, indexRight, alpha) { // num_tiles is how long you want your conveyour belt or mushroom or whatever
+        let arr = [];
+        for (let i = 0; i < num_tiles; ++i) {
+            let indexToAdd = null;
+            switch (i) {
+                case 0:
+                    indexToAdd = indexLeft;
+                    break;
+                case num_tiles - 1:
+                    indexToAdd = indexRight;
+                    break;
+                default:
+                    indexToAdd = indexLeft + 1;
+                    break;
+
+            }
+            arr.push(this.add.image(startingX + (i * 80), y, "Prototype_Tiles", indexToAdd).setAlpha(alpha));
+        }
+        return arr;
     }
 }

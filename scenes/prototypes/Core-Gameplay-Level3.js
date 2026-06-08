@@ -232,7 +232,7 @@ export default class GameplayPrototypeLevel3 extends Phaser.Scene {
         this.player.setCollideWorldBounds(true);
         this.physics.add.collider(this.player, this.layer1);
         this.physics.add.collider(this.player, this.door);
-        this.physics.add.collider(this.button, this.stone, () => { //there's actually supposed to be a button that the stone lands on to open the door, but im super tired rn
+        this.physics.add.collider(this.button, this.stone, () => {
             this.tweens.chain({
                 targets: [this.door, this.button, this.stone],
                 tweens: [
@@ -259,8 +259,7 @@ export default class GameplayPrototypeLevel3 extends Phaser.Scene {
                         ease: "Cubic.easeIn"
                     }
                 ]
-            })
-
+            });
         });
         this.physics.add.collider(this.stone, this.layer1);
 
@@ -278,7 +277,6 @@ export default class GameplayPrototypeLevel3 extends Phaser.Scene {
         // adding breakable rock platforms & teleporters
         // NOTE: need to be added after player because their construction references the player
         //--------------------------------------------------------------------------------------------
-        this.testRock = new Rock(this, 1160, 680); 
         this.rock1 = new Rock(this, 120, 680);     
         this.rock2 = new Rock(this, 1160, 440);
         this.teleporter1 = new Teleporter(this, 120, 336, 0, 0, 1);

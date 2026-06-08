@@ -130,7 +130,7 @@ export default class GameplayPrototype extends Phaser.Scene {
         // ------------------------
     
         //Create Player sprite
-        this.player = this.physics.add.sprite(800, 500, "playerS", 0).setScale(1);
+        this.player = this.physics.add.sprite(600, 500, "playerS", 0).setScale(1);
 
         this.anims.create({
             key: 'walk',
@@ -321,6 +321,8 @@ export default class GameplayPrototype extends Phaser.Scene {
             this.trashInventCheck = this.add.text( 600, 200, "Has the player collected all trash?").setAlpha(0);
             this.treasureInventCheck = this.add.text(600, 220, "Has the player collected all treasure?").setAlpha(0);
 
+
+
             this.treasure = new TreasureInfo(this, 1000, 130, 'treasure');
 
         this.lever.on('pointerdown', () => {
@@ -444,6 +446,11 @@ export default class GameplayPrototype extends Phaser.Scene {
             this.jumpButton.x += -9999;
             //this.interactButton.x += -9999;
         }
+
+        this.helpTip = this.add.text(this.W/2, 25, "Collect the trash and reveal the treasure to finish the level!", {
+            fontSize: '18px',
+            fontFamily: 'pixel'
+        }).setAlpha(1).setOrigin(0.5);
 
     }
 

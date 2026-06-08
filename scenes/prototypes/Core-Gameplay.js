@@ -28,11 +28,7 @@ export default class GameplayPrototype extends Phaser.Scene {
             ease: 'Expo.Out',
             onComplete: () => flash.destroy()
         });
-        console.log("hi");
-        if(this.overlay){
-            this.overlay.destroy();
-        }
-        
+        this.overlay = this.add.rectangle(this.CX, this.CY, this.W, this.H, 0xf9a039, 0.1);
     }
 
     flipToPast() {
@@ -46,7 +42,56 @@ export default class GameplayPrototype extends Phaser.Scene {
             ease: 'Expo.Out',
             onComplete: () => flash.destroy()
         });
-        this.overlay = this.add.rectangle(this.CX, this.CY, this.W, this.H, 0xf9a039, 0.1);
+        if(this.overlay){
+            this.overlay.destroy();
+        }
+    }
+
+    makeLeaves(num, size) {
+        let leaves = [];
+        for (let i = 0; i < num; i++) {
+            leaves[i] = this.add.image(i*1280/num, - 50, 'leaf').setOrigin(0, 1).setScale(size + Math.random());
+            if (Math.random() < 0.5) {
+                leaves[i].flipX = true;
+            }
+            if (Math.random() < 0.3) {
+                leaves[i].setTint(0xff9978);
+            }
+            if (Math.random() < 0.5) {
+                leaves[i].setTint(0xffc3af);
+            }
+            this.tweens.add({
+                targets: leaves[i],
+                delay: Math.random() * 10000 + (i % 2) * 1000,
+                y: 1280,
+                alpha: 0.3,
+                scale: 5,
+                duration: 5000 + Math.random() * 10000,
+                repeat: -1,
+            });
+            if (!leaves[i].flipX) {
+                this.tweens.add({
+                    targets: leaves[i],
+                    rotation: {from: 0.1, to: -1.4},
+                    x: {from: leaves[i].x - (100 + 50*Math.random()), to: leaves[i].x + (100 + 50*Math.random())},
+                    yoyo: true,
+                    duration: 2000 + Math.random() * 1000,
+                    repeat: -1,
+                    ease: 'Sine.easeInOut'
+                });
+            }
+            else {
+                this.tweens.add({
+                    targets: leaves[i],
+                    rotation: {from: 1.4, to: -0.1},
+                    x: {from: leaves[i].x - (100 + 50*Math.random()), to: leaves[i].x + (100 + 50*Math.random())},
+                    yoyo: true,
+                    duration: 2000 + Math.random() * 1000,
+                    repeat: -1,
+                    ease: 'Sine.easeInOut'
+                });
+            }
+        }
     }
 
     create(){
@@ -58,6 +103,8 @@ export default class GameplayPrototype extends Phaser.Scene {
         this.isJumping = false;
         this.cursors = this.input.keyboard.createCursorKeys();
         this.prev_time = 0;
+        this.makeLeaves(50, 1);
+        this.future_bg = this.add.rectangle(1280/2, 720/2, 1280, 720, 0x203030);
 
 
         //MUSIC
@@ -321,22 +368,14 @@ export default class GameplayPrototype extends Phaser.Scene {
             const prototypeTiles = prototypeMap.addTilesetImage("Prototype_Tiles", "Prototype_Tiles", 80, 80);
             this.layer1 = prototypeMap.createLayer("Tile Layer 1", prototypeTiles, 0, 0);
             this.layer1.setCollisionFromCollisionGroup();
+            this.overlay = this.add.rectangle(this.CX, this.CY, this.W, this.H, 0xf9a039, 0.1);
             
             // Add player collider now that the tilemap is created
             this.physics.add.collider(this.player, this.layer1);
 
-            // was there a better way to figure out how to add an outline to the lever?
-            // probably. Do I care? No. It is 12 AM. Did I try a better way? Yes. For much too long.
-            // this.leverOutline = this.add.image(40, 202, "levers", "leverOutline").setAlpha(0);
-            // this.lever = this.physics.add.staticImage(40, 200, "levers", "lever");
-
-            this.lever = this.physics.add.sprite(40, 202, "spriteAtlas", "lever");
-            this.leverOutline = this.add.sprite(40, 202, "spriteAtlas", "leverOutline").setAlpha(0);
-            this.lever.body.setCircle(80, -80 , -20).setAllowGravity(false).setImmovable();
-
-            // idk why the hitbox is in a weird position either - 
-            // changing x or y has seemed to have little effect so I just left it alone
-            //this.lever.body.setCircle(80, -80, -40);
+            this.lever = this.physics.add.sprite(60, 202, "spriteAtlas", "lever");
+            this.leverOutline = this.add.sprite(60, 202, "spriteAtlas", "leverOutline").setAlpha(0);
+            this.lever.body.setCircle(80, -40 , -25).setAllowGravity(false).setImmovable();
 
             // mushroom - stored as instance properties for access from other methods
             this.mush1 = this.add.image(480, 400, "Prototype_Tiles", 21).setAlpha(0);
@@ -367,11 +406,21 @@ export default class GameplayPrototype extends Phaser.Scene {
 
 
             });*/
+        
+        this.timestatetext =this.add.text(40, 30, "FUTURE", {
+            color: "#ffffff",
+            fontFamily: 'pixel',
+            fontSize: '60px'
+        });
 
         this.lever.on('pointerdown', () => {
             console.log("Lever clicked! Current past state:", this.past);
             if (this.past == true) {
+                this.future_bg.setAlpha(1);
+                this.lever.flipX = false;
+                this.leverOutline.flipX = false;
                 console.log("Switching to future - hiding mushrooms, showing conveyors");
+                this.timestatetext.text = "FUTURE";
                 this.flipToFuture();
                 this.mush1.setAlpha(0);
                 this.mush2.setAlpha(0);
@@ -387,6 +436,10 @@ export default class GameplayPrototype extends Phaser.Scene {
             }
             else {
                 console.log("Switching to past - showing mushrooms, hiding conveyors");
+                this.timestatetext.text = "PAST";
+                this.future_bg.setAlpha(0);
+                this.lever.flipX = true;
+                this.leverOutline.flipX = true;
                 this.flipToPast();
                 this.con1.setAlpha(0);
                 this.con2.setAlpha(0);
@@ -418,7 +471,7 @@ export default class GameplayPrototype extends Phaser.Scene {
         //     this.scene.start('end-scene', { itemsHeld: this.itemsHeld });
         // });
 
-        this.pauseButton = this.add.image(1200, 50, "pauseIcon").setOrigin(0.5).setScale(2).setInteractive();
+        this.pauseButton = this.add.image(1200, 70, "pauseIcon").setOrigin(0.5).setScale(2).setInteractive();
         //this.pauseButton.on('pointerover', () =>this.pauseButton.setTint(0xFF5C5));
         this.pauseButton.on('pointerup', ()=> {
             console.log("pause button clicked");
@@ -545,7 +598,6 @@ export default class GameplayPrototype extends Phaser.Scene {
         } else if (onFloor) {
             if (this.justLanded) {
                 this.tweens.killTweensOf(this.player);
-                this.player.setScale(1, 1);
                 this.justLanded = false;
             }
             if (movingLeft || movingRight) {
@@ -571,17 +623,17 @@ export default class GameplayPrototype extends Phaser.Scene {
         }
 
         // Jump
-        const jumpCaption = this.add.text(640, 600, 'boing', {
+        const jumpCaption = this.add.text(1280/2, 600, '*boing*', {
             color: "#ffffff",
             fontFamily: 'pixel',
-            fontSize: '20px'
+            fontSize: '50px'
         })
         .setOrigin(0.5).setAlpha(0);
 
-        const mushroomCaption = this.add.text(640, 600, 'bwoump', {
+        const mushroomCaption = this.add.text(1280/2, 600, '*bwoump*', {
             color: "#ffffff",
             fontFamily: 'pixel',
-            fontSize: '20px'
+            fontSize: '50px'
         })
         .setOrigin(0.5).setAlpha(0);
 
@@ -593,8 +645,11 @@ export default class GameplayPrototype extends Phaser.Scene {
             this.player.setScale(0.39, 0.18);
             this.tweens.add({ //jump anim
                 targets: this.player,
-                scaleX: { from: 1.3, to: 0.75 },
-                scaleY: { from: 0.6, to: 1.4 },
+                // i dont know if this looks as good BUT
+                // bringing the scales to 1 makes the jump not feel awful when you land
+                // which i think is a bigger issue
+                scaleX: { from: 1.5, to: 1 },
+                scaleY: { from: 0.3, to: 1 },
                 duration: 250,
                 ease: 'Quad.Out'
             });
@@ -625,7 +680,7 @@ export default class GameplayPrototype extends Phaser.Scene {
                     });
                 }
             }
-
+        }
         // variable jump is dead and phaser killed it
         // if ((this.cursors.up.isDown || this.touchJump) && (Math.floor(time/10) != this.prev_time && Math.floor(time/10) % 5 == 0) && this.player.body.velocity.y < -100) {
         //     this.prev_time = Math.floor(time/10);
@@ -646,5 +701,4 @@ export default class GameplayPrototype extends Phaser.Scene {
 
         }*/
     }
-}
 }

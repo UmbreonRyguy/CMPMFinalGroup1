@@ -531,6 +531,10 @@ export default class GameplayPrototypeLevel3 extends Phaser.Scene {
             this.scene.pause();
             this.scene.launch('pause', { resumeKey: 'core-gameplay-level3' });
         });
+        this.helpTip = this.add.text(this.W/2, 25, "Toggle the lever to activate the teleporters and use them \nto help the rock activate the button!", {
+            fontSize: '18px',
+            fontFamily: 'pixel'
+        }).setAlpha(1).setOrigin(0.5);
 
         // -------------------------------------------------------------------
         // touch UI

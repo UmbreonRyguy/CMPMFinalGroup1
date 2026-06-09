@@ -1,3 +1,9 @@
+Back To The Forest
+
+By: Monolith Studio
+
+Project Documentation Archive: [Archive Link](https://docs.google.com/document/d/e/2PACX-1vTDXJQCGB7wx_cZYv2h0UmMCsKIj049BfdoYKn5Ozq5ghFFyS73xPW4B8SBk4DmzAAuIlI1yDkLAviC/pub)
+
 ### Credits (everyone add their own name + role):
 - testing lead - Rheann Kunita
 - Backup Tech Lead, Art Direction Lead - Sydney Osako
@@ -5,12 +11,9 @@
 - Backup Production Lead - Kamalika De
 - Production Lead - Ryan Funk
 
-
-Access Game Here - https://umbreonryguy.github.io/CMPMFinalGroup1/
-
 Core Gameplay Prototype Documentation
 
-Audio - Background music and Jump Sound inside game on level 1
+Audio - Background music and Jump Sound inside the game on level 1
 Visual - Our game contains hand-drawn image assets and tilemap sheets
 Motion - Game includes tween motions in the opening animation 
 Progression - The player can progress through level one, flipping a switch to progress to the top platform.

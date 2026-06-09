@@ -51,7 +51,7 @@
 ## Tilemaps 
 - `prototypeTilemap.json` - Sydney Osako - Tiled - */assets
 - `level3tilemap.json` - Sydney Osako - Tiled - */assets
-- `lvl2tilemap.json` - 
+- `lvl2tilemap.json` - Quetzal Theobald - VSCodium -*/assets
 
 ### Tilesets (Spritesheets)
 - `Prototype_Tiles.png` - Sydney Osako - Procreate, upscaled with GIMP - */assets

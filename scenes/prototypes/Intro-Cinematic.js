@@ -1,26 +1,9 @@
-const reverb = new Tone.Reverb(3).toDestination();
-const synthRumble = new Tone.Synth({ oscillator: { type: "square" }, envelope: { attack: 0.001, decay: 0.08, sustain: 0, release: 0.05 } }).toDestination();
-const crack = new Tone.NoiseSynth({ noise: { type: "white" }, envelope: { attack: 0.001, decay: 0.15, sustain: 0, release: 0.05 } }).toDestination().connect(reverb);
-
-const loopA = new Tone.Loop((time) => { 
-    synthRumble.triggerAttackRelease("A2", "16n", time);     
-    synthRumble.triggerAttackRelease("E2", "16n", time + 0.1);
-}, "8n"); 
-
-const loopB = new Tone.Loop((time) => { 
-    synthRumble.triggerAttackRelease("B2", "16n", time);     
-    synthRumble.triggerAttackRelease("F2", "16n", time + 0.1);
-}, "12n"); 
 
 
 var introOver = false;
 
 export default class IntroCinematic extends Phaser.Scene {
-
     
-
-
-
 
     shatter() { //function to shatter rock and make dust cloud at same time after rock shakes
         this.logoDone = false;
@@ -84,6 +67,20 @@ export default class IntroCinematic extends Phaser.Scene {
 
     }
     create() {
+        const reverb = new Tone.Reverb(3).toDestination();
+    const synthRumble = new Tone.Synth({ oscillator: { type: "square" }, envelope: { attack: 0.001, decay: 0.08, sustain: 0, release: 0.05 } }).toDestination();
+    const crack = new Tone.NoiseSynth({ noise: { type: "white" }, envelope: { attack: 0.001, decay: 0.15, sustain: 0, release: 0.05 } }).toDestination().connect(reverb);
+
+    const loopA = new Tone.Loop((time) => { 
+    synthRumble.triggerAttackRelease("A2", "16n", time);     
+    synthRumble.triggerAttackRelease("E2", "16n", time + 0.1);
+}, "8n"); 
+
+    const loopB = new Tone.Loop((time) => { 
+    synthRumble.triggerAttackRelease("B2", "16n", time);     
+    synthRumble.triggerAttackRelease("F2", "16n", time + 0.1);
+}, "12n"); 
+
         
 
         //Music and SFX sound toggles

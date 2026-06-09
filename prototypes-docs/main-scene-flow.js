@@ -1,5 +1,5 @@
 
-class mainSceneFlow extends Phaser.Scene {
+export default class mainSceneFlow extends Phaser.Scene {
 
     constructor() {
         super('scene-flow');

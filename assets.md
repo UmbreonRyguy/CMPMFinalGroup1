@@ -39,7 +39,7 @@
 
 ### Music
 - `MenuTheme.mp3` - Ryan Funk - Ableton - */assets
-- - `GameTheme.mp3` - Ryan Funk - Ableton - */assets
+- `GameTheme.mp3` - Ryan Funk - Ableton - */assets
 - `prototype-bg-music.mp3` - Rheann Kunita - Chrome Music Lab - */assets
 
 ### Sound Effects

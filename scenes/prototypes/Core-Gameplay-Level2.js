@@ -296,7 +296,7 @@ export default class GameplayPrototypeLevel2 extends Phaser.Scene {
         this.layer1 = prototypeMap.createLayer("Tile Layer 1", prototypeTiles, 0, 0);
         this.layer1.setCollisionFromCollisionGroup();
 
-        this.add.rectangle(560, 460, 480, 60, 0x385a33);
+        //this.add.rectangle(560, 460, 480, 60, 0x385a33);
         this.overlay = this.add.rectangle(this.CX, this.CY, this.W, this.H, 0xf9a039, 0.1);
 
         // --------------------------------------------------------------------------------------------------------
@@ -333,7 +333,7 @@ export default class GameplayPrototypeLevel2 extends Phaser.Scene {
         // Add player collider now that the tilemap is created
         this.physics.add.collider(this.player, this.layer1);
 
-        this.platform = this.physics.add.body(400 - 80, 400, 480, 30).setAllowGravity(false).setImmovable();
+        this.platform = this.physics.add.body(400 - 80, 390, 480, 30).setAllowGravity(false).setImmovable();
         this.platform2 = this.physics.add.body(1050 + 80, 275, 150, 28).setAllowGravity(false).setImmovable();
         this.platform3 = this.physics.add.body(50, 500, 220, 28).setAllowGravity(false).setImmovable();
 

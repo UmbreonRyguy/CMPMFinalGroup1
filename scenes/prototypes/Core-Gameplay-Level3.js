@@ -535,7 +535,7 @@ export default class GameplayPrototypeLevel3 extends Phaser.Scene {
             fontSize: '18px',
             fontFamily: 'pixel'
         }).setAlpha(1).setOrigin(0.5);
-
+        
         // -------------------------------------------------------------------
         // touch UI
         // -------------------------------------------------------------------

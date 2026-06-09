@@ -1,4 +1,5 @@
 import IntroCinematic from '../scenes/prototypes/Intro-Cinematic.js';
+
 let config = {
     parent: 'root',
     type: Phaser.WEBGL,

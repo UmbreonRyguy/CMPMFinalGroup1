@@ -2,6 +2,8 @@ Back To The Forest
 
 By: Monolith Studio
 
+Play the Game Here: [Back to the Forest on ITCH.IO](https://monolithstudio.itch.io/back-to-the-forest)
+
 Project Documentation Archive: [Archive Link](https://docs.google.com/document/d/e/2PACX-1vTDXJQCGB7wx_cZYv2h0UmMCsKIj049BfdoYKn5Ozq5ghFFyS73xPW4B8SBk4DmzAAuIlI1yDkLAviC/pub)
 
 ### Credits (everyone add their own name + role):

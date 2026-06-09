@@ -49,9 +49,14 @@
 
 ## Tilemaps 
 - `prototypeTilemap.json` - Sydney Osako - Tiled - */assets
+- `level3tilemap.json` - Sydney Osako - Tiled - */assets
+- `lvl2tilemap.json` - 
 
 ### Tilesets (Spritesheets)
 - `Prototype_Tiles.png` - Sydney Osako - Procreate, upscaled with GIMP - */assets
+- `level3sprites.png` - Sydney Osako - Procreate, upscaled with GIMP - */assets
+- `level3tiles.png` - Sydney Osako - Procreate, upscaled with GIMP - */assets
+- `slugSS.png` - 
 
 
 ## Unused Assets

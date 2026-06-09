@@ -57,7 +57,7 @@
 - `Prototype_Tiles.png` - Sydney Osako - Procreate, upscaled with GIMP - */assets
 - `level3sprites.png` - Sydney Osako - Procreate, upscaled with GIMP - */assets
 - `level3tiles.png` - Sydney Osako - Procreate, upscaled with GIMP - */assets
-- `slugSS.png` - 
+- `slugSS.png` - Rheann Kunita - Piskel - */assets
 
 
 ## Unused Assets

@@ -37,6 +37,3 @@ The 'Fancy Transition' is demonstrated using the Gameplay scenes and pause scene
 
 All important scenes are accesible through buttons. 
 
-Asset Credits:
-to be added
-    
